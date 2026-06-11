@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import avatarImg from '../assets/avatar.png';
 import CreateEventModal from '../components/CreateEventModal';
+import ConfirmOrderModal from '../components/ConfirmOrderModal';
 
 const imgImageCappuccino = "https://www.figma.com/api/mcp/asset/b3f54ed9-1ba6-4554-89ea-f1d21d10dedc";
 const imgImageIcedLatte = "https://www.figma.com/api/mcp/asset/74dfc525-2491-46aa-9801-3998de3c8cfe";
@@ -45,6 +46,7 @@ interface ProductsProps {
 
 export default function Products({ onNavigate }: ProductsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [quantities, setQuantities] = useState<Record<number, number>>({});
 
   const handleIncrement = (id: number) => {
@@ -74,6 +76,17 @@ export default function Products({ onNavigate }: ProductsProps) {
     <div className='bg-[#f9fafb] min-h-screen flex justify-center'>
       <div className='bg-white flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
         {isModalOpen && <CreateEventModal onClose={() => setIsModalOpen(false)} />}
+        {isConfirmModalOpen && (
+          <ConfirmOrderModal
+            totalItems={totalCount}
+            totalPrice={totalCost}
+            onCancel={() => setIsConfirmModalOpen(false)}
+            onConfirm={() => {
+              setIsConfirmModalOpen(false);
+              setQuantities({});
+            }}
+          />
+        )}
         
         {/* App Header */}
         <div className='flex items-center justify-between px-5 py-3 shrink-0 bg-white'>
@@ -113,7 +126,12 @@ export default function Products({ onNavigate }: ProductsProps) {
         {/* Content */}
         <div className='flex-1 overflow-y-auto px-5 pb-[80px] bg-white'>
           {/* Summary Banner */}
-          <div className='bg-[#f47b20] rounded-[14px] w-full px-4 py-3 mb-5 flex items-center justify-between shadow-sm'>
+          <button 
+            className='bg-[#f47b20] rounded-[14px] w-full px-4 py-3 mb-5 flex items-center justify-between shadow-sm border-none cursor-pointer'
+            onClick={() => {
+              if (totalCount > 0) setIsConfirmModalOpen(true);
+            }}
+          >
             <div className='flex items-center gap-2'>
               <span className='font-semibold text-[13px] text-white'>
                 Total Products
@@ -131,7 +149,7 @@ export default function Products({ onNavigate }: ProductsProps) {
               </span>
             </div>
             <ChevronRight className='w-[18px] h-[18px] text-white' />
-          </div>
+          </button>
 
           {/* Product Table Data */}
           <div className='border border-gray-200 rounded-[14px] overflow-hidden flex flex-col bg-white'>
