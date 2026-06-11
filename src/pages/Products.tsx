@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Search,
   Calendar,
@@ -10,6 +11,7 @@ import {
   ReceiptText,
 } from 'lucide-react';
 import avatarImg from '../assets/avatar.png';
+import CreateEventModal from '../components/CreateEventModal';
 
 const imgImageCappuccino = "https://www.figma.com/api/mcp/asset/b3f54ed9-1ba6-4554-89ea-f1d21d10dedc";
 const imgImageIcedLatte = "https://www.figma.com/api/mcp/asset/74dfc525-2491-46aa-9801-3998de3c8cfe";
@@ -40,9 +42,13 @@ interface ProductsProps {
 }
 
 export default function Products({ onNavigate }: ProductsProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className='bg-[#f9fafb] min-h-screen flex justify-center'>
       <div className='bg-white flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
+        {isModalOpen && <CreateEventModal onClose={() => setIsModalOpen(false)} />}
+        
         {/* App Header */}
         <div className='flex items-center justify-between px-5 py-3 shrink-0 bg-white'>
           <button className='p-1 -ml-1'>
@@ -65,7 +71,7 @@ export default function Products({ onNavigate }: ProductsProps) {
             <button className='p-1'>
               <Search className='w-5 h-5 text-[#1c1c1e]' />
             </button>
-            <button className='p-1'>
+            <button className='p-1' onClick={() => setIsModalOpen(true)}>
               <Calendar className='w-5 h-5 text-[#1c1c1e]' />
             </button>
             <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300'>
