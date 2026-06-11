@@ -6,6 +6,8 @@ import {
   ArrowUpDown,
   Filter,
   Plus,
+  Minus,
+  Check,
   LayoutDashboard,
   Package,
   ReceiptText,
@@ -43,6 +45,30 @@ interface ProductsProps {
 
 export default function Products({ onNavigate }: ProductsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
+
+  const handleIncrement = (id: number) => {
+    setQuantities(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
+  };
+
+  const handleDecrement = (id: number) => {
+    setQuantities(prev => {
+      const current = prev[id] || 0;
+      if (current <= 1) {
+        const rest = { ...prev };
+        delete rest[id];
+        return rest;
+      }
+      return { ...prev, [id]: current - 1 };
+    });
+  };
+
+  const totalCount = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
+  const totalCost = products.reduce((sum, product) => {
+    const qty = quantities[product.id] || 0;
+    const price = parseFloat(product.price.replace('$', ''));
+    return sum + (price * qty);
+  }, 0);
 
   return (
     <div className='bg-[#f9fafb] min-h-screen flex justify-center'>
@@ -94,14 +120,14 @@ export default function Products({ onNavigate }: ProductsProps) {
               </span>
               <div className='bg-white rounded-full h-[22px] min-w-[22px] px-1.5 flex items-center justify-center'>
                 <span className='font-bold text-[#f47b20] text-[12px]'>
-                  0
+                  {totalCount}
                 </span>
               </div>
               <span className='font-semibold text-[13px] text-white/80'>
                 ·
               </span>
               <span className='font-bold text-[13px] text-white'>
-                $0.00
+                ${totalCost.toFixed(2)}
               </span>
             </div>
             <ChevronRight className='w-[18px] h-[18px] text-white' />
@@ -126,34 +152,70 @@ export default function Products({ onNavigate }: ProductsProps) {
 
             {/* List Items */}
             <div className='flex flex-col'>
-              {products.map((product, index) => (
-                <div
-                  key={product.id}
-                  className={`flex items-center gap-3 px-4 py-3 bg-white ${
-                    index !== products.length - 1 ? 'border-b border-gray-100' : ''
-                  }`}
-                >
-                  <div className='w-4 h-4 border border-gray-300 rounded shrink-0 bg-gray-50'></div>
-                  <div className='w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0'>
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className='w-full h-full object-cover'
-                    />
+              {products.map((product, index) => {
+                const qty = quantities[product.id] || 0;
+                const isSelected = qty > 0;
+
+                return (
+                  <div
+                    key={product.id}
+                    className={`flex items-center gap-3 px-4 py-3 bg-white ${
+                      index !== products.length - 1 ? 'border-b border-gray-100' : ''
+                    }`}
+                  >
+                    <button 
+                      className={`w-4 h-4 rounded shrink-0 flex items-center justify-center transition-colors ${
+                        isSelected ? 'bg-[#f47b20] border-[#f47b20] drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)]' : 'border border-gray-300 bg-gray-50'
+                      }`}
+                      onClick={() => isSelected ? setQuantities(prev => { const rest = { ...prev }; delete rest[product.id]; return rest; }) : handleIncrement(product.id)}
+                    >
+                      {isSelected && <Check className='w-3 h-3 text-white' strokeWidth={3} />}
+                    </button>
+                    <div className='w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0'>
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className='w-full h-full object-cover'
+                      />
+                    </div>
+                    <div className='flex-1 min-w-0 flex flex-col'>
+                      <span className='font-semibold text-[#1c1c1e] text-[13px] truncate'>
+                        {product.name}
+                      </span>
+                      <span className='text-gray-400 text-[11px] font-normal'>
+                        {product.price}
+                      </span>
+                    </div>
+                    
+                    {isSelected ? (
+                      <div className='flex items-center gap-2'>
+                        <button 
+                          className='w-7 h-7 rounded-[10px] bg-[#f47b20] flex items-center justify-center shrink-0'
+                          onClick={() => handleDecrement(product.id)}
+                        >
+                          <Minus className='w-4 h-4 text-white' />
+                        </button>
+                        <span className='w-5 text-center font-bold text-[#1c1c1e] text-[13px]'>
+                          {qty}
+                        </span>
+                        <button 
+                          className='w-7 h-7 rounded-[10px] bg-[#f47b20] flex items-center justify-center shrink-0'
+                          onClick={() => handleIncrement(product.id)}
+                        >
+                          <Plus className='w-4 h-4 text-white' />
+                        </button>
+                      </div>
+                    ) : (
+                      <button 
+                        className='w-8 h-8 rounded-[10px] bg-[#f47b20] flex items-center justify-center shrink-0'
+                        onClick={() => handleIncrement(product.id)}
+                      >
+                        <Plus className='w-4 h-4 text-white' />
+                      </button>
+                    )}
                   </div>
-                  <div className='flex-1 min-w-0 flex flex-col'>
-                    <span className='font-semibold text-[#1c1c1e] text-[13px] truncate'>
-                      {product.name}
-                    </span>
-                    <span className='text-gray-400 text-[11px] font-normal'>
-                      {product.price}
-                    </span>
-                  </div>
-                  <button className='w-8 h-8 rounded-[10px] bg-[#f47b20] flex items-center justify-center shrink-0'>
-                    <Plus className='w-4 h-4 text-white' />
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
