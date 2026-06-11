@@ -65,7 +65,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   return null;
 };
 
-export default function Overview() {
+export default function Overview({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   return (
     <div className='bg-[#f9fafb] min-h-screen flex justify-center'>
       <div className='bg-white flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
@@ -207,20 +207,29 @@ export default function Overview() {
         </div>
 
         {/* Bottom Navigation */}
-        <div className='absolute bottom-0 w-full max-w-[400px] bg-white border-t border-gray-100 flex items-center justify-between pb-safe'>
-          <button className='flex-1 flex flex-col items-center justify-center py-3 gap-1'>
+        <div className='absolute bottom-0 w-full max-w-[400px] bg-white border-t border-gray-100 flex items-center justify-between pb-safe z-10'>
+          <button 
+            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
+            onClick={() => onNavigate?.('dashboard')}
+          >
             <LayoutDashboard className='w-5 h-5 text-[#f47b20]' />
             <span className='text-[10px] font-semibold text-[#f47b20]'>
               Dashboard
             </span>
           </button>
-          <button className='flex-1 flex flex-col items-center justify-center py-3 gap-1'>
+          <button 
+            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
+            onClick={() => onNavigate?.('products')}
+          >
             <Package className='w-5 h-5 text-gray-400' />
             <span className='text-[10px] font-semibold text-gray-400'>
               Products
             </span>
           </button>
-          <button className='flex-1 flex flex-col items-center justify-center py-3 gap-1'>
+          <button 
+            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
+            onClick={() => onNavigate?.('transactions')}
+          >
             <ReceiptText className='w-5 h-5 text-gray-400' />
             <span className='text-[10px] font-semibold text-gray-400'>
               Transactions
