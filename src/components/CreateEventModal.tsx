@@ -8,6 +8,23 @@ interface CreateEventModalProps {
 
 export default function CreateEventModal({ onClose }: CreateEventModalProps) {
   const [activeDatePicker, setActiveDatePicker] = useState<'start' | 'end' | null>(null);
+  const [checkedCosts, setCheckedCosts] = useState<string[]>([]);
+
+  const costOptions = ['Booth', 'Travel', 'Hotel', 'Meals', 'Other'];
+  
+  const handleToggleAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setCheckedCosts(costOptions);
+    } else {
+      setCheckedCosts([]);
+    }
+  };
+
+  const handleToggleCost = (cost: string) => {
+    setCheckedCosts(prev => 
+      prev.includes(cost) ? prev.filter(c => c !== cost) : [...prev, cost]
+    );
+  };
 
   return (
     <div className="absolute inset-0 bg-black/45 z-50 flex items-center justify-center p-5">
@@ -88,17 +105,41 @@ export default function CreateEventModal({ onClose }: CreateEventModalProps) {
                 Event Costs <span className="text-[#ef4444]">*</span>
               </label>
               <label className="flex items-center gap-1.5 cursor-pointer">
-                <input type="checkbox" className="w-3.5 h-3.5 rounded-[3px] border-[#d1d5dc] text-[#f47b20] focus:ring-[#f47b20]" />
+                <input 
+                  type="checkbox" 
+                  checked={checkedCosts.length === costOptions.length}
+                  onChange={handleToggleAll}
+                  className="w-3.5 h-3.5 rounded-[3px] border-[#d1d5dc] text-[#f47b20] focus:ring-[#f47b20]" 
+                />
                 <span className="text-[12px] font-medium text-[#6b7280]">Select All</span>
               </label>
             </div>
             
-            <div className="flex flex-col gap-2">
-              {['Booth', 'Travel', 'Hotel', 'Meals', 'Other'].map((cost) => (
-                <label key={cost} className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="w-3.5 h-3.5 rounded-[3px] border-[#d1d5dc] text-[#f47b20] focus:ring-[#f47b20]" />
-                  <span className="text-[13px] font-medium text-[#374151]">{cost}</span>
-                </label>
+            <div className="flex flex-col gap-3">
+              {costOptions.map((cost) => (
+                <div key={cost} className="flex flex-col gap-1.5">
+                  <label className="flex items-center gap-2 cursor-pointer w-fit">
+                    <input 
+                      type="checkbox" 
+                      checked={checkedCosts.includes(cost)}
+                      onChange={() => handleToggleCost(cost)}
+                      className="w-3.5 h-3.5 rounded-[3px] border-[#d1d5dc] text-[#f47b20] focus:ring-[#f47b20]" 
+                    />
+                    <span className="text-[13px] font-medium text-[#374151]">{cost}</span>
+                  </label>
+                  {checkedCosts.includes(cost) && (
+                    <div className="ml-5">
+                      <div className="flex items-center gap-2 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] px-3 py-2">
+                        <span className="text-[#9ca3af] text-[13px]">$</span>
+                        <input 
+                          type="text" 
+                          placeholder="0.00"
+                          className="flex-1 text-[13px] text-[#1c1c1e] placeholder:text-[#9ca3af] outline-none bg-transparent"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
