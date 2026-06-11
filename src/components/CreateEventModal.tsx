@@ -1,13 +1,23 @@
+import { useState } from 'react';
 import { X, Calendar, FileText } from 'lucide-react';
+import DatePickerModal from './DatePickerModal';
 
 interface CreateEventModalProps {
   onClose: () => void;
 }
 
 export default function CreateEventModal({ onClose }: CreateEventModalProps) {
+  const [activeDatePicker, setActiveDatePicker] = useState<'start' | 'end' | null>(null);
+
   return (
     <div className="absolute inset-0 bg-black/45 z-50 flex items-center justify-center p-5">
-      <div className="bg-white w-full max-w-[335px] rounded-2xl flex flex-col overflow-hidden">
+      <div className="bg-white w-full max-w-[335px] rounded-2xl flex flex-col overflow-hidden relative">
+        {activeDatePicker && (
+          <DatePickerModal 
+            onClose={() => setActiveDatePicker(null)} 
+            onConfirm={() => setActiveDatePicker(null)} 
+          />
+        )}
         {/* Header */}
         <div className="flex items-center justify-between p-5 pb-4">
           <h2 className="text-[18px] font-bold text-[#1c1c1e] leading-[27px]">Create an Event</h2>
@@ -23,12 +33,16 @@ export default function CreateEventModal({ onClose }: CreateEventModalProps) {
             <label className="text-[13px] font-medium text-[#1c1c1e]">
               Start Date <span className="text-[#ef4444]">*</span>
             </label>
-            <div className="flex items-center gap-3 border border-[#e5e7eb] rounded-[14px] px-3.5 py-2.5">
-              <Calendar className="w-4 h-4 text-gray-400" />
+            <div 
+              className={`flex items-center gap-3 border rounded-[14px] px-3.5 py-2.5 cursor-pointer ${activeDatePicker === 'start' ? 'border-[#f47b20]' : 'border-[#e5e7eb]'}`}
+              onClick={() => setActiveDatePicker('start')}
+            >
+              <Calendar className="w-4 h-4 text-gray-400 pointer-events-none" />
               <input 
-                type="date" 
-                defaultValue="2026-03-01"
-                className="flex-1 text-[14px] font-medium text-[#1c1c1e] outline-none bg-transparent"
+                type="text"
+                readOnly
+                value="2026-03-01"
+                className="flex-1 text-[14px] font-medium text-[#1c1c1e] outline-none bg-transparent cursor-pointer"
               />
             </div>
           </div>
@@ -38,12 +52,16 @@ export default function CreateEventModal({ onClose }: CreateEventModalProps) {
             <label className="text-[13px] font-medium text-[#1c1c1e]">
               End Date <span className="text-[#ef4444]">*</span>
             </label>
-            <div className="flex items-center gap-3 border border-[#e5e7eb] rounded-[14px] px-3.5 py-2.5">
-              <Calendar className="w-4 h-4 text-gray-400" />
+            <div 
+              className={`flex items-center gap-3 border rounded-[14px] px-3.5 py-2.5 cursor-pointer ${activeDatePicker === 'end' ? 'border-[#f47b20]' : 'border-[#e5e7eb]'}`}
+              onClick={() => setActiveDatePicker('end')}
+            >
+              <Calendar className="w-4 h-4 text-gray-400 pointer-events-none" />
               <input 
-                type="date" 
-                defaultValue="2026-03-31"
-                className="flex-1 text-[14px] font-medium text-[#1c1c1e] outline-none bg-transparent"
+                type="text" 
+                readOnly
+                value="2026-03-31"
+                className="flex-1 text-[14px] font-medium text-[#1c1c1e] outline-none bg-transparent cursor-pointer"
               />
             </div>
           </div>
