@@ -12,8 +12,9 @@ import {
   Bar,
   Line,
   XAxis,
-  YAxis,
+  YAxis, 
   ResponsiveContainer,
+  Tooltip
 } from 'recharts';
 
 import avatarImg from '../assets/avatar.png';
@@ -27,6 +28,42 @@ const data = [
   { name: 'Sat', revenue: 16000, orders: 8000, profit: 6000 },
   { name: 'Sun', revenue: 11000, orders: 5000, profit: 4000 },
 ];
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{ dataKey: string; value: number }>;
+  label?: string;
+}
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+  if (active && payload && payload.length) {
+    const revenue = payload.find((p) => p.dataKey === 'revenue')?.value;
+    const orders = payload.find((p) => p.dataKey === 'orders')?.value;
+    const profit = payload.find((p) => p.dataKey === 'profit')?.value;
+
+    return (
+      <div className='bg-white border border-gray-200 p-2.5 shadow-sm min-w-[120px]'>
+        <p className='text-[#0a0a0a] text-[14px] font-medium mb-1.5'>{label}</p>
+        {revenue !== undefined && (
+          <p className='text-[#f47b20] text-[13px] mb-1'>
+            revenue : ${revenue.toLocaleString()}
+          </p>
+        )}
+        {orders !== undefined && (
+          <p className='text-[#22c55e] text-[13px] mb-1'>
+            orders : ${orders.toLocaleString()}
+          </p>
+        )}
+        {profit !== undefined && (
+          <p className='text-[#fda06a] text-[13px]'>
+            profit : ${profit.toLocaleString()}
+          </p>
+        )}
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function Overview() {
   return (
@@ -142,6 +179,7 @@ export default function Overview() {
                     }
                     ticks={[0, 5500, 11000, 16500, 22000]}
                   />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                   <Bar
                     dataKey='revenue'
                     barSize={16}
