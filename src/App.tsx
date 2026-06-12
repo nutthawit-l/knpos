@@ -4,6 +4,7 @@ import Order from './pages/Order'
 import Transactions from './pages/Transactions'
 import Products from './pages/Products'
 import AddProduct from './pages/AddProduct'
+import Login from './pages/Login'
 import Sidebar from './components/Sidebar'
 
 function App() {
@@ -49,6 +50,12 @@ function App() {
       )}
       {activeTab === 'add-product' && (
         <AddProduct 
+          onNavigate={handleNavigate} 
+          onMenuClick={() => setIsSidebarOpen(true)} 
+        />
+      )}
+      {activeTab === 'login' && (
+        <Login 
           onNavigate={handleNavigate} 
           onMenuClick={() => setIsSidebarOpen(true)} 
         />

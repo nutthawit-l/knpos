@@ -104,6 +104,7 @@ export default function Sidebar({ isOpen, onClose, activeTab, onNavigate }: Side
                 return (
                   <button
                     key={item.id}
+                    onClick={() => onNavigate(item.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-[14px] hover:bg-surface transition-colors`}
                   >
                     <Icon className={`w-5 h-5 ${item.color}`} />
