@@ -2,8 +2,6 @@ import { useState } from 'react';
 import {
   Calendar,
   ChevronRight,
-  ArrowUpDown,
-  Filter,
   Plus,
   Minus,
   Check,
@@ -14,6 +12,8 @@ import {
 import Header from '../components/Header';
 import CreateEventModal from '../components/CreateEventModal';
 import ConfirmOrderModal from '../components/ConfirmOrderModal';
+import { currencies, type Currency } from '../components/CurrencySwitchPopup';
+import CurrencySortControls from '../components/CurrencySortControls';
 
 const imgImageCappuccino = "https://www.figma.com/api/mcp/asset/b3f54ed9-1ba6-4554-89ea-f1d21d10dedc";
 const imgImageIcedLatte = "https://www.figma.com/api/mcp/asset/74dfc525-2491-46aa-9801-3998de3c8cfe";
@@ -48,6 +48,9 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
+    currencies.find((c) => c.code === 'USD') || currencies[0],
+  );
 
   const handleIncrement = (id: number) => {
     setQuantities(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
@@ -120,7 +123,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
                 ·
               </span>
               <span className='font-bold text-[13px] text-white'>
-                ${totalCost.toFixed(2)}
+                {selectedCurrency.symbol}{totalCost.toFixed(2)}
               </span>
             </div>
             <ChevronRight className='w-[18px] h-[18px] text-white' />
@@ -133,14 +136,10 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
               <h2 className='font-semibold text-foreground text-[14px]'>
                 Order Items
               </h2>
-              <div className='flex items-center gap-3 text-gray-500'>
-                <button>
-                  <ArrowUpDown className='w-4 h-4' />
-                </button>
-                <button>
-                  <Filter className='w-4 h-4' />
-                </button>
-              </div>
+              <CurrencySortControls
+                selectedCurrency={selectedCurrency}
+                onSelectCurrency={setSelectedCurrency}
+              />
             </div>
 
             {/* List Items */}
@@ -176,7 +175,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
                         {product.name}
                       </span>
                       <span className='text-gray-400 text-[11px] font-normal'>
-                        {product.price}
+                        {product.price.replace('$', selectedCurrency.symbol)}
                       </span>
                     </div>
                     
