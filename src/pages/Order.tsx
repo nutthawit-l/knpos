@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  Search,
   Calendar,
   ChevronRight,
   ArrowUpDown,
@@ -12,7 +11,7 @@ import {
   Package,
   ReceiptText,
 } from 'lucide-react';
-import avatarImg from '../assets/avatar.png';
+import Header from '../components/Header';
 import CreateEventModal from '../components/CreateEventModal';
 import ConfirmOrderModal from '../components/ConfirmOrderModal';
 
@@ -90,40 +89,14 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
           />
         )}
         
-        {/* App Header */}
-        <div className='flex items-center justify-between px-5 py-3 shrink-0 bg-white'>
-          <button className='p-1 -ml-1' onClick={onMenuClick}>
-            <svg
-              width='24'
-              height='24'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-            >
-              <line x1='3' y1='12' x2='21' y2='12'></line>
-              <line x1='3' y1='6' x2='21' y2='6'></line>
-              <line x1='3' y1='18' x2='21' y2='18'></line>
-            </svg>
-          </button>
-          <div className='flex items-center gap-4'>
-            <button className='p-1'>
-              <Search className='w-5 h-5 text-foreground' />
-            </button>
+        <Header
+          onMenuClick={onMenuClick}
+          rightElement={
             <button className='p-1' onClick={() => setIsModalOpen(true)}>
               <Calendar className='w-5 h-5 text-foreground' />
             </button>
-            <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300'>
-              <img
-                src={avatarImg}
-                alt='Avatar'
-                className='w-full h-full object-cover'
-              />
-            </button>
-          </div>
-        </div>
+          }
+        />
 
         {/* Content */}
         <div className='flex-1 overflow-y-auto px-5 pb-[80px] bg-white'>

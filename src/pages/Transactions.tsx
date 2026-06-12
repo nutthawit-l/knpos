@@ -1,13 +1,11 @@
 import {
-  Search,
-  Bell,
   LayoutDashboard,
   Package,
   ReceiptText,
   ArrowUpDown,
   Filter,
 } from 'lucide-react';
-import avatarImg from '../assets/avatar.png';
+import Header from '../components/Header';
 
 const imgImageCappuccino = "https://www.figma.com/api/mcp/asset/4bef099a-4290-4694-8269-f0a6be4ef565";
 const imgImageIcedLatte = "https://www.figma.com/api/mcp/asset/208f24fd-7360-4cd9-b02c-e303cc41042a";
@@ -37,41 +35,7 @@ export default function Transactions({ onNavigate, onMenuClick }: { onNavigate?:
   return (
     <div className='bg-[#f9fafb] min-h-screen flex justify-center'>
       <div className='bg-white flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
-        {/* App Header */}
-        <div className='flex items-center justify-between px-5 py-3 shrink-0 bg-white'>
-          <button className='p-1 -ml-1' onClick={onMenuClick}>
-            <svg
-              width='24'
-              height='24'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-            >
-              <line x1='3' y1='12' x2='21' y2='12'></line>
-              <line x1='3' y1='6' x2='21' y2='6'></line>
-              <line x1='3' y1='18' x2='21' y2='18'></line>
-            </svg>
-          </button>
-          <div className='flex items-center gap-4'>
-            <button className='p-1'>
-              <Search className='w-5 h-5 text-foreground' />
-            </button>
-            <button className='p-1 relative'>
-              <Bell className='w-5 h-5 text-foreground' />
-              <span className='absolute top-1 right-1.5 w-2 h-2 bg-[#fb2c36] rounded-full border border-white'></span>
-            </button>
-            <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300'>
-              <img
-                src={avatarImg}
-                alt='Avatar'
-                className='w-full h-full object-cover'
-              />
-            </button>
-          </div>
-        </div>
+        <Header onMenuClick={onMenuClick} showNotifications={true} />
 
         {/* Title */}
         <div className='px-5 pt-1 pb-3 shrink-0 bg-white'>

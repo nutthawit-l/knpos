@@ -1,5 +1,4 @@
 import { 
-  ChevronLeft, 
   Upload, 
   Info,
   LayoutDashboard,
@@ -7,7 +6,7 @@ import {
   ReceiptText,
   Trash2,
 } from 'lucide-react';
-import avatarImg from '../assets/avatar.png';
+import Header from '../components/Header';
 
 interface AddProductProps {
   onNavigate?: (tab: string) => void;
@@ -18,21 +17,10 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
   return (
     <div className='bg-[#f9fafb] min-h-screen flex justify-center'>
       <div className='bg-white flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
-        {/* App Header */}
-        <div className='flex items-center justify-between px-5 py-3 shrink-0 bg-white'>
-          <button className='p-1 -ml-1' onClick={() => onNavigate?.('products')}>
-            <ChevronLeft className='w-6 h-6 text-foreground' />
-          </button>
-          <div className='flex items-center gap-4'>
-            <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300'>
-              <img
-                src={avatarImg}
-                alt='Avatar'
-                className='w-full h-full object-cover'
-              />
-            </button>
-          </div>
-        </div>
+        <Header 
+          onBackClick={() => onNavigate?.('products')} 
+          showSearch={false}
+        />
 
         {/* Title & Top Actions */}
         <div className='px-5 pt-1 pb-3 shrink-0 bg-white'>
