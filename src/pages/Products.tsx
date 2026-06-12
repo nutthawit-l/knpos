@@ -108,16 +108,16 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
         <div className='flex-1 flex flex-col overflow-hidden px-5 pb-24 bg-white'>
           {/* Action Buttons */}
           <div className='flex flex-col gap-3 mb-6 shrink-0'>
+            <button className='w-full bg-white border border-gray-200 text-foreground font-semibold py-3 px-4 rounded-[14px] flex items-center justify-center gap-2'>
+              <FileDown className='w-4 h-4' />
+              <span>Import CSV</span>
+            </button>
             <button
               className='w-full bg-primary text-white font-semibold py-3 px-4 rounded-[14px] flex items-center justify-center gap-2 shadow-sm'
               onClick={() => onNavigate?.('add-product')}
             >
               <Plus className='w-4 h-4 text-white' />
               <span>Add New Products</span>
-            </button>
-            <button className='w-full bg-white border border-gray-200 text-foreground font-semibold py-3 px-4 rounded-[14px] flex items-center justify-center gap-2'>
-              <FileDown className='w-4 h-4' />
-              <span>Import CSV</span>
             </button>
           </div>
 
