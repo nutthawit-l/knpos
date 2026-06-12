@@ -1,27 +1,22 @@
-import { 
-  LayoutDashboard, 
-  Package, 
-  ReceiptText, 
-  ShieldCheck 
-} from 'lucide-react';
+import { Package, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 
-export default function OTPVerify({ 
-  onNavigate, 
-}: { 
-  onNavigate?: (tab: string) => void, 
+export default function OTPVerify({
+  onNavigate,
+}: {
+  onNavigate?: (tab: string) => void;
 }) {
   const [otp, setOtp] = useState(['', '', '', '', '']);
 
   const handleChange = (index: number, value: string) => {
     // Only allow numbers
     if (value && !/^\d+$/.test(value)) return;
-    
+
     if (value.length > 1) {
       // If pasting or similar, just take the first digit
       value = value[0];
     }
-    
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
@@ -43,21 +38,6 @@ export default function OTPVerify({
   return (
     <div className='bg-surface min-h-screen flex justify-center'>
       <div className='bg-border flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
-        {/* Status Bar (Simulated) */}
-        <div className='flex items-center justify-between px-6 pt-4 pb-1 shrink-0'>
-          <span className='text-[15px] font-semibold text-foreground'>9:41</span>
-          <div className='flex items-center gap-1.5'>
-            <div className='w-4 h-3 border border-current rounded-sm relative'>
-              <div className='absolute inset-0.5 bg-current rounded-px'></div>
-            </div>
-            <div className='w-4 h-3 relative'>
-              <div className='absolute bottom-0 left-0 w-1 h-1 bg-current'></div>
-              <div className='absolute bottom-0 left-1 w-1 h-2 bg-current'></div>
-              <div className='absolute bottom-0 left-2 w-1 h-3 bg-current'></div>
-            </div>
-          </div>
-        </div>
-
         {/* Logo Section */}
         <div className='flex items-center justify-center gap-2 py-6 shrink-0'>
           <div className='bg-primary w-9 h-9 rounded-[14px] flex items-center justify-center'>
@@ -72,10 +52,15 @@ export default function OTPVerify({
             <div className='bg-primary-light p-3.5 rounded-full mb-4'>
               <ShieldCheck className='w-6 h-6 text-primary' />
             </div>
-            
-            <h1 className='text-[20px] font-bold text-foreground mb-1.5'>OTP Verification</h1>
+
+            <h1 className='text-[20px] font-bold text-foreground mb-1.5'>
+              OTP Verification
+            </h1>
             <p className='text-[13px] text-foreground-subtle text-center mb-6'>
-              We have sent a verification code to email address <span className='font-bold text-foreground'>johndoe@examle.com</span>
+              We have sent a verification code to email address{' '}
+              <span className='font-bold text-foreground'>
+                johndoe@examle.com
+              </span>
             </p>
 
             <div className='flex gap-2.5 mb-6'>
@@ -89,13 +74,15 @@ export default function OTPVerify({
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   className={`w-12 h-[52px] border-2 rounded-[14px] text-center text-[18px] font-bold focus:outline-none transition-all ${
-                    digit ? 'border-primary bg-primary-light' : 'border-border bg-white'
+                    digit
+                      ? 'border-primary bg-primary-light'
+                      : 'border-border bg-white'
                   }`}
                 />
               ))}
             </div>
 
-            <button 
+            <button
               className='w-full bg-primary text-white text-[15px] font-semibold py-3.5 rounded-[14px] mb-5 shadow-sm active:scale-[0.98] transition-all'
               onClick={() => onNavigate?.('dashboard')}
             >
@@ -103,7 +90,8 @@ export default function OTPVerify({
             </button>
 
             <p className='text-[13px] text-foreground-subtle'>
-              Resend code in <span className='font-bold text-primary ml-1'>00:35</span>
+              Resend code in{' '}
+              <span className='font-bold text-primary ml-1'>00:35</span>
             </p>
           </div>
 
@@ -112,42 +100,6 @@ export default function OTPVerify({
               © 2026 Olsera. All right reserved.
             </p>
           </div>
-        </div>
-
-        {/* Bottom Navigation */}
-        <div className='bg-background border-t border-border flex items-center justify-between pb-safe z-10'>
-          <button 
-            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
-            onClick={() => onNavigate?.('dashboard')}
-          >
-            <LayoutDashboard className='w-5 h-5 text-foreground-subtle' />
-            <span className='text-[10px] font-semibold text-foreground-subtle'>
-              Dashboard
-            </span>
-          </button>
-          <button 
-            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
-            onClick={() => onNavigate?.('order')}
-          >
-            <Package className='w-5 h-5 text-foreground-subtle' />
-            <span className='text-[10px] font-semibold text-foreground-subtle'>
-              Order
-            </span>
-          </button>
-          <button 
-            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
-            onClick={() => onNavigate?.('transactions')}
-          >
-            <ReceiptText className='w-5 h-5 text-foreground-subtle' />
-            <span className='text-[10px] font-semibold text-foreground-subtle'>
-              Transactions
-            </span>
-          </button>
-        </div>
-
-        {/* Home Indicator */}
-        <div className='flex justify-center pb-2 bg-background'>
-          <div className='bg-foreground-subtle h-1 w-32 rounded-full'></div>
         </div>
       </div>
     </div>
