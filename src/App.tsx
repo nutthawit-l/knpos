@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Overview from './pages/Overview'
 import Order from './pages/Order'
 import Transactions from './pages/Transactions'
+import Products from './pages/Products'
 import Sidebar from './components/Sidebar'
 
 function App() {
@@ -35,6 +36,12 @@ function App() {
       )}
       {activeTab === 'transactions' && (
         <Transactions 
+          onNavigate={handleNavigate} 
+          onMenuClick={() => setIsSidebarOpen(true)} 
+        />
+      )}
+      {activeTab === 'products' && (
+        <Products 
           onNavigate={handleNavigate} 
           onMenuClick={() => setIsSidebarOpen(true)} 
         />

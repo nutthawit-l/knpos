@@ -20,7 +20,7 @@ const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'order', label: 'Order', icon: Package },
   { id: 'transactions', label: 'Transactions', icon: ReceiptText },
-  { id: 'product-list', label: 'Product', icon: Package }, // Assuming this is a future page
+  { id: 'products', label: 'Product', icon: Package },
 ];
 
 const footerItems = [
