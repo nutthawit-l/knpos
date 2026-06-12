@@ -6,6 +6,7 @@ import Products from './pages/Products'
 import AddProduct from './pages/AddProduct'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import OTPVerify from './pages/OTPVerify'
 import Sidebar from './components/Sidebar'
 
 function App() {
@@ -62,6 +63,11 @@ function App() {
       )}
       {activeTab === 'register' && (
         <Register 
+          onNavigate={handleNavigate} 
+        />
+      )}
+      {activeTab === 'otp-verify' && (
+        <OTPVerify 
           onNavigate={handleNavigate} 
         />
       )}
