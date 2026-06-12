@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { Check } from 'lucide-react';
 
 export interface Currency {
@@ -42,7 +43,7 @@ export default function CurrencySwitchPopup({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-4 py-3 border-b border-gray-50">
-          <h2 className="font-bold text-[#1c1c1e] text-[14px]">Select Currency</h2>
+          <h2 className="font-bold text-foreground text-[14px]">Select Currency</h2>
         </div>
 
         <div className="flex-1 overflow-y-auto max-h-[400px]">
@@ -56,24 +57,24 @@ export default function CurrencySwitchPopup({
                   onClose();
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 transition-colors ${
-                  isSelected ? 'bg-[#fef3e8]' : 'hover:bg-gray-50'
+                  isSelected ? 'bg-primary-light' : 'hover:bg-surface'
                 }`}
               >
                 <span className="text-xl shrink-0 grayscale-[0.2]">{currency.flag}</span>
                 <div className="flex-1 text-left min-w-0">
-                  <p className="font-bold text-[#1c1c1e] text-[13px] leading-tight">
+                  <p className="font-bold text-foreground text-[13px] leading-tight">
                     {currency.code}
                   </p>
-                  <p className="text-[#9ca3af] text-[10px] truncate">
+                  <p className="text-foreground-subtle text-[10px] truncate">
                     {currency.name}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`font-semibold text-[12px] ${isSelected ? 'text-[#1c1c1e]' : 'text-gray-400'}`}>
+                  <span className={`font-semibold text-[12px] ${isSelected ? 'text-foreground' : 'text-gray-400'}`}>
                     {currency.symbol}
                   </span>
                   {isSelected && (
-                    <Check className="w-3.5 h-3.5 text-[#f47b20]" strokeWidth={3} />
+                    <Check className="w-3.5 h-3.5 text-primary" strokeWidth={3} />
                   )}
                 </div>
               </button>

@@ -24,9 +24,9 @@ const navItems = [
 ];
 
 const footerItems = [
-  { id: 'settings', label: 'Settings', icon: Settings, color: 'text-[#374151]' },
-  { id: 'login', label: 'Login', icon: LogIn, color: 'text-[#f47b20]' },
-  { id: 'logout', label: 'Logout', icon: LogOut, color: 'text-[#ef4444]' },
+  { id: 'settings', label: 'Settings', icon: Settings, color: 'text-foreground-muted' },
+  { id: 'login', label: 'Login', icon: LogIn, color: 'text-primary' },
+  { id: 'logout', label: 'Logout', icon: LogOut, color: 'text-destructive' },
 ];
 
 export default function Sidebar({ isOpen, onClose, activeTab, onNavigate }: SidebarProps) {
@@ -50,21 +50,21 @@ export default function Sidebar({ isOpen, onClose, activeTab, onNavigate }: Side
             {/* User Profile */}
             <div className='pt-10 pb-6 px-5 flex items-center justify-between'>
               <div className='flex items-center gap-3'>
-                <div className='w-12 h-12 rounded-full border-2 border-[#f3f4f6] p-0.5 overflow-hidden'>
+                <div className='w-12 h-12 rounded-full border-2 border-border p-0.5 overflow-hidden'>
                   <img src={avatarImg} alt='User avatar' className='w-full h-full object-cover rounded-full' />
                 </div>
                 <div>
-                  <p className='text-[15px] font-bold text-[#1c1c1e] leading-tight'>John Smith</p>
-                  <p className='text-[12px] text-[#9ca3af]'>Store Manager</p>
+                  <p className='text-[15px] font-bold text-foreground leading-tight'>John Smith</p>
+                  <p className='text-[12px] text-foreground-subtle'>Store Manager</p>
                 </div>
               </div>
-              <button onClick={onClose} className='p-1 text-[#374151]'>
+              <button onClick={onClose} className='p-1 text-foreground-muted'>
                 <X className='w-5 h-5' />
               </button>
             </div>
 
             <div className='px-5 mb-4'>
-              <div className='h-px bg-[#f3f4f6]' />
+              <div className='h-px bg-border' />
             </div>
 
             {/* Navigation */}
@@ -78,16 +78,16 @@ export default function Sidebar({ isOpen, onClose, activeTab, onNavigate }: Side
                     onClick={() => onNavigate(item.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-[14px] transition-colors ${
                       isActive 
-                        ? 'bg-[#fef3e8] text-[#f47b20]' 
-                        : 'text-[#374151] hover:bg-gray-50'
+                        ? 'bg-primary-light text-primary' 
+                        : 'text-foreground-muted hover:bg-surface'
                     }`}
                   >
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#f47b20]' : 'text-[#374151]'}`} />
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-foreground-muted'}`} />
                     <span className={`text-[14px] ${isActive ? 'font-semibold' : 'font-medium'}`}>
                       {item.label}
                     </span>
                     {isActive && (
-                      <div className='ml-auto w-1.5 h-5 bg-[#f47b20] rounded-full' />
+                      <div className='ml-auto w-1.5 h-5 bg-primary rounded-full' />
                     )}
                   </button>
                 );
@@ -97,14 +97,14 @@ export default function Sidebar({ isOpen, onClose, activeTab, onNavigate }: Side
             {/* Footer */}
             <div className='px-3 pb-8 space-y-1'>
               <div className='px-2 mb-3'>
-                <div className='h-px bg-[#f3f4f6]' />
+                <div className='h-px bg-border' />
               </div>
               {footerItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <button
                     key={item.id}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-[14px] hover:bg-gray-50 transition-colors`}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-[14px] hover:bg-surface transition-colors`}
                   >
                     <Icon className={`w-5 h-5 ${item.color}`} />
                     <span className={`text-[14px] font-medium ${item.color}`}>

@@ -57,10 +57,10 @@ export default function Transactions({ onNavigate, onMenuClick }: { onNavigate?:
           </button>
           <div className='flex items-center gap-4'>
             <button className='p-1'>
-              <Search className='w-5 h-5 text-[#1c1c1e]' />
+              <Search className='w-5 h-5 text-foreground' />
             </button>
             <button className='p-1 relative'>
-              <Bell className='w-5 h-5 text-[#1c1c1e]' />
+              <Bell className='w-5 h-5 text-foreground' />
               <span className='absolute top-1 right-1.5 w-2 h-2 bg-[#fb2c36] rounded-full border border-white'></span>
             </button>
             <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300'>
@@ -75,7 +75,7 @@ export default function Transactions({ onNavigate, onMenuClick }: { onNavigate?:
 
         {/* Title */}
         <div className='px-5 pt-1 pb-3 shrink-0 bg-white'>
-          <h1 className='text-2xl font-bold text-[#1c1c1e]'>Transactions</h1>
+          <h1 className='text-2xl font-bold text-foreground'>Transactions</h1>
         </div>
 
         {/* Content */}
@@ -84,13 +84,13 @@ export default function Transactions({ onNavigate, onMenuClick }: { onNavigate?:
           <div className='bg-white border border-gray-200 rounded-[14px] p-4 mb-4'>
             <p className="text-[#6b7280] text-[12px] font-medium mb-3">Today's Summary</p>
             <div className="flex gap-3">
-              <div className="flex-1 bg-[#fef3e8] rounded-[14px] p-3">
-                <p className="text-[#f47b20] text-[11px] font-medium mb-1">Total Income</p>
-                <p className="text-[#1c1c1e] text-[18px] font-bold">$8,120.50</p>
+              <div className="flex-1 bg-primary-light rounded-[14px] p-3">
+                <p className="text-primary text-[11px] font-medium mb-1">Total Income</p>
+                <p className="text-foreground text-[18px] font-bold">$8,120.50</p>
               </div>
               <div className="flex-1 bg-[#f0fdf4] rounded-[14px] p-3">
                 <p className="text-[#22c55e] text-[11px] font-medium mb-1">Products Sold</p>
-                <p className="text-[#1c1c1e] text-[18px] font-bold">1,284</p>
+                <p className="text-foreground text-[18px] font-bold">1,284</p>
               </div>
             </div>
           </div>
@@ -99,7 +99,7 @@ export default function Transactions({ onNavigate, onMenuClick }: { onNavigate?:
           <div className='border border-gray-200 rounded-[14px] overflow-hidden flex flex-col bg-white'>
             {/* Table Header */}
             <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white'>
-              <h2 className='font-semibold text-[#1c1c1e] text-[14px]'>
+              <h2 className='font-semibold text-foreground text-[14px]'>
                 Recent Transactions
               </h2>
               <div className='flex items-center gap-3 text-gray-500'>
@@ -134,10 +134,10 @@ export default function Transactions({ onNavigate, onMenuClick }: { onNavigate?:
                       className='w-full h-full object-cover'
                     />
                   </div>
-                  <span className='flex-1 font-medium text-[#1c1c1e] text-[13px] truncate'>
+                  <span className='flex-1 font-medium text-foreground text-[13px] truncate'>
                     {item.name}
                   </span>
-                  <span className='font-bold text-[#f47b20] text-[13px]'>
+                  <span className='font-bold text-primary text-[13px]'>
                     {item.sold}
                   </span>
                 </div>
@@ -170,8 +170,8 @@ export default function Transactions({ onNavigate, onMenuClick }: { onNavigate?:
             className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
             onClick={() => onNavigate?.('transactions')}
           >
-            <ReceiptText className='w-5 h-5 text-[#f47b20]' />
-            <span className='text-[10px] font-semibold text-[#f47b20]'>
+            <ReceiptText className='w-5 h-5 text-primary' />
+            <span className='text-[10px] font-semibold text-primary'>
               Transactions
             </span>
           </button>

@@ -14,14 +14,14 @@ interface AddProductProps {
   onMenuClick?: () => void;
 }
 
-export default function AddProduct({ onNavigate, onMenuClick }: AddProductProps) {
+export default function AddProduct({ onNavigate }: AddProductProps) {
   return (
     <div className='bg-[#f9fafb] min-h-screen flex justify-center'>
       <div className='bg-white flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
         {/* App Header */}
         <div className='flex items-center justify-between px-5 py-3 shrink-0 bg-white'>
           <button className='p-1 -ml-1' onClick={() => onNavigate?.('products')}>
-            <ChevronLeft className='w-6 h-6 text-[#1c1c1e]' />
+            <ChevronLeft className='w-6 h-6 text-foreground' />
           </button>
           <div className='flex items-center gap-4'>
             <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300'>
@@ -36,12 +36,12 @@ export default function AddProduct({ onNavigate, onMenuClick }: AddProductProps)
 
         {/* Title & Top Actions */}
         <div className='px-5 pt-1 pb-3 shrink-0 bg-white'>
-          <h1 className='text-2xl font-bold text-[#1c1c1e] mb-4'>Add New Product</h1>
+          <h1 className='text-2xl font-bold text-foreground mb-4'>Add New Product</h1>
           <div className='flex gap-2'>
             <button className='p-3 border border-gray-200 rounded-[14px] bg-white'>
               <Trash2 className='w-5 h-5 text-red-500' />
             </button>
-            <button className='flex-1 bg-[#f47b20] text-white font-semibold py-3 px-4 rounded-[14px] shadow-sm'>
+            <button className='flex-1 bg-primary text-white font-semibold py-3 px-4 rounded-[14px] shadow-sm'>
               Add
             </button>
           </div>
@@ -51,10 +51,10 @@ export default function AddProduct({ onNavigate, onMenuClick }: AddProductProps)
         <div className='flex-1 overflow-y-auto px-5 pb-24 bg-white'>
           {/* Product Image Section */}
           <div className='bg-white border border-gray-200 rounded-[16px] p-4 mb-4'>
-            <h2 className='font-bold text-[#1c1c1e] text-[14px] mb-3'>Product Image</h2>
+            <h2 className='font-bold text-foreground text-[14px] mb-3'>Product Image</h2>
             <div className='bg-[#f9fafb] border-2 border-gray-200 border-dashed rounded-[14px] p-6 flex flex-col items-center justify-center text-center'>
               <Upload className='w-6 h-6 text-gray-400 mb-2' />
-              <p className='text-[13px] font-semibold text-[#1c1c1e]'>
+              <p className='text-[13px] font-semibold text-foreground'>
                 Drag your image here or browse here
               </p>
               <p className='text-[11px] text-gray-400'>
@@ -71,7 +71,7 @@ export default function AddProduct({ onNavigate, onMenuClick }: AddProductProps)
 
           {/* Product Information Section */}
           <div className='bg-white border border-gray-200 rounded-[16px] p-4 flex flex-col gap-4'>
-            <h2 className='font-bold text-[#1c1c1e] text-[14px]'>Product Information</h2>
+            <h2 className='font-bold text-foreground text-[14px]'>Product Information</h2>
             
             {/* Product Name */}
             <div className='flex flex-col gap-1.5'>
@@ -79,7 +79,7 @@ export default function AddProduct({ onNavigate, onMenuClick }: AddProductProps)
               <input 
                 type="text" 
                 placeholder="Enter product name"
-                className='w-full border border-gray-200 rounded-[14px] px-4 py-2.5 text-[13px] outline-none focus:border-[#f47b20] transition-colors'
+                className='w-full border border-gray-200 rounded-[14px] px-4 py-2.5 text-[13px] outline-none focus:border-primary transition-colors'
               />
             </div>
 
@@ -104,7 +104,7 @@ export default function AddProduct({ onNavigate, onMenuClick }: AddProductProps)
                   <input 
                     type="text" 
                     placeholder={price.placeholder}
-                    className='w-full border border-gray-200 rounded-[14px] pl-10 pr-4 py-2.5 text-[13px] outline-none focus:border-[#f47b20] transition-colors'
+                    className='w-full border border-gray-200 rounded-[14px] pl-10 pr-4 py-2.5 text-[13px] outline-none focus:border-primary transition-colors'
                   />
                 </div>
               </div>
