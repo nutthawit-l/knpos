@@ -45,8 +45,8 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
   const [isCurrencyPopupOpen, setIsCurrencyPopupOpen] = useState(false);
 
   return (
-    <div className='bg-[#f9fafb] min-h-screen flex justify-center'>
-      <div className='bg-white flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
+    <div className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'>
+      <div className='bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
         <Header onMenuClick={onMenuClick} />
 
         {/* Title */}
@@ -55,9 +55,9 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
         </div>
 
         {/* Content */}
-        <div className='flex-1 overflow-y-auto px-5 pb-24 bg-white'>
+        <div className='flex-1 flex flex-col overflow-hidden px-5 pb-24 bg-white'>
           {/* Action Buttons */}
-          <div className='flex flex-col gap-3 mb-6'>
+          <div className='flex flex-col gap-3 mb-6 shrink-0'>
             <button 
               className='w-full bg-primary text-white font-semibold py-3 px-4 rounded-[14px] flex items-center justify-center gap-2 shadow-sm'
               onClick={() => onNavigate?.('add-product')}
@@ -72,9 +72,9 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
           </div>
 
           {/* Product Table Data */}
-          <div className='border border-gray-200 rounded-[14px] overflow-hidden flex flex-col bg-white'>
+          <div className='flex-1 border border-gray-200 rounded-[14px] overflow-hidden flex flex-col bg-white'>
             {/* Table Header */}
-            <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white'>
+            <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white shrink-0'>
               <h2 className='font-semibold text-foreground text-[14px]'>
                 Product Table Data
               </h2>
@@ -103,7 +103,7 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
             </div>
 
             {/* Column Labels */}
-            <div className='flex items-center px-4 py-2 bg-[#f9fafb] border-b border-gray-100'>
+            <div className='flex items-center px-4 py-2 bg-[#f9fafb] border-b border-gray-100 shrink-0'>
               <div className='flex-1 flex items-center gap-1'>
                 <span className='text-[12px] font-medium text-gray-500'>Product Info</span>
                 <Filter className='w-2.5 h-2.5 text-gray-400' />
@@ -112,7 +112,7 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
             </div>
 
             {/* List Items */}
-            <div className='flex flex-col'>
+            <div className='flex-1 flex flex-col overflow-y-auto'>
               {products.map((product, index) => (
                 <div
                   key={product.id}

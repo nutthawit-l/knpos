@@ -33,8 +33,8 @@ const transactions = [
 
 export default function Transactions({ onNavigate, onMenuClick }: { onNavigate?: (tab: string) => void, onMenuClick?: () => void }) {
   return (
-    <div className='bg-[#f9fafb] min-h-screen flex justify-center'>
-      <div className='bg-white flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
+    <div className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'>
+      <div className='bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
         <Header onMenuClick={onMenuClick} showNotifications={true} />
 
         {/* Title */}
@@ -43,9 +43,9 @@ export default function Transactions({ onNavigate, onMenuClick }: { onNavigate?:
         </div>
 
         {/* Content */}
-        <div className='flex-1 overflow-y-auto px-5 pb-24 bg-white'>
+        <div className='flex-1 flex flex-col overflow-hidden px-5 pb-24 bg-white'>
           {/* Summary */}
-          <div className='bg-white border border-gray-200 rounded-[14px] p-4 mb-4'>
+          <div className='bg-white border border-gray-200 rounded-[14px] p-4 mb-4 shrink-0'>
             <p className="text-[#6b7280] text-[12px] font-medium mb-3">Today's Summary</p>
             <div className="flex gap-3">
               <div className="flex-1 bg-primary-light rounded-[14px] p-3">
@@ -60,9 +60,9 @@ export default function Transactions({ onNavigate, onMenuClick }: { onNavigate?:
           </div>
 
           {/* Transactions List */}
-          <div className='border border-gray-200 rounded-[14px] overflow-hidden flex flex-col bg-white'>
+          <div className='flex-1 border border-gray-200 rounded-[14px] overflow-hidden flex flex-col bg-white'>
             {/* Table Header */}
-            <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white'>
+            <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white shrink-0'>
               <h2 className='font-semibold text-foreground text-[14px]'>
                 Recent Transactions
               </h2>
@@ -77,13 +77,13 @@ export default function Transactions({ onNavigate, onMenuClick }: { onNavigate?:
             </div>
 
             {/* Sub Header */}
-            <div className='bg-[#f9fafb] border-b border-gray-100 px-4 py-2 flex justify-between items-center'>
+            <div className='bg-[#f9fafb] border-b border-gray-100 px-4 py-2 flex justify-between items-center shrink-0'>
               <span className='text-[#6b7280] text-[12px] font-medium'>Product</span>
               <span className='text-[#6b7280] text-[12px] font-medium'>Total Sold</span>
             </div>
 
             {/* List Items */}
-            <div className='flex flex-col'>
+            <div className='flex-1 flex flex-col overflow-y-auto'>
               {transactions.map((item, index) => (
                 <div
                   key={item.id}

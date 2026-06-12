@@ -20,3 +20,13 @@
   /* Semantic UI */
   --color-destructive: #ef4444;
 }
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+}

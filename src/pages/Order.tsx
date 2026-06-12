@@ -73,8 +73,8 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
   }, 0);
 
   return (
-    <div className='bg-[#f9fafb] min-h-screen flex justify-center'>
-      <div className='bg-white flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
+    <div className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'>
+      <div className='bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
         {isModalOpen && <CreateEventModal onClose={() => setIsModalOpen(false)} />}
         {isConfirmModalOpen && (
           <ConfirmOrderModal
