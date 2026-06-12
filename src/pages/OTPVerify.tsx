@@ -1,4 +1,4 @@
-import { Package, ShieldCheck } from 'lucide-react';
+import { Package } from 'lucide-react';
 import { useState } from 'react';
 
 export default function OTPVerify({
@@ -49,10 +49,6 @@ export default function OTPVerify({
         {/* OTP Card */}
         <div className='flex-1 px-5 overflow-y-auto'>
           <div className='bg-background rounded-[24px] p-6 shadow-[0px_1px_1.5px_rgba(0,0,0,0.1),0px_1px_1px_rgba(0,0,0,0.1)] flex flex-col items-center'>
-            <div className='bg-primary-light p-3.5 rounded-full mb-4'>
-              <ShieldCheck className='w-6 h-6 text-primary' />
-            </div>
-
             <h1 className='text-[20px] font-bold text-foreground mb-1.5'>
               OTP Verification
             </h1>
