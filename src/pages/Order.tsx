@@ -40,11 +40,12 @@ const products = [
   { id: 10, name: 'Espresso', price: '$2.25', image: imgImageEspresso },
 ];
 
-interface ProductsProps {
+interface OrderProps {
   onNavigate?: (tab: string) => void;
+  onMenuClick?: () => void;
 }
 
-export default function Products({ onNavigate }: ProductsProps) {
+export default function Order({ onNavigate, onMenuClick }: OrderProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [quantities, setQuantities] = useState<Record<number, number>>({});
@@ -84,13 +85,14 @@ export default function Products({ onNavigate }: ProductsProps) {
             onConfirm={() => {
               setIsConfirmModalOpen(false);
               setQuantities({});
+              onNavigate?.('transactions');
             }}
           />
         )}
         
         {/* App Header */}
         <div className='flex items-center justify-between px-5 py-3 shrink-0 bg-white'>
-          <button className='p-1 -ml-1'>
+          <button className='p-1 -ml-1' onClick={onMenuClick}>
             <svg
               width='24'
               height='24'
@@ -134,7 +136,7 @@ export default function Products({ onNavigate }: ProductsProps) {
           >
             <div className='flex items-center gap-2'>
               <span className='font-semibold text-[13px] text-white'>
-                Total Products
+                Total Order
               </span>
               <div className='bg-white rounded-full h-[22px] min-w-[22px] px-1.5 flex items-center justify-center'>
                 <span className='font-bold text-[#f47b20] text-[12px]'>
@@ -156,7 +158,7 @@ export default function Products({ onNavigate }: ProductsProps) {
             {/* Table Header */}
             <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white'>
               <h2 className='font-semibold text-[#1c1c1e] text-[14px]'>
-                Product Table Data
+                Order Items
               </h2>
               <div className='flex items-center gap-3 text-gray-500'>
                 <button>
@@ -251,11 +253,11 @@ export default function Products({ onNavigate }: ProductsProps) {
           </button>
           <button 
             className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
-            onClick={() => onNavigate?.('products')}
+            onClick={() => onNavigate?.('order')}
           >
             <Package className='w-5 h-5 text-[#f47b20]' />
             <span className='text-[10px] font-semibold text-[#f47b20]'>
-              Products
+              Order
             </span>
           </button>
           <button 

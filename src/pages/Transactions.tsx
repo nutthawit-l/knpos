@@ -1,0 +1,182 @@
+import {
+  Search,
+  Bell,
+  LayoutDashboard,
+  Package,
+  ReceiptText,
+  ArrowUpDown,
+  Filter,
+} from 'lucide-react';
+import avatarImg from '../assets/avatar.png';
+
+const imgImageCappuccino = "https://www.figma.com/api/mcp/asset/4bef099a-4290-4694-8269-f0a6be4ef565";
+const imgImageIcedLatte = "https://www.figma.com/api/mcp/asset/208f24fd-7360-4cd9-b02c-e303cc41042a";
+const imgImageChocolateCroissant = "https://www.figma.com/api/mcp/asset/5dcf43db-bfd3-4edc-9adc-c6f6b92a3265";
+const imgImageAmericano = "https://www.figma.com/api/mcp/asset/c50b7b00-bff5-43cc-b24e-c19a9839b963";
+const imgImageBlueberryMuffin = "https://www.figma.com/api/mcp/asset/ab1a6628-a6d0-4413-99ff-86fe017a8e7f";
+const imgImageCaramelMacchiato = "https://www.figma.com/api/mcp/asset/558604bc-fb0a-4518-b9d2-805af2222a30";
+const imgImageHamSandwich = "https://www.figma.com/api/mcp/asset/d104f66c-45d5-45fd-9464-2d33254ce0c0";
+const imgImageGreenTea = "https://www.figma.com/api/mcp/asset/00d9ff94-62af-43f8-a336-b42985c6f389";
+const imgImageVanillaDonut = "https://www.figma.com/api/mcp/asset/59b3d410-0e4d-476c-9cff-b8619f905d34";
+const imgImageEspresso = "https://www.figma.com/api/mcp/asset/45ac1a32-6c47-411f-bbf1-98fed0f06c60";
+
+const transactions = [
+  { id: 1, name: 'Cappuccino', sold: 312, image: imgImageCappuccino },
+  { id: 2, name: 'Iced Latte', sold: 278, image: imgImageIcedLatte },
+  { id: 3, name: 'Chocolate Croissant', sold: 195, image: imgImageChocolateCroissant },
+  { id: 4, name: 'Americano', sold: 401, image: imgImageAmericano },
+  { id: 5, name: 'Blueberry Muffin', sold: 143, image: imgImageBlueberryMuffin },
+  { id: 6, name: 'Caramel Macchiato', sold: 229, image: imgImageCaramelMacchiato },
+  { id: 7, name: 'Ham Sandwich', sold: 88, image: imgImageHamSandwich },
+  { id: 8, name: 'Green Tea', sold: 176, image: imgImageGreenTea },
+  { id: 9, name: 'Vanilla Donut', sold: 260, image: imgImageVanillaDonut },
+  { id: 10, name: 'Espresso', sold: 352, image: imgImageEspresso },
+];
+
+export default function Transactions({ onNavigate, onMenuClick }: { onNavigate?: (tab: string) => void, onMenuClick?: () => void }) {
+  return (
+    <div className='bg-[#f9fafb] min-h-screen flex justify-center'>
+      <div className='bg-white flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
+        {/* App Header */}
+        <div className='flex items-center justify-between px-5 py-3 shrink-0 bg-white'>
+          <button className='p-1 -ml-1' onClick={onMenuClick}>
+            <svg
+              width='24'
+              height='24'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth='2'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+            >
+              <line x1='3' y1='12' x2='21' y2='12'></line>
+              <line x1='3' y1='6' x2='21' y2='6'></line>
+              <line x1='3' y1='18' x2='21' y2='18'></line>
+            </svg>
+          </button>
+          <div className='flex items-center gap-4'>
+            <button className='p-1'>
+              <Search className='w-5 h-5 text-[#1c1c1e]' />
+            </button>
+            <button className='p-1 relative'>
+              <Bell className='w-5 h-5 text-[#1c1c1e]' />
+              <span className='absolute top-1 right-1.5 w-2 h-2 bg-[#fb2c36] rounded-full border border-white'></span>
+            </button>
+            <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300'>
+              <img
+                src={avatarImg}
+                alt='Avatar'
+                className='w-full h-full object-cover'
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className='px-5 pt-1 pb-3 shrink-0 bg-white'>
+          <h1 className='text-2xl font-bold text-[#1c1c1e]'>Transactions</h1>
+        </div>
+
+        {/* Content */}
+        <div className='flex-1 overflow-y-auto px-5 pb-24 bg-white'>
+          {/* Summary */}
+          <div className='bg-white border border-gray-200 rounded-[14px] p-4 mb-4'>
+            <p className="text-[#6b7280] text-[12px] font-medium mb-3">Today's Summary</p>
+            <div className="flex gap-3">
+              <div className="flex-1 bg-[#fef3e8] rounded-[14px] p-3">
+                <p className="text-[#f47b20] text-[11px] font-medium mb-1">Total Income</p>
+                <p className="text-[#1c1c1e] text-[18px] font-bold">$8,120.50</p>
+              </div>
+              <div className="flex-1 bg-[#f0fdf4] rounded-[14px] p-3">
+                <p className="text-[#22c55e] text-[11px] font-medium mb-1">Products Sold</p>
+                <p className="text-[#1c1c1e] text-[18px] font-bold">1,284</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Transactions List */}
+          <div className='border border-gray-200 rounded-[14px] overflow-hidden flex flex-col bg-white'>
+            {/* Table Header */}
+            <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white'>
+              <h2 className='font-semibold text-[#1c1c1e] text-[14px]'>
+                Recent Transactions
+              </h2>
+              <div className='flex items-center gap-3 text-gray-500'>
+                <button>
+                  <ArrowUpDown className='w-4 h-4' />
+                </button>
+                <button>
+                  <Filter className='w-4 h-4' />
+                </button>
+              </div>
+            </div>
+
+            {/* Sub Header */}
+            <div className='bg-[#f9fafb] border-b border-gray-100 px-4 py-2 flex justify-between items-center'>
+              <span className='text-[#6b7280] text-[12px] font-medium'>Product</span>
+              <span className='text-[#6b7280] text-[12px] font-medium'>Total Sold</span>
+            </div>
+
+            {/* List Items */}
+            <div className='flex flex-col'>
+              {transactions.map((item, index) => (
+                <div
+                  key={item.id}
+                  className={`flex items-center gap-3 px-4 py-3 bg-white ${
+                    index !== transactions.length - 1 ? 'border-b border-gray-100' : ''
+                  }`}
+                >
+                  <div className='w-8 h-8 rounded-full overflow-hidden bg-gray-100 shrink-0'>
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className='w-full h-full object-cover'
+                    />
+                  </div>
+                  <span className='flex-1 font-medium text-[#1c1c1e] text-[13px] truncate'>
+                    {item.name}
+                  </span>
+                  <span className='font-bold text-[#f47b20] text-[13px]'>
+                    {item.sold}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Navigation */}
+        <div className='absolute bottom-0 w-full max-w-[400px] bg-white border-t border-gray-100 flex items-center justify-between pb-safe z-10'>
+          <button 
+            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
+            onClick={() => onNavigate?.('dashboard')}
+          >
+            <LayoutDashboard className='w-5 h-5 text-gray-400' />
+            <span className='text-[10px] font-semibold text-gray-400'>
+              Dashboard
+            </span>
+          </button>
+          <button 
+            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
+            onClick={() => onNavigate?.('order')}
+          >
+            <Package className='w-5 h-5 text-gray-400' />
+            <span className='text-[10px] font-semibold text-gray-400'>
+              Order
+            </span>
+          </button>
+          <button 
+            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
+            onClick={() => onNavigate?.('transactions')}
+          >
+            <ReceiptText className='w-5 h-5 text-[#f47b20]' />
+            <span className='text-[10px] font-semibold text-[#f47b20]'>
+              Transactions
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

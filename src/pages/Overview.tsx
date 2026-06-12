@@ -65,13 +65,13 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   return null;
 };
 
-export default function Overview({ onNavigate }: { onNavigate?: (tab: string) => void }) {
+export default function Overview({ onNavigate, onMenuClick }: { onNavigate?: (tab: string) => void, onMenuClick?: () => void }) {
   return (
     <div className='bg-[#f9fafb] min-h-screen flex justify-center'>
       <div className='bg-white flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
         {/* App Header */}
         <div className='flex items-center justify-between px-5 py-3 shrink-0 bg-white'>
-          <button className='p-1 -ml-1'>
+          <button className='p-1 -ml-1' onClick={onMenuClick}>
             <svg
               width='24'
               height='24'
@@ -219,11 +219,11 @@ export default function Overview({ onNavigate }: { onNavigate?: (tab: string) =>
           </button>
           <button 
             className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
-            onClick={() => onNavigate?.('products')}
+            onClick={() => onNavigate?.('order')}
           >
             <Package className='w-5 h-5 text-gray-400' />
             <span className='text-[10px] font-semibold text-gray-400'>
-              Products
+              Order
             </span>
           </button>
           <button 
