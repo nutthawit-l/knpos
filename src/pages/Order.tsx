@@ -99,7 +99,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
         />
 
         {/* Content */}
-        <div className='flex-1 overflow-y-auto px-5 pb-[80px] bg-white'>
+        <div className='flex-1 flex flex-col overflow-hidden px-5 pb-[80px] bg-white'>
           {/* Summary Banner */}
           <button 
             className='bg-primary rounded-[14px] w-full px-4 py-3 mb-5 flex items-center justify-between shadow-sm border-none cursor-pointer'
@@ -127,7 +127,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
           </button>
 
           {/* Product Table Data */}
-          <div className='border border-gray-200 rounded-[14px] overflow-hidden flex flex-col bg-white'>
+          <div className='flex-1 border border-gray-200 rounded-[14px] overflow-hidden flex flex-col bg-white'>
             {/* Table Header */}
             <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white'>
               <h2 className='font-semibold text-foreground text-[14px]'>
@@ -144,7 +144,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
             </div>
 
             {/* List Items */}
-            <div className='flex flex-col'>
+            <div className='flex-1 flex flex-col overflow-y-auto'>
               {products.map((product, index) => {
                 const qty = quantities[product.id] || 0;
                 const isSelected = qty > 0;
