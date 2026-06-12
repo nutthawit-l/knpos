@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Bell, Menu, ChevronLeft } from 'lucide-react';
+import { Menu, ChevronLeft } from 'lucide-react';
 import avatarImg from '../assets/avatar.png';
 
 interface HeaderProps {
@@ -13,8 +13,6 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({
   onMenuClick,
   onBackClick,
-  showSearch = true,
-  showNotifications = false,
   rightElement,
 }) => {
   return (
@@ -31,17 +29,6 @@ const Header: React.FC<HeaderProps> = ({
         )}
       </div>
       <div className='flex items-center gap-4'>
-        {showSearch && (
-          <button className='p-1'>
-            <Search className='w-5 h-5 text-foreground' />
-          </button>
-        )}
-        {showNotifications && (
-          <button className='p-1 relative'>
-            <Bell className='w-5 h-5 text-foreground' />
-            <span className='absolute top-1 right-1.5 w-2 h-2 bg-[#fb2c36] rounded-full border border-white'></span>
-          </button>
-        )}
         {rightElement}
         <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300'>
           <img
