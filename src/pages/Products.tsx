@@ -89,7 +89,10 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
         <div className='flex-1 overflow-y-auto px-5 pb-24 bg-white'>
           {/* Action Buttons */}
           <div className='flex flex-col gap-3 mb-6'>
-            <button className='w-full bg-[#f47b20] text-white font-semibold py-3 px-4 rounded-[14px] flex items-center justify-center gap-2 shadow-sm'>
+            <button 
+              className='w-full bg-[#f47b20] text-white font-semibold py-3 px-4 rounded-[14px] flex items-center justify-center gap-2 shadow-sm'
+              onClick={() => onNavigate?.('add-product')}
+            >
               <Plus className='w-4 h-4 text-white' />
               <span>Add New Products</span>
             </button>
