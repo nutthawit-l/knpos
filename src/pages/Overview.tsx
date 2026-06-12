@@ -16,7 +16,6 @@ import {
 } from 'recharts';
 import Header from '../components/Header';
 
-
 const data = [
   { name: 'Mon', revenue: 7000, orders: 4000, profit: 3000 },
   { name: 'Tue', revenue: 11000, orders: 6000, profit: 5000 },
@@ -63,16 +62,20 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   return null;
 };
 
-export default function Overview({ onNavigate, onMenuClick }: { onNavigate?: (tab: string) => void, onMenuClick?: () => void }) {
+export default function Overview({
+  onNavigate,
+  onMenuClick,
+}: {
+  onNavigate?: (tab: string) => void;
+  onMenuClick?: () => void;
+}) {
   return (
     <div className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'>
       <div className='bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
-        <Header onMenuClick={onMenuClick || (() => {})} showNotifications={true} />
-
-        {/* Title */}
-        <div className='px-5 pt-1 pb-3 shrink-0 bg-white'>
-          <h1 className='text-2xl font-bold text-foreground'>Overview</h1>
-        </div>
+        <Header
+          onMenuClick={onMenuClick || (() => {})}
+          showNotifications={true}
+        />
 
         {/* Content */}
         <div className='flex-1 overflow-y-auto px-5 pb-24 bg-white'>
@@ -143,7 +146,10 @@ export default function Overview({ onNavigate, onMenuClick }: { onNavigate?: (ta
                     }
                     ticks={[0, 5500, 11000, 16500, 22000]}
                   />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+                  <Tooltip
+                    content={<CustomTooltip />}
+                    cursor={{ fill: 'transparent' }}
+                  />
                   <Bar
                     dataKey='revenue'
                     barSize={16}
@@ -172,7 +178,7 @@ export default function Overview({ onNavigate, onMenuClick }: { onNavigate?: (ta
 
         {/* Bottom Navigation */}
         <div className='absolute bottom-0 w-full max-w-[400px] bg-white border-t border-gray-100 flex items-center justify-between pb-safe z-10'>
-          <button 
+          <button
             className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
             onClick={() => onNavigate?.('dashboard')}
           >
@@ -181,7 +187,7 @@ export default function Overview({ onNavigate, onMenuClick }: { onNavigate?: (ta
               Dashboard
             </span>
           </button>
-          <button 
+          <button
             className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
             onClick={() => onNavigate?.('order')}
           >
@@ -190,7 +196,7 @@ export default function Overview({ onNavigate, onMenuClick }: { onNavigate?: (ta
               Order
             </span>
           </button>
-          <button 
+          <button
             className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
             onClick={() => onNavigate?.('transactions')}
           >
