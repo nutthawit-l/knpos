@@ -110,10 +110,10 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
           </button>
           <div className='flex items-center gap-4'>
             <button className='p-1'>
-              <Search className='w-5 h-5 text-[#1c1c1e]' />
+              <Search className='w-5 h-5 text-foreground' />
             </button>
             <button className='p-1' onClick={() => setIsModalOpen(true)}>
-              <Calendar className='w-5 h-5 text-[#1c1c1e]' />
+              <Calendar className='w-5 h-5 text-foreground' />
             </button>
             <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300'>
               <img
@@ -129,7 +129,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
         <div className='flex-1 overflow-y-auto px-5 pb-[80px] bg-white'>
           {/* Summary Banner */}
           <button 
-            className='bg-[#f47b20] rounded-[14px] w-full px-4 py-3 mb-5 flex items-center justify-between shadow-sm border-none cursor-pointer'
+            className='bg-primary rounded-[14px] w-full px-4 py-3 mb-5 flex items-center justify-between shadow-sm border-none cursor-pointer'
             onClick={() => {
               if (totalCount > 0) setIsConfirmModalOpen(true);
             }}
@@ -139,7 +139,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
                 Total Order
               </span>
               <div className='bg-white rounded-full h-[22px] min-w-[22px] px-1.5 flex items-center justify-center'>
-                <span className='font-bold text-[#f47b20] text-[12px]'>
+                <span className='font-bold text-primary text-[12px]'>
                   {totalCount}
                 </span>
               </div>
@@ -157,7 +157,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
           <div className='border border-gray-200 rounded-[14px] overflow-hidden flex flex-col bg-white'>
             {/* Table Header */}
             <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white'>
-              <h2 className='font-semibold text-[#1c1c1e] text-[14px]'>
+              <h2 className='font-semibold text-foreground text-[14px]'>
                 Order Items
               </h2>
               <div className='flex items-center gap-3 text-gray-500'>
@@ -185,7 +185,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
                   >
                     <button 
                       className={`w-4 h-4 rounded shrink-0 flex items-center justify-center transition-colors ${
-                        isSelected ? 'bg-[#f47b20] border-[#f47b20] drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)]' : 'border border-gray-300 bg-gray-50'
+                        isSelected ? 'bg-primary border-primary drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)]' : 'border border-gray-300 bg-surface'
                       }`}
                       onClick={() => isSelected ? setQuantities(prev => { const rest = { ...prev }; delete rest[product.id]; return rest; }) : handleIncrement(product.id)}
                     >
@@ -199,7 +199,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
                       />
                     </div>
                     <div className='flex-1 min-w-0 flex flex-col'>
-                      <span className='font-semibold text-[#1c1c1e] text-[13px] truncate'>
+                      <span className='font-semibold text-foreground text-[13px] truncate'>
                         {product.name}
                       </span>
                       <span className='text-gray-400 text-[11px] font-normal'>
@@ -210,16 +210,16 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
                     {isSelected ? (
                       <div className='flex items-center gap-2'>
                         <button 
-                          className='w-7 h-7 rounded-[10px] bg-[#f47b20] flex items-center justify-center shrink-0'
+                          className='w-7 h-7 rounded-[10px] bg-primary flex items-center justify-center shrink-0'
                           onClick={() => handleDecrement(product.id)}
                         >
                           <Minus className='w-4 h-4 text-white' />
                         </button>
-                        <span className='w-5 text-center font-bold text-[#1c1c1e] text-[13px]'>
+                        <span className='w-5 text-center font-bold text-foreground text-[13px]'>
                           {qty}
                         </span>
                         <button 
-                          className='w-7 h-7 rounded-[10px] bg-[#f47b20] flex items-center justify-center shrink-0'
+                          className='w-7 h-7 rounded-[10px] bg-primary flex items-center justify-center shrink-0'
                           onClick={() => handleIncrement(product.id)}
                         >
                           <Plus className='w-4 h-4 text-white' />
@@ -227,7 +227,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
                       </div>
                     ) : (
                       <button 
-                        className='w-8 h-8 rounded-[10px] bg-[#f47b20] flex items-center justify-center shrink-0'
+                        className='w-8 h-8 rounded-[10px] bg-primary flex items-center justify-center shrink-0'
                         onClick={() => handleIncrement(product.id)}
                       >
                         <Plus className='w-4 h-4 text-white' />
@@ -255,8 +255,8 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
             className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
             onClick={() => onNavigate?.('order')}
           >
-            <Package className='w-5 h-5 text-[#f47b20]' />
-            <span className='text-[10px] font-semibold text-[#f47b20]'>
+            <Package className='w-5 h-5 text-primary' />
+            <span className='text-[10px] font-semibold text-primary'>
               Order
             </span>
           </button>

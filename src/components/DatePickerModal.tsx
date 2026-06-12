@@ -11,7 +11,7 @@ export default function DatePickerModal({ onClose, onConfirm }: DatePickerModalP
       <div className="w-full mx-auto overflow-hidden px-4">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-transparent">
-          <h3 className="text-[14px] font-semibold text-[#1c1c1e]">Select Date</h3>
+          <h3 className="text-[14px] font-semibold text-foreground">Select Date</h3>
           <button onClick={onClose} className="p-1 text-gray-500 hover:text-gray-700">
             <X className="w-4 h-4" />
           </button>
@@ -19,7 +19,7 @@ export default function DatePickerModal({ onClose, onConfirm }: DatePickerModalP
 
         {/* Scrollable Picker Area (Visual Mock) */}
         <div className="px-4 py-2 relative">
-          <div className="absolute top-[68px] left-4 right-4 h-7 bg-[#fef3e8] rounded-[10px] pointer-events-none" />
+          <div className="absolute top-[68px] left-4 right-4 h-7 bg-primary-light rounded-[10px] pointer-events-none" />
           
           <div className="flex justify-between relative z-10">
             {/* Days Column */}
@@ -30,7 +30,7 @@ export default function DatePickerModal({ onClose, onConfirm }: DatePickerModalP
               <div className="h-[120px] w-full overflow-y-auto flex flex-col items-center text-[13px] snap-y snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] py-[48px]">
                 {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                   <div key={day} className="h-6 flex items-center justify-center snap-center shrink-0 w-full">
-                    <span className={`${day === 1 ? 'text-[18px] font-bold text-[#1c1c1e]' : 'text-gray-400'}`}>{day}</span>
+                    <span className={`${day === 1 ? 'text-[18px] font-bold text-foreground' : 'text-gray-400'}`}>{day}</span>
                   </div>
                 ))}
               </div>
@@ -47,7 +47,7 @@ export default function DatePickerModal({ onClose, onConfirm }: DatePickerModalP
               <div className="h-[120px] w-full overflow-y-auto flex flex-col items-center text-[13px] snap-y snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] py-[48px]">
                 {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, i) => (
                   <div key={month} className="h-6 flex items-center justify-center snap-center shrink-0 w-full">
-                    <span className={`${i === 2 ? 'text-[18px] font-bold text-[#1c1c1e]' : 'text-gray-400'}`}>{month}</span>
+                    <span className={`${i === 2 ? 'text-[18px] font-bold text-foreground' : 'text-gray-400'}`}>{month}</span>
                   </div>
                 ))}
               </div>
@@ -64,7 +64,7 @@ export default function DatePickerModal({ onClose, onConfirm }: DatePickerModalP
               <div className="h-[120px] w-full overflow-y-auto flex flex-col items-center text-[13px] snap-y snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] py-[48px]">
                 {Array.from({ length: 20 }, (_, i) => 2020 + i).map(year => (
                   <div key={year} className="h-6 flex items-center justify-center snap-center shrink-0 w-full">
-                    <span className={`${year === 2026 ? 'text-[18px] font-bold text-[#1c1c1e]' : 'text-gray-400'}`}>{year}</span>
+                    <span className={`${year === 2026 ? 'text-[18px] font-bold text-foreground' : 'text-gray-400'}`}>{year}</span>
                   </div>
                 ))}
               </div>
@@ -79,7 +79,7 @@ export default function DatePickerModal({ onClose, onConfirm }: DatePickerModalP
         <div className="p-4 pt-2">
           <button 
             onClick={onConfirm}
-            className="w-full bg-[#f47b20] text-white rounded-[14px] py-2.5 text-[14px] font-semibold hover:bg-[#e06a1b] transition-colors"
+            className="w-full bg-primary text-white rounded-[14px] py-2.5 text-[14px] font-semibold hover:bg-[#e06a1b] transition-colors"
           >
             Confirm
           </button>

@@ -45,7 +45,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
       <div className='bg-white border border-gray-200 p-2.5 shadow-sm min-w-[120px]'>
         <p className='text-[#0a0a0a] text-[14px] font-medium mb-1.5'>{label}</p>
         {revenue !== undefined && (
-          <p className='text-[#f47b20] text-[13px] mb-1'>
+          <p className='text-primary text-[13px] mb-1'>
             revenue : ${revenue.toLocaleString()}
           </p>
         )}
@@ -89,10 +89,10 @@ export default function Overview({ onNavigate, onMenuClick }: { onNavigate?: (ta
           </button>
           <div className='flex items-center gap-4'>
             <button className='p-1'>
-              <Search className='w-5 h-5 text-[#1c1c1e]' />
+              <Search className='w-5 h-5 text-foreground' />
             </button>
             <button className='p-1 relative'>
-              <Bell className='w-5 h-5 text-[#1c1c1e]' />
+              <Bell className='w-5 h-5 text-foreground' />
               <span className='absolute top-1 right-1.5 w-2 h-2 bg-[#fb2c36] rounded-full border border-white'></span>
             </button>
             <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300'>
@@ -107,7 +107,7 @@ export default function Overview({ onNavigate, onMenuClick }: { onNavigate?: (ta
 
         {/* Title */}
         <div className='px-5 pt-1 pb-3 shrink-0 bg-white'>
-          <h1 className='text-2xl font-bold text-[#1c1c1e]'>Overview</h1>
+          <h1 className='text-2xl font-bold text-foreground'>Overview</h1>
         </div>
 
         {/* Content */}
@@ -115,7 +115,7 @@ export default function Overview({ onNavigate, onMenuClick }: { onNavigate?: (ta
           <div className='bg-white border border-gray-100 rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)]'>
             {/* Card Header */}
             <div className='flex items-center justify-between mb-4'>
-              <h2 className='text-[14px] font-semibold text-[#1c1c1e]'>
+              <h2 className='text-[14px] font-semibold text-foreground'>
                 Sales Performance
               </h2>
               <button className='flex items-center gap-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-500'>
@@ -126,7 +126,7 @@ export default function Overview({ onNavigate, onMenuClick }: { onNavigate?: (ta
 
             {/* Value */}
             <div className='flex items-baseline gap-2 mb-1'>
-              <span className='text-[20px] font-bold text-[#1c1c1e]'>
+              <span className='text-[20px] font-bold text-foreground'>
                 $20,234
               </span>
               <div className='flex items-center gap-0.5 bg-green-50 px-1.5 py-0.5 rounded-full'>
@@ -143,7 +143,7 @@ export default function Overview({ onNavigate, onMenuClick }: { onNavigate?: (ta
             {/* Legend */}
             <div className='flex items-center gap-3 mt-4 mb-6'>
               <div className='flex items-center gap-1.5'>
-                <span className='w-2 h-2 rounded-full bg-[#f47b20]'></span>
+                <span className='w-2 h-2 rounded-full bg-primary'></span>
                 <span className='text-[10px] text-gray-500'>Revenue</span>
               </div>
               <div className='flex items-center gap-1.5'>
@@ -183,7 +183,7 @@ export default function Overview({ onNavigate, onMenuClick }: { onNavigate?: (ta
                   <Bar
                     dataKey='revenue'
                     barSize={16}
-                    fill='#f47b20'
+                    fill='var(--color-primary)'
                     radius={[4, 4, 4, 4]}
                   />
                   <Line
@@ -212,8 +212,8 @@ export default function Overview({ onNavigate, onMenuClick }: { onNavigate?: (ta
             className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
             onClick={() => onNavigate?.('dashboard')}
           >
-            <LayoutDashboard className='w-5 h-5 text-[#f47b20]' />
-            <span className='text-[10px] font-semibold text-[#f47b20]'>
+            <LayoutDashboard className='w-5 h-5 text-primary' />
+            <span className='text-[10px] font-semibold text-primary'>
               Dashboard
             </span>
           </button>

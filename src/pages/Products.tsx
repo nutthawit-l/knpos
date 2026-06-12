@@ -68,7 +68,7 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
           </button>
           <div className='flex items-center gap-4'>
             <button className='p-1'>
-              <Search className='w-5 h-5 text-[#1c1c1e]' />
+              <Search className='w-5 h-5 text-foreground' />
             </button>
             <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300'>
               <img
@@ -82,7 +82,7 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
 
         {/* Title */}
         <div className='px-5 pt-1 pb-3 shrink-0 bg-white'>
-          <h1 className='text-2xl font-bold text-[#1c1c1e]'>Products</h1>
+          <h1 className='text-2xl font-bold text-foreground'>Products</h1>
         </div>
 
         {/* Content */}
@@ -90,13 +90,13 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
           {/* Action Buttons */}
           <div className='flex flex-col gap-3 mb-6'>
             <button 
-              className='w-full bg-[#f47b20] text-white font-semibold py-3 px-4 rounded-[14px] flex items-center justify-center gap-2 shadow-sm'
+              className='w-full bg-primary text-white font-semibold py-3 px-4 rounded-[14px] flex items-center justify-center gap-2 shadow-sm'
               onClick={() => onNavigate?.('add-product')}
             >
               <Plus className='w-4 h-4 text-white' />
               <span>Add New Products</span>
             </button>
-            <button className='w-full bg-white border border-gray-200 text-[#1c1c1e] font-semibold py-3 px-4 rounded-[14px] flex items-center justify-center gap-2'>
+            <button className='w-full bg-white border border-gray-200 text-foreground font-semibold py-3 px-4 rounded-[14px] flex items-center justify-center gap-2'>
               <FileDown className='w-4 h-4' />
               <span>Import CSV</span>
             </button>
@@ -106,7 +106,7 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
           <div className='border border-gray-200 rounded-[14px] overflow-hidden flex flex-col bg-white'>
             {/* Table Header */}
             <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white'>
-              <h2 className='font-semibold text-[#1c1c1e] text-[14px]'>
+              <h2 className='font-semibold text-foreground text-[14px]'>
                 Product Table Data
               </h2>
               <div className='flex items-center gap-3 text-gray-500 relative'>
@@ -114,10 +114,10 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
                   <ArrowUpDown className='w-4 h-4' />
                 </button>
                 <button 
-                  className='flex items-center gap-1 border border-gray-200 rounded-lg px-2 py-1 text-[11px] font-semibold text-[#f47b20] transition-colors hover:bg-gray-50'
+                  className='flex items-center gap-1 border border-gray-200 rounded-lg px-2 py-1 text-[11px] font-semibold text-primary transition-colors hover:bg-surface'
                   onClick={() => setIsCurrencyPopupOpen(true)}
                 >
-                   <span className='w-3 h-3 rounded-full border border-[#f47b20] flex items-center justify-center text-[8px]'>
+                   <span className='w-3 h-3 rounded-full border border-primary flex items-center justify-center text-[8px]'>
                      {selectedCurrency.symbol}
                    </span>
                    {selectedCurrency.code}
@@ -159,14 +159,14 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
                     />
                   </div>
                   <div className='flex-1 min-w-0 flex flex-col'>
-                    <span className='font-semibold text-[#1c1c1e] text-[13px] truncate'>
+                    <span className='font-semibold text-foreground text-[13px] truncate'>
                       {product.name}
                     </span>
                     <span className='text-gray-400 text-[11px] font-normal'>
                       {product.id}
                     </span>
                   </div>
-                  <span className='font-semibold text-[#1c1c1e] text-[13px]'>
+                  <span className='font-semibold text-foreground text-[13px]'>
                     {product.price.replace('$', selectedCurrency.symbol)}
                   </span>
                 </div>
