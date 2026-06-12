@@ -5,6 +5,7 @@ import Transactions from './pages/Transactions'
 import Products from './pages/Products'
 import AddProduct from './pages/AddProduct'
 import Login from './pages/Login'
+import Register from './pages/Register'
 import Sidebar from './components/Sidebar'
 
 function App() {
@@ -57,7 +58,11 @@ function App() {
       {activeTab === 'login' && (
         <Login 
           onNavigate={handleNavigate} 
-          onMenuClick={() => setIsSidebarOpen(true)} 
+        />
+      )}
+      {activeTab === 'register' && (
+        <Register 
+          onNavigate={handleNavigate} 
         />
       )}
     </>
