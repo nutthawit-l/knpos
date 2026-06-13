@@ -20,7 +20,7 @@ const Header: React.FC<HeaderProps> = ({
   onAddClick,
 }) => {
   return (
-    <div className='flex items-center justify-between px-5 py-3 shrink-0 bg-white'>
+    <div className='flex items-center justify-between px-5 h-14 shrink-0 bg-white'>
       <div className='flex items-center'>
         {onBackClick ? (
           <button className='p-1 -ml-1' onClick={onBackClick}>
@@ -38,7 +38,7 @@ const Header: React.FC<HeaderProps> = ({
             onClick={onImportClick}
             className='p-2 border border-gray-200 rounded-[12px] bg-white text-gray-400'
           >
-            <FileDown className='w-5 h-5' />
+            <FileDown className='w-4 h-4' />
           </button>
         )}
         {onAddClick && (
@@ -46,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({
             onClick={onAddClick}
             className='p-2 bg-primary rounded-[12px] text-white shadow-sm'
           >
-            <Plus className='w-5 h-5' />
+            <Plus className='w-4 h-4' />
           </button>
         )}
         {rightElement}
