@@ -7,7 +7,7 @@ Connect the frontend `AddProduct` UI to the backend API. This enables users to s
 *   **Environment Variable:** Add an `R2_PUBLIC_URL` binding to `wrangler.toml` so the API knows the public base URL of the R2 bucket.
 *   **POST Endpoint Logic:**
     *   Extract the `image` field from `FormData` as a `File` object.
-    *   Generate a unique filename (e.g., using `crypto.randomUUID()` + file extension).
+    *   Generate a unique filename by prepending the current timestamp to the original filename (e.g., `Date.now() + '-' + file.name`).
     *   Upload the `File` stream to the `IMAGES_BUCKET` R2 binding.
     *   Construct the final `image_url` by combining `R2_PUBLIC_URL` and the generated filename.
     *   Insert the new product record into the D1 database and return a success response.
