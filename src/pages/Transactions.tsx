@@ -104,9 +104,6 @@ export default function Transactions({
                 <button>
                   <ArrowUpDown className='w-4 h-4' />
                 </button>
-                <button>
-                  <Filter className='w-4 h-4' />
-                </button>
               </div>
             </div>
 
