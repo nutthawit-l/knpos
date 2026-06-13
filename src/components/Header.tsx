@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, ChevronLeft } from 'lucide-react';
+import { Menu, ChevronLeft, FileDown, Plus } from 'lucide-react';
 import avatarImg from '../assets/avatar.png';
 
 interface HeaderProps {
@@ -8,12 +8,16 @@ interface HeaderProps {
   showSearch?: boolean;
   showNotifications?: boolean;
   rightElement?: React.ReactNode;
+  onImportClick?: () => void;
+  onAddClick?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
   onMenuClick,
   onBackClick,
   rightElement,
+  onImportClick,
+  onAddClick,
 }) => {
   return (
     <div className='flex items-center justify-between px-5 py-3 shrink-0 bg-white'>
@@ -28,9 +32,25 @@ const Header: React.FC<HeaderProps> = ({
           </button>
         )}
       </div>
-      <div className='flex items-center gap-4'>
+      <div className='flex items-center gap-2'>
+        {onImportClick && (
+          <button
+            onClick={onImportClick}
+            className='p-2 border border-gray-200 rounded-[12px] bg-white text-gray-400'
+          >
+            <FileDown className='w-5 h-5' />
+          </button>
+        )}
+        {onAddClick && (
+          <button
+            onClick={onAddClick}
+            className='p-2 bg-primary rounded-[12px] text-white shadow-sm'
+          >
+            <Plus className='w-5 h-5' />
+          </button>
+        )}
         {rightElement}
-        <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300'>
+        <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300 ml-2'>
           <img
             src={avatarImg}
             alt='Avatar'

@@ -1,12 +1,5 @@
 import { useState } from 'react';
-import {
-  Plus,
-  FileDown,
-  Filter,
-  LayoutDashboard,
-  Package,
-  ReceiptText,
-} from 'lucide-react';
+import { Filter, LayoutDashboard, Package, ReceiptText } from 'lucide-react';
 import Header from '../components/Header';
 import { currencies, type Currency } from '../components/CurrencySwitchPopup';
 import CurrencySortControls from '../components/CurrencySortControls';
@@ -98,24 +91,15 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
   return (
     <div className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'>
       <div className='bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
-        <Header onMenuClick={onMenuClick} />
+        <Header
+          onMenuClick={onMenuClick}
+          onImportClick={() => console.log('Import CSV')}
+          onAddClick={() => onNavigate?.('add-product')}
+        />
 
         {/* Content */}
         <div className='flex-1 flex flex-col overflow-hidden px-5 pb-24 bg-white'>
-          {/* Action Buttons */}
-          <div className='flex flex-col gap-3 mb-6 shrink-0'>
-            <button className='w-full bg-white border border-gray-200 text-foreground font-semibold py-3 px-4 rounded-[14px] flex items-center justify-center gap-2'>
-              <FileDown className='w-4 h-4' />
-              <span>Import CSV</span>
-            </button>
-            <button
-              className='w-full bg-primary text-white font-semibold py-3 px-4 rounded-[14px] flex items-center justify-center gap-2 shadow-sm'
-              onClick={() => onNavigate?.('add-product')}
-            >
-              <Plus className='w-4 h-4 text-white' />
-              <span>Add New Products</span>
-            </button>
-          </div>
+          {/* Categories */}
 
           {/* Product Table Data */}
           <div className='flex-1 border border-gray-200 rounded-[14px] overflow-hidden flex flex-col bg-white'>
