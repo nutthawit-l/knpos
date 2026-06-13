@@ -12,8 +12,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return new Response(JSON.stringify(results), {
       headers: { "Content-Type": "application/json" },
     });
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), { 
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: errorMessage }), { 
         status: 500,
         headers: { "Content-Type": "application/json" }
     });
@@ -55,8 +56,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         return new Response("Database insert failed", { status: 500 });
     }
 
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), { 
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: errorMessage }), { 
         status: 500,
         headers: { "Content-Type": "application/json" }
     });
