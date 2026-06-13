@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   ChevronDown,
   TrendingUp,
@@ -15,6 +16,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import Header from '../components/Header';
+import TimeRangeDropdown from '../components/TimeRangeDropdown';
+import type { TimeRange } from '../components/TimeRangeDropdown';
 
 const data = [
   { name: 'Mon', revenue: 7000, orders: 4000, profit: 3000 },
@@ -69,6 +72,9 @@ export default function Overview({
   onNavigate?: (tab: string) => void;
   onMenuClick?: () => void;
 }) {
+  const [timeRange, setTimeRange] = useState<TimeRange>('Weekly');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   return (
     <div className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'>
       <div className='bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
@@ -85,10 +91,22 @@ export default function Overview({
               <h2 className='text-[14px] font-semibold text-foreground'>
                 Sales Performance
               </h2>
-              <button className='flex items-center gap-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-500'>
-                Weekly
-                <ChevronDown className='w-3.5 h-3.5' />
-              </button>
+              <div className='relative'>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className='flex items-center gap-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 transition-colors'
+                >
+                  {timeRange}
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isDropdownOpen && (
+                  <TimeRangeDropdown
+                    selectedRange={timeRange}
+                    onSelect={setTimeRange}
+                    onClose={() => setIsDropdownOpen(false)}
+                  />
+                )}
+              </div>
             </div>
 
             {/* Value */}
@@ -103,7 +121,7 @@ export default function Overview({
                 </span>
               </div>
               <span className='text-[11px] text-gray-400 ml-1'>
-                vs last week
+                vs last {timeRange === 'Weekly' ? 'week' : timeRange === 'Monthly' ? 'month' : 'year'}
               </span>
             </div>
 

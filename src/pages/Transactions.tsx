@@ -3,7 +3,6 @@ import {
   Package,
   ReceiptText,
   ArrowUpDown,
-  Filter,
 } from 'lucide-react';
 import Header from '../components/Header';
 
