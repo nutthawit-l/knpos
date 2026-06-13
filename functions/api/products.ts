@@ -1,6 +1,7 @@
 export interface Env {
   DB: D1Database;
   IMAGES_BUCKET: R2Bucket;
+  R2_PUBLIC_URL: string;
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
@@ -34,11 +35,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const chnPrice = formData.get("chn_price") ? parseFloat(formData.get("chn_price") as string) : null;
     const twnPrice = formData.get("twn_price") ? parseFloat(formData.get("twn_price") as string) : null;
     const korPrice = formData.get("kor_price") ? parseFloat(formData.get("kor_price") as string) : null;
-    const imageUrl = formData.get("image_url") as string;
+    
+    const imageFile = formData.get("image") as File;
 
-    if (!name || isNaN(thaPrice) || !imageUrl) {
+    if (!name || isNaN(thaPrice) || !imageFile || !imageFile.name) {
         return new Response("Missing required fields", { status: 400 });
     }
+
+    const filename = `${Date.now()}-${imageFile.name}`;
+    await context.env.IMAGES_BUCKET.put(filename, imageFile.stream());
+    const imageUrl = `${context.env.R2_PUBLIC_URL}/${filename}`;
 
     const { success } = await context.env.DB.prepare(
       `INSERT INTO Product (name, tha_price, sgp_price, idn_price, deu_price, jpn_price, chn_price, twn_price, kor_price, image_url) 
@@ -48,7 +54,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     ).run();
 
     if (success) {
-      return new Response(JSON.stringify({ success: true }), { 
+      return new Response(JSON.stringify({ success: true, imageUrl }), { 
           status: 201,
           headers: { "Content-Type": "application/json" }
       });
