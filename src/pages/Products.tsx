@@ -1,82 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Filter, LayoutDashboard, Package, ReceiptText } from 'lucide-react';
 import Header from '../components/Header';
 import { currencies, type Currency } from '../components/CurrencySwitchPopup';
 import CurrencySortControls from '../components/CurrencySortControls';
 
-const imgImageCappuccino =
-  'https://www.figma.com/api/mcp/asset/b3f54ed9-1ba6-4554-89ea-f1d21d10dedc';
-const imgImageIcedLatte =
-  'https://www.figma.com/api/mcp/asset/74dfc525-2491-46aa-9801-3998de3c8cfe';
-const imgImageChocolateCroissant =
-  'https://www.figma.com/api/mcp/asset/d4502458-1117-4ff7-ab83-3edd0960055f';
-const imgImageAmericano =
-  'https://www.figma.com/api/mcp/asset/be4fa76b-1408-4a44-b1ff-601932955c0f';
-const imgImageBlueberryMuffin =
-  'https://www.figma.com/api/mcp/asset/09a1aa38-1920-4eba-9ca4-193d4abd9631';
-const imgImageCaramelMacchiato =
-  'https://www.figma.com/api/mcp/asset/c7c5b1e0-9eb0-4b6d-b1d9-4381156a4ac2';
-const imgImageHamSandwich =
-  'https://www.figma.com/api/mcp/asset/7b5609bd-af99-4ac3-af0d-a2b53d88ecc4';
-const imgImageGreenTea =
-  'https://www.figma.com/api/mcp/asset/39d4d6fb-b408-453b-b360-5dcf0a383848';
-const imgImageVanillaDonut =
-  'https://www.figma.com/api/mcp/asset/5fc86fcd-e257-4bb4-873e-5c858f628db3';
-const imgImageEspresso =
-  'https://www.figma.com/api/mcp/asset/db9fcdb0-ab24-4d35-98d1-9b1819a52103';
-
-const products = [
-  {
-    id: 'PRD-001',
-    name: 'Cappuccino',
-    price: '$4.00',
-    image: imgImageCappuccino,
-  },
-  {
-    id: 'PRD-002',
-    name: 'Iced Latte',
-    price: '$4.25',
-    image: imgImageIcedLatte,
-  },
-  {
-    id: 'PRD-003',
-    name: 'Chocolate Croissant',
-    price: '$3.50',
-    image: imgImageChocolateCroissant,
-  },
-  {
-    id: 'PRD-004',
-    name: 'Americano',
-    price: '$3.00',
-    image: imgImageAmericano,
-  },
-  {
-    id: 'PRD-005',
-    name: 'Blueberry Muffin',
-    price: '$3.25',
-    image: imgImageBlueberryMuffin,
-  },
-  {
-    id: 'PRD-006',
-    name: 'Caramel Macchiato',
-    price: '$4.75',
-    image: imgImageCaramelMacchiato,
-  },
-  {
-    id: 'PRD-007',
-    name: 'Ham Sandwich',
-    price: '$5.50',
-    image: imgImageHamSandwich,
-  },
-  { id: 'PRD-008', name: 'Green Tea', price: '$2.85', image: imgImageGreenTea },
-  {
-    id: 'PRD-009',
-    name: 'Vanilla Donut',
-    price: '$2.50',
-    image: imgImageVanillaDonut,
-  },
-  { id: 'PRD-010', name: 'Espresso', price: '$2.25', image: imgImageEspresso },
-];
+// Dynamic products are fetched from the API.
 
 interface ProductsProps {
   onNavigate?: (tab: string) => void;
@@ -85,8 +13,36 @@ interface ProductsProps {
 
 export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
-    currencies.find((c) => c.code === 'USD') || currencies[0],
+    currencies.find((c) => c.code === 'THB') || currencies[0],
   );
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        setProducts(data);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setIsLoading(false);
+      });
+  }, []);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getPrice = (product: any, currencyCode: string) => {
+    const map: Record<string, string> = {
+      'JPY': 'jpn_price', 'THB': 'tha_price', 'SGD': 'sgp_price',
+      'USD': 'deu_price', 'EUR': 'deu_price', 'KRW': 'kor_price',
+      'IDR': 'idn_price', 'CNY': 'chn_price', 'TWD': 'twn_price'
+    };
+    const key = map[currencyCode] || 'tha_price';
+    return parseFloat(product[key]) || 0;
+  };
 
   return (
     <div className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'>
@@ -129,7 +85,11 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
 
             {/* List Items */}
             <div className='flex-1 flex flex-col overflow-y-auto'>
-              {products.map((product, index) => (
+              {isLoading ? (
+                <div className="p-4 text-center text-[13px] text-gray-500 font-medium">
+                  Loading products...
+                </div>
+              ) : products.map((product, index) => (
                 <div
                   key={product.id}
                   className={`flex items-center gap-3 px-4 py-3 bg-white ${
@@ -140,7 +100,7 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
                 >
                   <div className='w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0'>
                     <img
-                      src={product.image}
+                      src={product.image_url}
                       alt={product.name}
                       className='w-full h-full object-cover'
                     />
@@ -150,11 +110,11 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
                       {product.name}
                     </span>
                     <span className='text-gray-400 text-[11px] font-normal'>
-                      {product.id}
+                      PRD-{String(product.id).padStart(3, '0')}
                     </span>
                   </div>
                   <span className='font-semibold text-foreground text-[13px]'>
-                    {product.price.replace('$', selectedCurrency.symbol)}
+                    {selectedCurrency.symbol}{getPrice(product, selectedCurrency.code).toFixed(2)}
                   </span>
                 </div>
               ))}

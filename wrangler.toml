@@ -1,6 +1,15 @@
-name = "knpos"
+name = "charni-pos"
+pages_build_output_dir = "dist"
 compatibility_date = "2026-06-11"
 
-[assets]
-directory = "./dist/"
-not_found_handling = "single-page-application"
+[[d1_databases]]
+binding = "DB"
+database_name = "charnipos-db"
+database_id = "75d849d5-3341-4e1d-be69-fec8e3eb7c30"
+
+[[r2_buckets]]
+binding = "IMAGES_BUCKET"
+bucket_name = "charnipos-images"
+
+[vars]
+R2_PUBLIC_URL = "https://pub-591d7a44897c44de8e396920cfc7042b.r2.dev"

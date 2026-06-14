@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Calendar,
   ChevronRight,
@@ -15,29 +15,7 @@ import ConfirmOrderModal from '../components/ConfirmOrderModal';
 import { currencies, type Currency } from '../components/CurrencySwitchPopup';
 import CurrencySortControls from '../components/CurrencySortControls';
 
-const imgImageCappuccino = "https://www.figma.com/api/mcp/asset/b3f54ed9-1ba6-4554-89ea-f1d21d10dedc";
-const imgImageIcedLatte = "https://www.figma.com/api/mcp/asset/74dfc525-2491-46aa-9801-3998de3c8cfe";
-const imgImageChocolateCroissant = "https://www.figma.com/api/mcp/asset/d4502458-1117-4ff7-ab83-3edd0960055f";
-const imgImageAmericano = "https://www.figma.com/api/mcp/asset/be4fa76b-1408-4a44-b1ff-601932955c0f";
-const imgImageBlueberryMuffin = "https://www.figma.com/api/mcp/asset/09a1aa38-1920-4eba-9ca4-193d4abd9631";
-const imgImageCaramelMacchiato = "https://www.figma.com/api/mcp/asset/c7c5b1e0-9eb0-4b6d-b1d9-4381156a4ac2";
-const imgImageHamSandwich = "https://www.figma.com/api/mcp/asset/7b5609bd-af99-4ac3-af0d-a2b53d88ecc4";
-const imgImageGreenTea = "https://www.figma.com/api/mcp/asset/39d4d6fb-b408-453b-b360-5dcf0a383848";
-const imgImageVanillaDonut = "https://www.figma.com/api/mcp/asset/5fc86fcd-e257-4bb4-873e-5c858f628db3";
-const imgImageEspresso = "https://www.figma.com/api/mcp/asset/db9fcdb0-ab24-4d35-98d1-9b1819a52103";
-
-const products = [
-  { id: 1, name: 'Cappuccino', price: '$4.00', image: imgImageCappuccino },
-  { id: 2, name: 'Iced Latte', price: '$4.25', image: imgImageIcedLatte },
-  { id: 3, name: 'Chocolate Croissant', price: '$3.50', image: imgImageChocolateCroissant },
-  { id: 4, name: 'Americano', price: '$3.00', image: imgImageAmericano },
-  { id: 5, name: 'Blueberry Muffin', price: '$3.25', image: imgImageBlueberryMuffin },
-  { id: 6, name: 'Caramel Macchiato', price: '$4.75', image: imgImageCaramelMacchiato },
-  { id: 7, name: 'Ham Sandwich', price: '$5.50', image: imgImageHamSandwich },
-  { id: 8, name: 'Green Tea', price: '$2.85', image: imgImageGreenTea },
-  { id: 9, name: 'Vanilla Donut', price: '$2.50', image: imgImageVanillaDonut },
-  { id: 10, name: 'Espresso', price: '$2.25', image: imgImageEspresso },
-];
+// Dynamic products are fetched from the API.
 
 interface OrderProps {
   onNavigate?: (tab: string) => void;
@@ -49,8 +27,25 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
-    currencies.find((c) => c.code === 'USD') || currencies[0],
+    currencies.find((c) => c.code === 'THB') || currencies[0],
   );
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        setProducts(data);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setIsLoading(false);
+      });
+  }, []);
 
   const handleIncrement = (id: number) => {
     setQuantities(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
@@ -68,11 +63,21 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
     });
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getPrice = (product: any, currencyCode: string) => {
+    const map: Record<string, string> = {
+      'JPY': 'jpn_price', 'THB': 'tha_price', 'SGD': 'sgp_price',
+      'USD': 'deu_price', 'EUR': 'deu_price', 'KRW': 'kor_price',
+      'IDR': 'idn_price', 'CNY': 'chn_price', 'TWD': 'twn_price'
+    };
+    const key = map[currencyCode] || 'tha_price';
+    return parseFloat(product[key]) || 0;
+  };
+
   const totalCount = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
   const totalCost = products.reduce((sum, product) => {
     const qty = quantities[product.id] || 0;
-    const price = parseFloat(product.price.replace('$', ''));
-    return sum + (price * qty);
+    return sum + (getPrice(product, selectedCurrency.code) * qty);
   }, 0);
 
   return (
@@ -144,7 +149,11 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
 
             {/* List Items */}
             <div className='flex-1 flex flex-col overflow-y-auto'>
-              {products.map((product, index) => {
+              {isLoading ? (
+                <div className="p-4 text-center text-[13px] text-gray-500 font-medium">
+                  Loading products...
+                </div>
+              ) : products.map((product, index) => {
                 const qty = quantities[product.id] || 0;
                 const isSelected = qty > 0;
 
@@ -165,7 +174,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
                     </button>
                     <div className='w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0'>
                       <img
-                        src={product.image}
+                        src={product.image_url}
                         alt={product.name}
                         className='w-full h-full object-cover'
                       />
@@ -175,7 +184,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
                         {product.name}
                       </span>
                       <span className='text-gray-400 text-[11px] font-normal'>
-                        {product.price.replace('$', selectedCurrency.symbol)}
+                        {selectedCurrency.symbol}{getPrice(product, selectedCurrency.code).toFixed(2)}
                       </span>
                     </div>
                     
