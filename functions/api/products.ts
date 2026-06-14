@@ -1,3 +1,5 @@
+import type { PagesFunction, D1Database, R2Bucket } from "@cloudflare/workers-types";
+
 export interface Env {
   DB: D1Database;
   IMAGES_BUCKET: R2Bucket;
@@ -50,7 +52,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       ? parseFloat(formData.get('kor_price') as string)
       : null;
 
-    const imageFile = formData.get('image') as File;
+    const imageFile = formData.get('image') as unknown as File;
 
     if (!name || isNaN(thaPrice) || !imageFile || !imageFile.name) {
       return new Response('Missing required fields', { status: 400 });
