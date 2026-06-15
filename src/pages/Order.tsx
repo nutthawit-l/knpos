@@ -25,6 +25,7 @@ interface OrderProps {
 export default function Order({ onNavigate, onMenuClick }: OrderProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
     currencies.find((c) => c.code === 'THB') || currencies[0],
@@ -99,11 +100,17 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
           <ConfirmOrderModal
             totalItems={totalCount}
             totalPrice={totalCost}
+            isLoading={isConfirming}
             onCancel={() => setIsConfirmModalOpen(false)}
             onConfirm={() => {
-              setIsConfirmModalOpen(false);
-              setQuantities({});
-              onNavigate?.('transactions');
+              setIsConfirming(true);
+              // Simulate an API call delay
+              setTimeout(() => {
+                setIsConfirming(false);
+                setIsConfirmModalOpen(false);
+                setQuantities({});
+                onNavigate?.('transactions');
+              }, 1500);
             }}
           />
         )}

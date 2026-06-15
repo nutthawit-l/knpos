@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Package,
   ReceiptText,
+  Loader2,
 } from 'lucide-react';
 import Header from '../components/Header';
 
@@ -234,15 +235,23 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
             <button
               className='flex-1 py-3 border border-gray-200 rounded-[14px] text-[14px] font-bold text-gray-400'
               onClick={() => onNavigate?.('products')}
+              disabled={isLoading}
             >
               Cancel
             </button>
             <button
-              className='flex-1 py-3 bg-[#f47b20] rounded-[14px] text-[14px] font-bold text-white shadow-sm'
+              className='flex-1 py-3 bg-[#f47b20] rounded-[14px] text-[14px] font-bold text-white shadow-sm flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed'
               onClick={handleSave}
               disabled={isLoading}
             >
-              Confirm
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Confirm'
+              )}
             </button>
           </div>
         </div>
