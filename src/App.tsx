@@ -12,10 +12,19 @@ import Sidebar from './components/Sidebar';
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
 
   const handleNavigate = (tab: string) => {
     setActiveTab(tab);
     setIsSidebarOpen(false);
+    if (tab !== 'add-product') {
+      setEditingProduct(null);
+    }
+  };
+
+  const handleEditProduct = (product: any) => {
+    setEditingProduct(product);
+    setActiveTab('add-product');
   };
 
   return (
@@ -48,12 +57,14 @@ function App() {
         <Products
           onNavigate={handleNavigate}
           onMenuClick={() => setIsSidebarOpen(true)}
+          onEditProduct={handleEditProduct}
         />
       )}
       {activeTab === 'add-product' && (
         <AddProduct
           onNavigate={handleNavigate}
           onMenuClick={() => setIsSidebarOpen(true)}
+          productToEdit={editingProduct}
         />
       )}
       {activeTab === 'login' && <Login onNavigate={handleNavigate} />}
