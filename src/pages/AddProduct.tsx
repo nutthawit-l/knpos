@@ -33,19 +33,26 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
 
   const handleSave = async () => {
     if (!name || !prices['THB'] || !imageFile) {
-      alert("Name, Thai Price, and Image are required.");
+      alert('Name, Thai Price, and Image are required.');
       return;
     }
     setIsLoading(true);
     try {
       const formData = new FormData();
-      formData.append("name", name);
-      formData.append("image", imageFile);
-      formData.append("tha_price", prices['THB']);
+      formData.append('name', name);
+      formData.append('image', imageFile);
+      formData.append('tha_price', prices['THB']);
       
       const currencyMap: Record<string, string> = {
-        'JPY': 'jpn_price', 'SGD': 'sgp_price', 'USD': 'deu_price', 'EUR': 'deu_price',
-        'KRW': 'kor_price', 'IDR': 'idn_price', 'CNY': 'chn_price', 'TWD': 'twn_price'
+        JPY: 'jpn_price',
+        SGD: 'sgp_price',
+        USD: 'deu_price',
+        EUR: 'deu_price',
+        KRW: 'kor_price',
+        IDR: 'idn_price',
+        CNY: 'chn_price',
+        TWD: 'twn_price',
+        THA: 'tha_price',
       };
       
       Object.entries(prices).forEach(([currency, val]) => {
@@ -63,11 +70,11 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
         onNavigate?.('products');
       } else {
         const errorText = await res.text();
-        alert("Failed to save: " + errorText);
+        alert('Failed to save: ' + errorText);
       }
     } catch (err) {
       console.error(err);
-      alert("An error occurred");
+      alert('An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +115,11 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
               onClick={() => fileInputRef.current?.click()}
             >
               {imagePreview ? (
-                <img src={imagePreview} alt="Preview" className='absolute inset-0 w-full h-full object-cover' />
+                <img
+                  src={imagePreview}
+                  alt='Preview'
+                  className='absolute inset-0 w-full h-full object-cover'
+                />
               ) : (
                 <>
                   <Upload className='w-6 h-6 text-gray-400 mb-2' />
@@ -121,10 +132,10 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
                 </>
               )}
               <input 
-                type="file" 
+                type='file'
                 ref={fileInputRef}
-                className="hidden" 
-                accept="image/*"
+                className='hidden'
+                accept='image/*'
                 onChange={handleImageChange}
               />
             </div>
@@ -179,8 +190,13 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
                   <input
                     type='text'
                     placeholder={price.placeholder}
-                    value={prices[price.code] || ''}
-                    onChange={(e) => setPrices(prev => ({ ...prev, [price.code]: e.target.value }))}
+                    value={prices[price.label] || ''}
+                    onChange={(e) =>
+                      setPrices((prev) => ({
+                        ...prev,
+                        [price.label]: e.target.value,
+                      }))
+                    }
                     className='w-full border border-gray-200 rounded-[14px] pl-10 pr-4 py-2.5 text-[13px] outline-none focus:border-primary transition-colors'
                   />
                 </div>
