@@ -3,6 +3,7 @@ import { ShoppingBag, Loader2 } from 'lucide-react';
 interface ConfirmOrderModalProps {
   totalItems: number;
   totalPrice: number;
+  currencySymbol: string;
   isLoading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -11,6 +12,7 @@ interface ConfirmOrderModalProps {
 export default function ConfirmOrderModal({
   totalItems,
   totalPrice,
+  currencySymbol,
   isLoading,
   onConfirm,
   onCancel,
@@ -38,7 +40,7 @@ export default function ConfirmOrderModal({
           <div className='flex justify-between items-center w-full'>
             <span className='text-[#6b7280] text-[13px]'>Total Price</span>
             <span className='font-semibold text-foreground text-[13px]'>
-              ${totalPrice.toFixed(2)}
+              {currencySymbol}{totalPrice.toFixed(2)}
             </span>
           </div>
         </div>

@@ -12,8 +12,9 @@ import {
 import Header from '../components/Header';
 import CreateEventModal from '../components/CreateEventModal';
 import ConfirmOrderModal from '../components/ConfirmOrderModal';
-import { currencies, type Currency } from '../types/currency';
+
 import CurrencySortControls from '../components/CurrencySortControls';
+import { useOrderStore } from '../store/useOrderStore';
 
 // Dynamic products are fetched from the API.
 
@@ -26,10 +27,15 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
-  const [quantities, setQuantities] = useState<Record<number, number>>({});
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
-    currencies.find((c) => c.code === 'THB') || currencies[0],
-  );
+  const {
+    quantities,
+    selectedCurrency,
+    setCurrency: setSelectedCurrency,
+    incrementItem: handleIncrement,
+    decrementItem: handleDecrement,
+    removeItem,
+    clearOrder,
+  } = useOrderStore();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [products, setProducts] = useState<any[]>([]);
@@ -48,21 +54,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
       });
   }, []);
 
-  const handleIncrement = (id: number) => {
-    setQuantities((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
-  };
-
-  const handleDecrement = (id: number) => {
-    setQuantities((prev) => {
-      const current = prev[id] || 0;
-      if (current <= 1) {
-        const rest = { ...prev };
-        delete rest[id];
-        return rest;
-      }
-      return { ...prev, [id]: current - 1 };
-    });
-  };
+  // Increments and decrements are handled globally via useOrderStore
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getPrice = (product: any, currencyCode: string) => {
@@ -100,17 +92,58 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
           <ConfirmOrderModal
             totalItems={totalCount}
             totalPrice={totalCost}
+            currencySymbol={selectedCurrency.symbol}
             isLoading={isConfirming}
             onCancel={() => setIsConfirmModalOpen(false)}
-            onConfirm={() => {
+            onConfirm={async () => {
               setIsConfirming(true);
-              // Simulate an API call delay
-              setTimeout(() => {
+              
+              const orderItems = products
+                .filter((p) => quantities[p.id] > 0)
+                .map((p) => ({
+                  product_id: p.id,
+                  quantity: quantities[p.id],
+                  price_per_unit: getPrice(p, selectedCurrency.code),
+                }));
+
+              try {
+                const response = await fetch('/api/transactions', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    currency_code: selectedCurrency.code,
+                    total_income: totalCost,
+                    total_product_sold: totalCount,
+                    items: orderItems,
+                  }),
+                });
+
+                if (response.ok) {
+                  clearOrder();
+                  onNavigate?.('transactions');
+                  setIsConfirmModalOpen(false);
+                } else {
+                  let errorMsg = 'Unknown error';
+                  const contentType = response.headers.get('content-type');
+                  if (contentType && contentType.includes('application/json')) {
+                    try {
+                      const errJson = await response.json() as { error?: string };
+                      errorMsg = errJson.error || errorMsg;
+                    } catch {
+                      // Fallback if parsing fails
+                    }
+                  } else {
+                    errorMsg = await response.text();
+                  }
+                  console.error('Checkout failed:', errorMsg);
+                  alert(`Checkout failed: ${errorMsg}`);
+                }
+              } catch (err) {
+                console.error('Checkout error:', err);
+                alert('A network error occurred. Please check your connection and try again.');
+              } finally {
                 setIsConfirming(false);
-                setIsConfirmModalOpen(false);
-                setQuantities({});
-                onNavigate?.('transactions');
-              }, 1500);
+              }
             }}
           />
         )}
@@ -192,11 +225,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
                         }`}
                         onClick={() =>
                           isSelected
-                            ? setQuantities((prev) => {
-                                const rest = { ...prev };
-                                delete rest[product.id];
-                                return rest;
-                              })
+                            ? removeItem(product.id)
                             : handleIncrement(product.id)
                         }
                       >
