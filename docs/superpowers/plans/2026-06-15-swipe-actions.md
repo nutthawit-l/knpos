@@ -11,7 +11,6 @@
 ---
 
 ## File Structure Changes
-* **Create:** `scripts/test-api.ts` — Mock testing script for DELETE and PUT API endpoints.
 * **Create:** `src/components/SwipeableProductRow.tsx` — Reusable touch-gesture swipeable row component.
 * **Modify:** `functions/api/products.ts` — Add `onRequestDelete` and `onRequestPut`.
 * **Modify:** `src/App.tsx` — Add `editingProduct` navigation state and pass to `AddProduct`.
@@ -23,95 +22,9 @@
 ### Task 1: Add DELETE and PUT endpoints to products API
 
 **Files:**
-* Create: `scripts/test-api.ts`
 * Modify: `functions/api/products.ts`
 
-- [ ] **Step 1: Create the API test script**
-Create `scripts/test-api.ts` to mock and run test calls to `onRequestDelete` and `onRequestPut`:
-
-```typescript
-import { onRequestDelete, onRequestPut } from '../functions/api/products';
-
-// Mock DB implementation
-const mockDb = {
-  prepare: (sql: string) => ({
-    bind: (...args: any[]) => ({
-      run: async () => ({ success: true }),
-      all: async () => ({ results: [] }),
-    }),
-    run: async () => ({ success: true }),
-    all: async () => ({ results: [] }),
-  }),
-};
-
-// Mock R2 implementation
-const mockBucket = {
-  put: async () => {},
-};
-
-const mockContext: any = {
-  env: {
-    DB: mockDb,
-    IMAGES_BUCKET: mockBucket,
-    R2_PUBLIC_URL: 'http://localhost/images',
-  },
-  request: new Request('http://localhost/api/products?id=99', {
-    method: 'DELETE',
-  }),
-};
-
-async function runTests() {
-  console.log('Running API tests...');
-
-  // Test DELETE
-  if (typeof onRequestDelete !== 'function') {
-    throw new Error('onRequestDelete is not defined');
-  }
-  const deleteRes = await onRequestDelete(mockContext);
-  console.log('DELETE status:', deleteRes.status);
-  const deleteData = await deleteRes.json();
-  if (!deleteData.success) {
-    throw new Error('DELETE failed');
-  }
-
-  // Test PUT
-  if (typeof onRequestPut !== 'function') {
-    throw new Error('onRequestPut is not defined');
-  }
-  const mockForm = new FormData();
-  mockForm.append('name', 'Updated Product');
-  mockForm.append('tha_price', '450');
-  mockForm.append('image_url', 'http://localhost/images/prev.png');
-  
-  const putContext = {
-    ...mockContext,
-    request: new Request('http://localhost/api/products?id=99', {
-      method: 'PUT',
-      body: mockForm,
-    }),
-  };
-
-  const putRes = await onRequestPut(putContext);
-  console.log('PUT status:', putRes.status);
-  const putData = await putRes.json();
-  if (!putData.success) {
-    throw new Error('PUT failed');
-  }
-
-  console.log('All API tests passed!');
-}
-
-runTests().catch(err => {
-  console.error('Test failed:', err.message);
-  process.exit(1);
-});
-```
-
-- [ ] **Step 2: Run test to verify it fails**
-Run: `npx tsx scripts/test-api.ts`
-Expected Output: Fail with "onRequestDelete is not defined" or similar.
-
-- [ ] **Step 3: Implement PUT and DELETE API endpoints**
+- [ ] **Step 1: Implement PUT and DELETE API endpoints**
 Modify `functions/api/products.ts` to implement both handlers:
 
 ```typescript
@@ -217,15 +130,11 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
-Run: `npx tsx scripts/test-api.ts`
-Expected Output: "All API tests passed!"
-
-- [ ] **Step 5: Commit**
+- [ ] **Step 2: Commit**
 Run:
 ```bash
-git add functions/api/products.ts scripts/test-api.ts
-git commit -m "feat: add PUT and DELETE product API endpoints with tests"
+git add functions/api/products.ts
+git commit -m "feat: add PUT and DELETE product API endpoints"
 ```
 
 ---
