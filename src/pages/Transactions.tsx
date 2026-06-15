@@ -21,20 +21,39 @@ export default function Transactions({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    Promise.resolve().then(() => setIsLoading(true));
+    let active = true;
+    Promise.resolve().then(() => {
+      if (active) {
+        setIsLoading(true);
+        setSummary({ daily_total_income: 0, daily_total_product_sold: 0 });
+        setItemsSold([]);
+      }
+    });
+
     // Determine the browser timezone offset in hours to align local midnight business bounds correctly
     const tzOffset = -new Date().getTimezoneOffset() / 60;
     fetch(`/api/transactions?currency=${selectedCurrency.code}&tzOffset=${tzOffset}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch transactions');
+        return res.json();
+      })
       .then((data) => {
-        setSummary(data.summary);
-        setItemsSold(data.products || []);
-        setIsLoading(false);
+        if (active) {
+          setSummary(data.summary);
+          setItemsSold(data.products || []);
+          setIsLoading(false);
+        }
       })
       .catch((err) => {
         console.error(err);
-        setIsLoading(false);
+        if (active) {
+          setIsLoading(false);
+        }
       });
+
+    return () => {
+      active = false;
+    };
   }, [selectedCurrency]);
 
   return (
