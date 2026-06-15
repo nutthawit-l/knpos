@@ -8,14 +8,24 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import OTPVerify from './pages/OTPVerify';
 import Sidebar from './components/Sidebar';
+import { type Product } from './components/SwipeableProductRow';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
 
   const handleNavigate = (tab: string) => {
     setActiveTab(tab);
     setIsSidebarOpen(false);
+    if (tab !== 'add-product') {
+      setEditingProduct(undefined);
+    }
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct(product);
+    setActiveTab('add-product');
   };
 
   return (
@@ -48,12 +58,14 @@ function App() {
         <Products
           onNavigate={handleNavigate}
           onMenuClick={() => setIsSidebarOpen(true)}
+          onEditProduct={handleEditProduct}
         />
       )}
       {activeTab === 'add-product' && (
         <AddProduct
           onNavigate={handleNavigate}
           onMenuClick={() => setIsSidebarOpen(true)}
+          productToEdit={editingProduct}
         />
       )}
       {activeTab === 'login' && <Login onNavigate={handleNavigate} />}

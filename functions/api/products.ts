@@ -97,3 +97,104 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     });
   }
 };
+
+export const onRequestDelete: PagesFunction<Env> = async (context) => {
+  try {
+    const url = new URL(context.request.url);
+    const id = url.searchParams.get('id');
+
+    if (!id) {
+      return new Response(JSON.stringify({ error: 'Missing product ID' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { success } = await context.env.DB.prepare(
+      'DELETE FROM Product WHERE id = ?'
+    )
+      .bind(parseInt(id))
+      .run();
+
+    if (success) {
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } else {
+      return new Response('Database deletion failed', { status: 500 });
+    }
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
+export const onRequestPut: PagesFunction<Env> = async (context) => {
+  try {
+    const url = new URL(context.request.url);
+    const id = url.searchParams.get('id');
+
+    if (!id) {
+      return new Response(JSON.stringify({ error: 'Missing product ID' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const formData = await context.request.formData();
+    const name = formData.get('name') as string;
+    const thaPrice = parseFloat(formData.get('tha_price') as string);
+    const sgpPrice = formData.get('sgp_price') ? parseFloat(formData.get('sgp_price') as string) : null;
+    const idnPrice = formData.get('idn_price') ? parseFloat(formData.get('idn_price') as string) : null;
+    const deuPrice = formData.get('deu_price') ? parseFloat(formData.get('deu_price') as string) : null;
+    const jpnPrice = formData.get('jpn_price') ? parseFloat(formData.get('jpn_price') as string) : null;
+    const chnPrice = formData.get('chn_price') ? parseFloat(formData.get('chn_price') as string) : null;
+    const twnPrice = formData.get('twn_price') ? parseFloat(formData.get('twn_price') as string) : null;
+    const korPrice = formData.get('kor_price') ? parseFloat(formData.get('kor_price') as string) : null;
+
+    if (!name || isNaN(thaPrice)) {
+      return new Response('Missing required fields', { status: 400 });
+    }
+
+    let imageUrl = formData.get('image_url') as string || '';
+    const imageFile = formData.get('image') as unknown as File;
+
+    if (imageFile && imageFile.name) {
+      const filename = `${Date.now()}-${imageFile.name}`;
+      await context.env.IMAGES_BUCKET.put(filename, imageFile.stream());
+      imageUrl = `${context.env.R2_PUBLIC_URL}/${filename}`;
+    }
+
+    const { success } = await context.env.DB.prepare(
+      `UPDATE Product SET 
+        name = ?, tha_price = ?, sgp_price = ?, idn_price = ?, deu_price = ?, 
+        jpn_price = ?, chn_price = ?, twn_price = ?, kor_price = ?, image_url = ?
+       WHERE id = ?`
+    )
+      .bind(
+        name, thaPrice, sgpPrice, idnPrice, deuPrice, 
+        jpnPrice, chnPrice, twnPrice, korPrice, imageUrl,
+        parseInt(id)
+      )
+      .run();
+
+    if (success) {
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } else {
+      return new Response('Database update failed', { status: 500 });
+    }
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
