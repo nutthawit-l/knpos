@@ -1,59 +1,12 @@
+import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Package,
   ReceiptText,
-  ArrowUpDown,
 } from 'lucide-react';
 import Header from '../components/Header';
-
-const imgImageCappuccino =
-  'https://www.figma.com/api/mcp/asset/4bef099a-4290-4694-8269-f0a6be4ef565';
-const imgImageIcedLatte =
-  'https://www.figma.com/api/mcp/asset/208f24fd-7360-4cd9-b02c-e303cc41042a';
-const imgImageChocolateCroissant =
-  'https://www.figma.com/api/mcp/asset/5dcf43db-bfd3-4edc-9adc-c6f6b92a3265';
-const imgImageAmericano =
-  'https://www.figma.com/api/mcp/asset/c50b7b00-bff5-43cc-b24e-c19a9839b963';
-const imgImageBlueberryMuffin =
-  'https://www.figma.com/api/mcp/asset/ab1a6628-a6d0-4413-99ff-86fe017a8e7f';
-const imgImageCaramelMacchiato =
-  'https://www.figma.com/api/mcp/asset/558604bc-fb0a-4518-b9d2-805af2222a30';
-const imgImageHamSandwich =
-  'https://www.figma.com/api/mcp/asset/d104f66c-45d5-45fd-9464-2d33254ce0c0';
-const imgImageGreenTea =
-  'https://www.figma.com/api/mcp/asset/00d9ff94-62af-43f8-a336-b42985c6f389';
-const imgImageVanillaDonut =
-  'https://www.figma.com/api/mcp/asset/59b3d410-0e4d-476c-9cff-b8619f905d34';
-const imgImageEspresso =
-  'https://www.figma.com/api/mcp/asset/45ac1a32-6c47-411f-bbf1-98fed0f06c60';
-
-const transactions = [
-  { id: 1, name: 'Cappuccino', sold: 312, image: imgImageCappuccino },
-  { id: 2, name: 'Iced Latte', sold: 278, image: imgImageIcedLatte },
-  {
-    id: 3,
-    name: 'Chocolate Croissant',
-    sold: 195,
-    image: imgImageChocolateCroissant,
-  },
-  { id: 4, name: 'Americano', sold: 401, image: imgImageAmericano },
-  {
-    id: 5,
-    name: 'Blueberry Muffin',
-    sold: 143,
-    image: imgImageBlueberryMuffin,
-  },
-  {
-    id: 6,
-    name: 'Caramel Macchiato',
-    sold: 229,
-    image: imgImageCaramelMacchiato,
-  },
-  { id: 7, name: 'Ham Sandwich', sold: 88, image: imgImageHamSandwich },
-  { id: 8, name: 'Green Tea', sold: 176, image: imgImageGreenTea },
-  { id: 9, name: 'Vanilla Donut', sold: 260, image: imgImageVanillaDonut },
-  { id: 10, name: 'Espresso', sold: 352, image: imgImageEspresso },
-];
+import { useOrderStore } from '../store/useOrderStore';
+import CurrencySortControls from '../components/CurrencySortControls';
 
 export default function Transactions({
   onNavigate,
@@ -62,6 +15,28 @@ export default function Transactions({
   onNavigate?: (tab: string) => void;
   onMenuClick?: () => void;
 }) {
+  const { selectedCurrency, setCurrency } = useOrderStore();
+  const [summary, setSummary] = useState({ daily_total_income: 0, daily_total_product_sold: 0 });
+  const [itemsSold, setItemsSold] = useState<Array<{ product_id: number; product_name: string; image_url: string; total_sold_today: number }>>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.resolve().then(() => setIsLoading(true));
+    // Determine the browser timezone offset in hours to align local midnight business bounds correctly
+    const tzOffset = -new Date().getTimezoneOffset() / 60;
+    fetch(`/api/transactions?currency=${selectedCurrency.code}&tzOffset=${tzOffset}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setSummary(data.summary);
+        setItemsSold(data.products || []);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setIsLoading(false);
+      });
+  }, [selectedCurrency]);
+
   return (
     <div className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'>
       <div className='bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
@@ -80,14 +55,20 @@ export default function Transactions({
                   Total Income
                 </p>
                 <p className='text-foreground text-[18px] font-bold'>
-                  $8,120.50
+                  {selectedCurrency.symbol}
+                  {summary.daily_total_income.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </p>
               </div>
               <div className='flex-1 bg-[#f0fdf4] rounded-[14px] p-3'>
                 <p className='text-[#22c55e] text-[11px] font-medium mb-1'>
                   Products Sold
                 </p>
-                <p className='text-foreground text-[18px] font-bold'>1,284</p>
+                <p className='text-foreground text-[18px] font-bold'>
+                  {summary.daily_total_product_sold.toLocaleString()}
+                </p>
               </div>
             </div>
           </div>
@@ -100,9 +81,10 @@ export default function Transactions({
                 Recent Transactions
               </h2>
               <div className='flex items-center gap-3 text-gray-500'>
-                <button>
-                  <ArrowUpDown className='w-4 h-4' />
-                </button>
+                <CurrencySortControls
+                  selectedCurrency={selectedCurrency}
+                  onSelectCurrency={setCurrency}
+                />
               </div>
             </div>
 
@@ -118,30 +100,40 @@ export default function Transactions({
 
             {/* List Items */}
             <div className='flex-1 flex flex-col overflow-y-auto'>
-              {transactions.map((item, index) => (
-                <div
-                  key={item.id}
-                  className={`flex items-center gap-3 px-4 py-3 bg-white ${
-                    index !== transactions.length - 1
-                      ? 'border-b border-gray-100'
-                      : ''
-                  }`}
-                >
-                  <div className='w-8 h-8 rounded-full overflow-hidden bg-gray-100 shrink-0'>
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className='w-full h-full object-cover'
-                    />
-                  </div>
-                  <span className='flex-1 font-medium text-foreground text-[13px] truncate'>
-                    {item.name}
-                  </span>
-                  <span className='font-bold text-primary text-[13px]'>
-                    {item.sold}
-                  </span>
+              {isLoading ? (
+                <div className='p-4 text-center text-[13px] text-gray-500 font-medium'>
+                  Loading transaction data...
                 </div>
-              ))}
+              ) : itemsSold.length === 0 ? (
+                <div className='p-8 text-center text-[13px] text-gray-400 font-medium'>
+                  No transactions recorded today.
+                </div>
+              ) : (
+                itemsSold.map((item, index) => (
+                  <div
+                    key={item.product_id}
+                    className={`flex items-center gap-3 px-4 py-3 bg-white ${
+                      index !== itemsSold.length - 1
+                        ? 'border-b border-gray-100'
+                        : ''
+                    }`}
+                  >
+                    <div className='w-8 h-8 rounded-full overflow-hidden bg-gray-100 shrink-0'>
+                      <img
+                        src={item.image_url}
+                        alt={item.product_name}
+                        className='w-full h-full object-cover'
+                      />
+                    </div>
+                    <span className='flex-1 font-medium text-foreground text-[13px] truncate'>
+                      {item.product_name}
+                    </span>
+                    <span className='font-bold text-primary text-[13px]'>
+                      {item.total_sold_today}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
