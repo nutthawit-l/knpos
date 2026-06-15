@@ -1,12 +1,10 @@
 import { useState, useRef } from 'react';
-import { 
-  Upload, 
+import {
+  Upload,
   Info,
   LayoutDashboard,
   Package,
   ReceiptText,
-  Trash2,
-  Check,
 } from 'lucide-react';
 import Header from '../components/Header';
 
@@ -42,7 +40,7 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
       formData.append('name', name);
       formData.append('image', imageFile);
       formData.append('tha_price', prices['THB']);
-      
+
       const currencyMap: Record<string, string> = {
         JPY: 'jpn_price',
         SGD: 'sgp_price',
@@ -54,7 +52,7 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
         TWD: 'twn_price',
         THA: 'tha_price',
       };
-      
+
       Object.entries(prices).forEach(([currency, val]) => {
         if (currency !== 'THB' && val && currencyMap[currency]) {
           formData.append(currencyMap[currency], val);
@@ -83,24 +81,7 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
   return (
     <div className='bg-[#f9fafb] min-h-screen flex justify-center'>
       <div className='bg-white flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
-        <Header 
-          onBackClick={() => onNavigate?.('products')} 
-          rightElement={
-            <div className='flex items-center gap-2'>
-              <button className='p-2 border border-gray-200 rounded-[14px] bg-white text-gray-400'>
-                <Trash2 className='w-4 h-4 text-red-500' />
-              </button>
-              <button 
-                className={`p-2 rounded-[10px] text-white shadow-sm flex items-center justify-center ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#f47b20]'}`}
-                onClick={handleSave}
-                disabled={isLoading}
-              >
-                <Check className='w-4 h-4 text-white stroke-[4px]' />
-              </button>
-
-            </div>
-          }
-        />
+        <Header onBackClick={() => onNavigate?.('products')} />
 
         {/* Scrollable Content */}
         <div className='flex-1 overflow-y-auto px-5 pb-24 bg-white'>
@@ -110,7 +91,7 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
             <h2 className='font-bold text-foreground text-[14px] mb-3'>
               Product Image
             </h2>
-            <div 
+            <div
               className='bg-[#f9fafb] border-2 border-gray-200 border-dashed rounded-[14px] p-6 flex flex-col items-center justify-center text-center cursor-pointer relative overflow-hidden'
               onClick={() => fileInputRef.current?.click()}
             >
@@ -131,7 +112,7 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
                   </p>
                 </>
               )}
-              <input 
+              <input
                 type='file'
                 ref={fileInputRef}
                 className='hidden'
@@ -169,15 +150,51 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
 
             {/* Price Inputs */}
             {[
-              { label: 'Price — Japan (JPY)', symbol: '¥', code: 'JPY', placeholder: 'e.g ¥1,000' },
-              { label: 'Price — Thailand (THB)', symbol: '฿', code: 'THB', placeholder: 'e.g ฿350' },
-              { label: 'Price — Singapore (SGD)', symbol: 'S$', code: 'SGD', placeholder: 'e.g S$10' },
-              { label: 'Price — America (USD)', symbol: '$', code: 'USD', placeholder: 'e.g $10' },
-              { label: 'Price — Germany (EUR)', symbol: '€', code: 'EUR', placeholder: 'e.g €9' },
-              { label: 'Price — Korea (KRW)', symbol: '₩', code: 'KRW', placeholder: 'e.g ₩13,000' },
-              { label: 'Price — Indonesia (IDR)', symbol: 'Rp', code: 'IDR', placeholder: 'e.g Rp150,000' },
-              { label: 'Price — China (CNY)', symbol: '¥', code: 'CNY', placeholder: 'e.g ¥70' },
-              { label: 'Price — Taiwan (TWD)', symbol: 'NT$', code: 'TWD', placeholder: 'e.g NT$300' },
+              {
+                label: 'Price — Thailand (THB)',
+                symbol: '฿',
+                placeholder: 'e.g ฿350',
+              },
+              {
+                label: 'Price — Singapore (SGD)',
+                symbol: 'S$',
+                placeholder: 'e.g S$10',
+              },
+              {
+                label: 'Price — Japan (JPY)',
+                symbol: '¥',
+                placeholder: 'e.g ¥1,000',
+              },
+              {
+                label: 'Price — America (USD)',
+                symbol: '$',
+                placeholder: 'e.g $10',
+              },
+              {
+                label: 'Price — Germany (EUR)',
+                symbol: '€',
+                placeholder: 'e.g €9',
+              },
+              {
+                label: 'Price — Korea (KRW)',
+                symbol: '₩',
+                placeholder: 'e.g ₩13,000',
+              },
+              {
+                label: 'Price — Indonesia (IDR)',
+                symbol: 'Rp',
+                placeholder: 'e.g Rp150,000',
+              },
+              {
+                label: 'Price — China (CNY)',
+                symbol: '¥',
+                placeholder: 'e.g ¥70',
+              },
+              {
+                label: 'Price — Taiwan (TWD)',
+                symbol: 'NT$',
+                placeholder: 'e.g NT$300',
+              },
             ].map((price, idx) => (
               <div key={idx} className='flex flex-col gap-1.5'>
                 <label className='text-[12px] font-medium text-gray-600'>
@@ -203,8 +220,22 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
               </div>
             ))}
           </div>
-
           <div className='h-6' />
+          <div className='flex items-center gap-3'>
+            <button
+              className='flex-1 py-3 border border-gray-200 rounded-[14px] text-[14px] font-bold text-gray-400'
+              onClick={() => onNavigate?.('products')}
+            >
+              Cancel
+            </button>
+            <button
+              className='flex-1 py-3 bg-[#f47b20] rounded-[14px] text-[14px] font-bold text-white shadow-sm'
+              onClick={handleSave}
+              disabled={isLoading}
+            >
+              Confirm
+            </button>
+          </div>
         </div>
 
         {/* Bottom Navigation */}
