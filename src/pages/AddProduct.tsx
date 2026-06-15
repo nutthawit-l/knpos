@@ -50,7 +50,7 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
         IDR: 'idn_price',
         CNY: 'chn_price',
         TWD: 'twn_price',
-        THA: 'tha_price',
+        THB: 'tha_price',
       };
 
       Object.entries(prices).forEach(([currency, val]) => {
@@ -152,46 +152,55 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
             {[
               {
                 label: 'Price — Thailand (THB)',
+                currency: 'THB',
                 symbol: '฿',
                 placeholder: 'e.g ฿350',
               },
               {
                 label: 'Price — Singapore (SGD)',
+                currency: 'SGD',
                 symbol: 'S$',
                 placeholder: 'e.g S$10',
               },
               {
                 label: 'Price — Japan (JPY)',
+                currency: 'JPY',
                 symbol: '¥',
                 placeholder: 'e.g ¥1,000',
               },
               {
                 label: 'Price — America (USD)',
+                currency: 'USD',
                 symbol: '$',
                 placeholder: 'e.g $10',
               },
               {
                 label: 'Price — Germany (EUR)',
+                currency: 'EUR',
                 symbol: '€',
                 placeholder: 'e.g €9',
               },
               {
                 label: 'Price — Korea (KRW)',
+                currency: 'KRW',
                 symbol: '₩',
                 placeholder: 'e.g ₩13,000',
               },
               {
                 label: 'Price — Indonesia (IDR)',
+                currency: 'IDR',
                 symbol: 'Rp',
                 placeholder: 'e.g Rp150,000',
               },
               {
                 label: 'Price — China (CNY)',
+                currency: 'CNY',
                 symbol: '¥',
                 placeholder: 'e.g ¥70',
               },
               {
                 label: 'Price — Taiwan (TWD)',
+                currency: 'TWD',
                 symbol: 'NT$',
                 placeholder: 'e.g NT$300',
               },
@@ -207,11 +216,11 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
                   <input
                     type='text'
                     placeholder={price.placeholder}
-                    value={prices[price.label] || ''}
+                    value={prices[price.currency] || ''}
                     onChange={(e) =>
                       setPrices((prev) => ({
                         ...prev,
-                        [price.label]: e.target.value,
+                        [price.currency]: e.target.value,
                       }))
                     }
                     className='w-full border border-gray-200 rounded-[14px] pl-10 pr-4 py-2.5 text-[13px] outline-none focus:border-primary transition-colors'
