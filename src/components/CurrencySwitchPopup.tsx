@@ -17,6 +17,7 @@ export const currencies: Currency[] = [
   { code: 'CNY', name: 'Chinese Yuan', symbol: '¥', flag: '🇨🇳' },
   { code: 'EUR', name: 'Euro (Germany)', symbol: '€', flag: '🇩🇪' },
   { code: 'TWD', name: 'Taiwan Dollar', symbol: 'NT$', flag: '🇹🇼' },
+  { code: 'THB', name: 'Thai Baht', symbol: '฿', flag: '🇹🇭' },
 ];
 
 interface CurrencySwitchPopupProps {
