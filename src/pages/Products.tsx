@@ -3,49 +3,74 @@ import { Filter, LayoutDashboard, Package, ReceiptText } from 'lucide-react';
 import Header from '../components/Header';
 import { currencies, type Currency } from '../components/CurrencySwitchPopup';
 import CurrencySortControls from '../components/CurrencySortControls';
-
-// Dynamic products are fetched from the API.
+import SwipeableProductRow, { type Product } from '../components/SwipeableProductRow';
 
 interface ProductsProps {
   onNavigate?: (tab: string) => void;
   onMenuClick?: () => void;
+  onEditProduct?: (product: Product) => void;
 }
 
-export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
+export default function Products({ onNavigate, onMenuClick, onEditProduct }: ProductsProps) {
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
     currencies.find((c) => c.code === 'THB') || currencies[0],
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [openRowId, setOpenRowId] = useState<number | null>(null);
 
   useEffect(() => {
     fetch('/api/products')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setProducts(data);
         setIsLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         setIsLoading(false);
       });
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getPrice = (product: any, currencyCode: string) => {
+  const getPrice = (product: Product, currencyCode: string) => {
     const map: Record<string, string> = {
       'JPY': 'jpn_price', 'THB': 'tha_price', 'SGD': 'sgp_price',
       'USD': 'deu_price', 'EUR': 'deu_price', 'KRW': 'kor_price',
       'IDR': 'idn_price', 'CNY': 'chn_price', 'TWD': 'twn_price'
     };
     const key = map[currencyCode] || 'tha_price';
-    return parseFloat(product[key]) || 0;
+    const val = product[key as keyof Product];
+    return typeof val === 'number' ? val : (typeof val === 'string' ? parseFloat(val) : 0);
+  };
+
+  const handleDeleteProduct = async (id: number) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this product?');
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`/api/products?id=${id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setProducts((prev) => prev.filter((p) => p.id !== id));
+        if (openRowId === id) {
+          setOpenRowId(null);
+        }
+      } else {
+        alert('Failed to delete product.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred during deletion.');
+    }
   };
 
   return (
-    <div className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'>
+    <div 
+      className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'
+      onClick={() => setOpenRowId(null)}
+    >
       <div className='bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
         <Header
           onMenuClick={onMenuClick}
@@ -90,33 +115,22 @@ export default function Products({ onNavigate, onMenuClick }: ProductsProps) {
                   Loading products...
                 </div>
               ) : products.map((product, index) => (
-                <div
+                <SwipeableProductRow
                   key={product.id}
-                  className={`flex items-center gap-3 px-4 py-3 bg-white ${
-                    index !== products.length - 1
-                      ? 'border-b border-gray-100'
-                      : ''
-                  }`}
-                >
-                  <div className='w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0'>
-                    <img
-                      src={product.image_url}
-                      alt={product.name}
-                      className='w-full h-full object-cover'
-                    />
-                  </div>
-                  <div className='flex-1 min-w-0 flex flex-col'>
-                    <span className='font-semibold text-foreground text-[13px] truncate'>
-                      {product.name}
-                    </span>
-                    <span className='text-gray-400 text-[11px] font-normal'>
-                      PRD-{String(product.id).padStart(3, '0')}
-                    </span>
-                  </div>
-                  <span className='font-semibold text-foreground text-[13px]'>
-                    {selectedCurrency.symbol}{getPrice(product, selectedCurrency.code).toFixed(2)}
-                  </span>
-                </div>
+                  product={product}
+                  selectedCurrency={selectedCurrency}
+                  price={getPrice(product, selectedCurrency.code)}
+                  onEdit={() => onEditProduct?.(product)}
+                  onDelete={() => handleDeleteProduct(product.id)}
+                  isOpen={openRowId === product.id}
+                  onOpen={() => setOpenRowId(product.id)}
+                  onClose={() => {
+                    if (openRowId === product.id) {
+                      setOpenRowId(null);
+                    }
+                  }}
+                  isLast={index === products.length - 1}
+                />
               ))}
             </div>
           </div>

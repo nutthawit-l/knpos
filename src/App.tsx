@@ -8,21 +8,22 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import OTPVerify from './pages/OTPVerify';
 import Sidebar from './components/Sidebar';
+import { type Product } from './components/SwipeableProductRow';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
 
   const handleNavigate = (tab: string) => {
     setActiveTab(tab);
     setIsSidebarOpen(false);
     if (tab !== 'add-product') {
-      setEditingProduct(null);
+      setEditingProduct(undefined);
     }
   };
 
-  const handleEditProduct = (product: any) => {
+  const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     setActiveTab('add-product');
   };
