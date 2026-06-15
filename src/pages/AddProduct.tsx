@@ -12,14 +12,31 @@ import Header from '../components/Header';
 interface AddProductProps {
   onNavigate?: (tab: string) => void;
   onMenuClick?: () => void;
+  productToEdit?: any;
 }
 
-export default function AddProduct({ onNavigate }: AddProductProps) {
+export default function AddProduct({ onNavigate, productToEdit }: AddProductProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    productToEdit ? productToEdit.image_url : null,
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [name, setName] = useState('');
-  const [prices, setPrices] = useState<Record<string, string>>({});
+  const [name, setName] = useState(productToEdit ? productToEdit.name : '');
+  const [prices, setPrices] = useState<Record<string, string>>(() => {
+    if (!productToEdit) return {};
+    const priceMap: Record<string, string> = {
+      THB: String(productToEdit.tha_price || ''),
+      SGD: String(productToEdit.sgp_price || ''),
+      JPY: String(productToEdit.jpn_price || ''),
+      USD: String(productToEdit.deu_price || ''),
+      EUR: String(productToEdit.deu_price || ''),
+      KRW: String(productToEdit.kor_price || ''),
+      IDR: String(productToEdit.idn_price || ''),
+      CNY: String(productToEdit.chn_price || ''),
+      TWD: String(productToEdit.twn_price || ''),
+    };
+    return priceMap;
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,7 +48,7 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
   };
 
   const handleSave = async () => {
-    if (!name || !prices['THB'] || !imageFile) {
+    if (!name || !prices['THB'] || (!imageFile && !productToEdit)) {
       alert('Name, Thai Price, and Image are required.');
       return;
     }
@@ -39,7 +56,11 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
     try {
       const formData = new FormData();
       formData.append('name', name);
-      formData.append('image', imageFile);
+      if (imageFile) {
+        formData.append('image', imageFile);
+      } else if (productToEdit) {
+        formData.append('image_url', productToEdit.image_url);
+      }
       formData.append('tha_price', prices['THB']);
 
       const currencyMap: Record<string, string> = {
@@ -60,8 +81,11 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
         }
       });
 
-      const res = await fetch('/api/products', {
-        method: 'POST',
+      const url = productToEdit ? `/api/products?id=${productToEdit.id}` : '/api/products';
+      const method = productToEdit ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         body: formData,
       });
 
@@ -250,7 +274,7 @@ export default function AddProduct({ onNavigate }: AddProductProps) {
                   Saving...
                 </>
               ) : (
-                'Confirm'
+                productToEdit ? 'Save Changes' : 'Confirm'
               )}
             </button>
           </div>
