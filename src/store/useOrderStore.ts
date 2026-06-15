@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { currencies, type Currency } from '../components/CurrencySwitchPopup';
+import { currencies, type Currency } from '../types/currency';
 
 interface OrderState {
   quantities: Record<number, number>; // productId -> quantity

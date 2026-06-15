@@ -12,7 +12,7 @@ import {
 import Header from '../components/Header';
 import CreateEventModal from '../components/CreateEventModal';
 import ConfirmOrderModal from '../components/ConfirmOrderModal';
-import { currencies, type Currency } from '../components/CurrencySwitchPopup';
+import { currencies, type Currency } from '../types/currency';
 import CurrencySortControls from '../components/CurrencySortControls';
 
 // Dynamic products are fetched from the API.

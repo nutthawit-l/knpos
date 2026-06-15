@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Settings, Trash2 } from 'lucide-react';
-import { type Currency } from './CurrencySwitchPopup';
+import { type Currency } from '../types/currency';
 
 export interface Product {
   id: number;

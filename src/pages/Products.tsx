@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Filter, LayoutDashboard, Package, ReceiptText } from 'lucide-react';
 import Header from '../components/Header';
-import { currencies, type Currency } from '../components/CurrencySwitchPopup';
+import { currencies, type Currency } from '../types/currency';
 import CurrencySortControls from '../components/CurrencySortControls';
 import SwipeableProductRow, { type Product } from '../components/SwipeableProductRow';
 
