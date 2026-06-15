@@ -8,14 +8,18 @@ import {
   Loader2,
 } from 'lucide-react';
 import Header from '../components/Header';
+import { type Product } from '../components/SwipeableProductRow';
 
 interface AddProductProps {
   onNavigate?: (tab: string) => void;
   onMenuClick?: () => void;
-  productToEdit?: any;
+  productToEdit?: Product;
 }
 
-export default function AddProduct({ onNavigate, productToEdit }: AddProductProps) {
+export default function AddProduct({
+  onNavigate,
+  productToEdit,
+}: AddProductProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
     productToEdit ? productToEdit.image_url : null,
@@ -81,7 +85,9 @@ export default function AddProduct({ onNavigate, productToEdit }: AddProductProp
         }
       });
 
-      const url = productToEdit ? `/api/products?id=${productToEdit.id}` : '/api/products';
+      const url = productToEdit
+        ? `/api/products?id=${productToEdit.id}`
+        : '/api/products';
       const method = productToEdit ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
@@ -270,11 +276,13 @@ export default function AddProduct({ onNavigate, productToEdit }: AddProductProp
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className='w-4 h-4 animate-spin' />
                   Saving...
                 </>
+              ) : productToEdit ? (
+                'Save Changes'
               ) : (
-                productToEdit ? 'Save Changes' : 'Confirm'
+                'Confirm'
               )}
             </button>
           </div>
