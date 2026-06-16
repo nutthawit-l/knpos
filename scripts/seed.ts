@@ -119,14 +119,24 @@ async function run() {
   console.log('Preparing D1 seed SQL statements...');
   const sqlLines: string[] = [];
 
-  // 1. Insert Products
-  products.forEach((p) => {
+  // 1. Insert Products and Prices
+  products.forEach((p, idx) => {
+    const productId = idx + 1;
     const imageUrl = `${R2_PUBLIC_URL}/${p.filename}`;
-    const sgpPrice = p.sgd !== null ? p.sgd : 'NULL';
     sqlLines.push(
-      `INSERT INTO Product (name, tha_price, sgp_price, idn_price, deu_price, jpn_price, chn_price, twn_price, kor_price, image_url) ` +
-      `VALUES ('${p.name.replace(/'/g, "''")}', ${p.thb}, ${sgpPrice}, NULL, NULL, NULL, NULL, NULL, NULL, '${imageUrl}');`
+      `INSERT INTO product (id, name, image_url) ` +
+      `VALUES (${productId}, '${p.name.replace(/'/g, "''")}', '${imageUrl}');`
     );
+    sqlLines.push(
+      `INSERT INTO product_price (product_id, currency_code, price) ` +
+      `VALUES (${productId}, 'THB', ${p.thb});`
+    );
+    if (p.sgd !== null) {
+      sqlLines.push(
+        `INSERT INTO product_price (product_id, currency_code, price) ` +
+        `VALUES (${productId}, 'SGD', ${p.sgd});`
+      );
+    }
   });
 
   // 2. Insert Transactions
@@ -153,22 +163,22 @@ async function run() {
   transactions.forEach((tx, idx) => {
     const txId = idx + 1;
     sqlLines.push(
-      `INSERT INTO "Transaction" (id, currency_code, total_income, total_product_sold, created_at) ` +
+      `INSERT INTO "order" (id, currency_code, total_income, total_product_sold, created_at) ` +
       `VALUES (${txId}, '${tx.currency}', ${tx.income}, ${tx.sold}, datetime('now'));`
     );
     tx.items.forEach((item) => {
       sqlLines.push(
-        `INSERT INTO Transaction_Item (transaction_id, product_id, quantity, price_per_unit) ` +
+        `INSERT INTO order_item (order_id, product_id, quantity, price_per_unit) ` +
         `VALUES (${txId}, ${item.pid}, ${item.qty}, ${item.price});`
       );
     });
   });
 
-  const sqlFile = path.resolve(process.cwd(), 'seed_temp.sql');
+  const sqlFile = 'seed_temp.sql';
   fs.writeFileSync(sqlFile, sqlLines.join('\n'));
 
   console.log(`Executing seed SQL in ${envLabel} D1...`);
-  execSync(`npx wrangler d1 execute charnipos-db ${wranglerFlag} --file=${sqlFile}`, { stdio: 'inherit' });
+  execSync(`npx wrangler d1 execute charnipos-db ${wranglerFlag} --file=./${sqlFile}`, { stdio: 'inherit' });
 
   // Cleanup
   console.log('Cleaning up temporary SQL file...');

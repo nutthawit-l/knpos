@@ -21,7 +21,7 @@ export default function Products({ onNavigate, onMenuClick, onEditProduct }: Pro
   const [openRowId, setOpenRowId] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch('/api/products')
+    fetch('/api/product')
       .then((res) => res.json())
       .then((data) => {
         setProducts(data);
@@ -34,13 +34,7 @@ export default function Products({ onNavigate, onMenuClick, onEditProduct }: Pro
   }, []);
 
   const getPrice = (product: Product, currencyCode: string) => {
-    const map: Record<string, string> = {
-      'JPY': 'jpn_price', 'THB': 'tha_price', 'SGD': 'sgp_price',
-      'USD': 'deu_price', 'EUR': 'deu_price', 'KRW': 'kor_price',
-      'IDR': 'idn_price', 'CNY': 'chn_price', 'TWD': 'twn_price'
-    };
-    const key = map[currencyCode] || 'tha_price';
-    const val = product[key as keyof Product];
+    const val = product.prices?.[currencyCode];
     return typeof val === 'number' ? val : (typeof val === 'string' ? parseFloat(val) : 0);
   };
 
@@ -49,7 +43,7 @@ export default function Products({ onNavigate, onMenuClick, onEditProduct }: Pro
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(`/api/products?id=${id}`, {
+      const res = await fetch(`/api/product?id=${id}`, {
         method: 'DELETE',
       });
       if (res.ok) {

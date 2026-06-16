@@ -6,14 +6,7 @@ export interface Product {
   id: number;
   name: string;
   image_url: string;
-  tha_price: number;
-  sgp_price: number | null;
-  idn_price: number | null;
-  deu_price: number | null;
-  jpn_price: number | null;
-  chn_price: number | null;
-  twn_price: number | null;
-  kor_price: number | null;
+  prices: Record<string, number | null>;
   created_at?: string;
 }
 

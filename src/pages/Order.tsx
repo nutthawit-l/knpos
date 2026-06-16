@@ -42,7 +42,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/products')
+    fetch('/api/product')
       .then((res) => res.json())
       .then((data) => {
         setProducts(data);
@@ -58,19 +58,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getPrice = (product: any, currencyCode: string) => {
-    const map: Record<string, string> = {
-      JPY: 'jpn_price',
-      THB: 'tha_price',
-      SGD: 'sgp_price',
-      USD: 'deu_price',
-      EUR: 'deu_price',
-      KRW: 'kor_price',
-      IDR: 'idn_price',
-      CNY: 'chn_price',
-      TWD: 'twn_price',
-    };
-    const key = map[currencyCode] || 'tha_price';
-    return parseFloat(product[key]) || 0;
+    return parseFloat(product.prices?.[currencyCode]) || 0;
   };
 
   const totalCount = Object.values(quantities).reduce(
