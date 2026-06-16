@@ -174,11 +174,11 @@ async function run() {
     });
   });
 
-  const sqlFile = path.resolve(process.cwd(), 'seed_temp.sql');
+  const sqlFile = 'seed_temp.sql';
   fs.writeFileSync(sqlFile, sqlLines.join('\n'));
 
   console.log(`Executing seed SQL in ${envLabel} D1...`);
-  execSync(`npx wrangler d1 execute charnipos-db ${wranglerFlag} --file=${sqlFile}`, { stdio: 'inherit' });
+  execSync(`npx wrangler d1 execute charnipos-db ${wranglerFlag} --file=./${sqlFile}`, { stdio: 'inherit' });
 
   // Cleanup
   console.log('Cleaning up temporary SQL file...');
