@@ -75,16 +75,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // Insert master transaction and child items in a single D1 transaction batch for atomicity
     const insertTx = context.env.DB.prepare(
-      `INSERT INTO "Transaction" (currency_code, total_income, total_product_sold) 
+      `INSERT INTO "order" (currency_code, total_income, total_product_sold) 
        VALUES (?, ?, ?)`
     ).bind(currency_code, total_income, total_product_sold);
 
-    // Use (SELECT MAX(id) FROM "Transaction") to obtain the correct transaction ID.
+    // Use (SELECT MAX(id) FROM "order") to obtain the correct transaction ID.
     // last_insert_rowid() changes as soon as the first item is inserted, which breaks multi-item inserts.
     const itemStatements = items.map((item) =>
       context.env.DB.prepare(
-        `INSERT INTO Transaction_Item (transaction_id, product_id, quantity, price_per_unit) 
-         VALUES ((SELECT MAX(id) FROM "Transaction"), ?, ?, ?)`
+        `INSERT INTO order_item (order_id, product_id, quantity, price_per_unit) 
+         VALUES ((SELECT MAX(id) FROM "order"), ?, ?, ?)`
       ).bind(item.product_id, item.quantity, item.price_per_unit)
     );
 
@@ -144,7 +144,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       `SELECT 
           COALESCE(SUM(total_income), 0) AS daily_total_income,
           COALESCE(SUM(total_product_sold), 0) AS daily_total_product_sold
-       FROM "Transaction"
+       FROM "order"
        WHERE created_at >= datetime('now', ?, 'start of day', ?)
          AND created_at < datetime('now', ?, 'start of day', ?)
          AND currency_code = ?`
@@ -159,9 +159,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           p.name AS product_name,
           p.image_url,
           SUM(ti.quantity) AS total_sold_today
-       FROM Transaction_Item ti
-       JOIN "Transaction" t ON ti.transaction_id = t.id
-       JOIN Product p ON ti.product_id = p.id
+       FROM order_item ti
+       JOIN "order" t ON ti.order_id = t.id
+       JOIN product p ON ti.product_id = p.id
        WHERE t.created_at >= datetime('now', ?, 'start of day', ?)
          AND t.created_at < datetime('now', ?, 'start of day', ?)
          AND t.currency_code = ?

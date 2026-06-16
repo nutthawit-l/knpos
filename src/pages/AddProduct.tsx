@@ -27,18 +27,11 @@ export default function AddProduct({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(productToEdit ? productToEdit.name : '');
   const [prices, setPrices] = useState<Record<string, string>>(() => {
-    if (!productToEdit) return {};
-    const priceMap: Record<string, string> = {
-      THB: String(productToEdit.tha_price || ''),
-      SGD: String(productToEdit.sgp_price || ''),
-      JPY: String(productToEdit.jpn_price || ''),
-      USD: String(productToEdit.deu_price || ''),
-      EUR: String(productToEdit.deu_price || ''),
-      KRW: String(productToEdit.kor_price || ''),
-      IDR: String(productToEdit.idn_price || ''),
-      CNY: String(productToEdit.chn_price || ''),
-      TWD: String(productToEdit.twn_price || ''),
-    };
+    if (!productToEdit || !productToEdit.prices) return {};
+    const priceMap: Record<string, string> = {};
+    Object.entries(productToEdit.prices).forEach(([currency, value]) => {
+      priceMap[currency] = value !== null && value !== undefined ? String(value) : '';
+    });
     return priceMap;
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -65,29 +58,22 @@ export default function AddProduct({
       } else if (productToEdit) {
         formData.append('image_url', productToEdit.image_url);
       }
-      formData.append('tha_price', prices['THB']);
 
-      const currencyMap: Record<string, string> = {
-        JPY: 'jpn_price',
-        SGD: 'sgp_price',
-        USD: 'deu_price',
-        EUR: 'deu_price',
-        KRW: 'kor_price',
-        IDR: 'idn_price',
-        CNY: 'chn_price',
-        TWD: 'twn_price',
-        THB: 'tha_price',
-      };
-
+      // Build prices dictionary to send to API
+      const parsedPrices: Record<string, number | null> = {};
       Object.entries(prices).forEach(([currency, val]) => {
-        if (currency !== 'THB' && val && currencyMap[currency]) {
-          formData.append(currencyMap[currency], val);
+        const parsed = parseFloat(val);
+        if (!isNaN(parsed)) {
+          parsedPrices[currency] = parsed;
+        } else {
+          parsedPrices[currency] = null;
         }
       });
+      formData.append('prices', JSON.stringify(parsedPrices));
 
       const url = productToEdit
-        ? `/api/products?id=${productToEdit.id}`
-        : '/api/products';
+        ? `/api/product?id=${productToEdit.id}`
+        : '/api/product';
       const method = productToEdit ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
