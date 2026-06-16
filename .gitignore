@@ -35,3 +35,6 @@ dist-ssr
 
 # Seed data
 seed/images/*
+
+# Agent skills
+.agents/
