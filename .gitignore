@@ -32,3 +32,6 @@ dist-ssr
 # Gemini cache/scratch/logs
 .gemini/*
 !.gemini/settings.json
+
+# Seed data
+seed/images/*
