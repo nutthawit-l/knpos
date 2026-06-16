@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowUpDown } from 'lucide-react';
-import CurrencySwitchPopup, { type Currency } from './CurrencySwitchPopup';
+import CurrencySwitchPopup from './CurrencySwitchPopup';
+import { type Currency } from '../types/currency';
 
 interface CurrencySortControlsProps {
   selectedCurrency: Currency;

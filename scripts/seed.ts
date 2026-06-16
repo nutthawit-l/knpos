@@ -1,23 +1,183 @@
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
+import sharp from 'sharp';
 
-const csvPath = path.resolve(process.cwd(), 'seed/products.csv');
-const csvContent = fs.readFileSync(csvPath, 'utf-8');
-const lines = csvContent.split('\n').filter(l => l.trim() !== '');
+// Disable TLS reject unauthorized for local developer testing image downloads
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-// Skip header
-for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(',');
-    if (cols.length < 10) continue;
+// Check CLI arguments for --remote
+const isRemote = process.argv.includes('--remote');
+const wranglerFlag = isRemote ? '--remote' : '--local';
+const envLabel = isRemote ? 'remote' : 'local';
 
-    const [name, tha, sgp, idn, deu, jpn, chn, twn, kor, imgUrl] = cols;
-    
-    // Construct SQL
-    const sql = `INSERT INTO Product (name, tha_price, sgp_price, idn_price, deu_price, jpn_price, chn_price, twn_price, kor_price, image_url) VALUES ('${name}', ${tha}, ${sgp || 'NULL'}, ${idn || 'NULL'}, ${deu || 'NULL'}, ${jpn || 'NULL'}, ${chn || 'NULL'}, ${twn || 'NULL'}, ${kor || 'NULL'}, '${imgUrl.trim()}');`;
+// Read config from wrangler.toml
+const wranglerConfig = fs.readFileSync('wrangler.toml', 'utf-8');
+const r2PublicUrlMatch = wranglerConfig.match(/R2_PUBLIC_URL\s*=\s*"([^"]+)"/);
+const R2_PUBLIC_URL = isRemote
+  ? (r2PublicUrlMatch ? r2PublicUrlMatch[1] : 'https://pub-591d7a44897c44de8e396920cfc7042b.r2.dev')
+  : '/api/images';
 
-    console.log(`Executing: ${sql}`);
-    execSync(`npx wrangler d1 execute charnipos-db --local --command="${sql}"`);
+const bucketNameMatch = wranglerConfig.match(/bucket_name\s*=\s*"([^"]+)"/);
+const BUCKET_NAME = bucketNameMatch ? bucketNameMatch[1] : 'charnipos-images';
+
+const tempDir = path.resolve(process.cwd(), 'seed/images');
+const csvPath = path.resolve(process.cwd(), 'seed/flyaway-seed.csv');
+
+async function generatePlaceholderImage(filePath: string, text: string, bgColor: string) {
+  const svgText = `
+    <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="200" fill="${bgColor}" />
+      <text x="100" y="110" font-family="sans-serif" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">${text}</text>
+    </svg>
+  `;
+
+  await sharp(Buffer.from(svgText))
+    .png()
+    .toFile(filePath);
 }
 
-console.log('Seed completed.');
+async function downloadImage(url: string, destPath: string): Promise<boolean> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return false;
+    const arrayBuffer = await res.arrayBuffer();
+    fs.writeFileSync(destPath, Buffer.from(arrayBuffer));
+    return true;
+  } catch (err) {
+    console.warn(`Could not download image from ${url}:`, err);
+    return false;
+  }
+}
+
+async function run() {
+  console.log(`Resetting ${envLabel} D1 database schema...`);
+  execSync(`npx wrangler d1 execute charnipos-db ${wranglerFlag} --file=./schema.sql`, { stdio: 'inherit' });
+
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir);
+  }
+
+  console.log(`Reading seed CSV: ${csvPath}`);
+  const csvContent = fs.readFileSync(csvPath, 'utf-8');
+  const lines = csvContent.split('\n').map(l => l.trim()).filter(l => l !== '');
+  
+  // Parse CSV (Header: image_url,name,thb,sgd)
+  const products: Array<{
+    originalUrl: string;
+    name: string;
+    thb: number;
+    sgd: number | null;
+    filename: string;
+  }> = [];
+
+  const bgColors = ['#8D6E63', '#A1887F', '#D7CCC8', '#FFA726', '#FFB74D', '#FFE082', '#A1887F', '#8D6E63'];
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(',');
+    if (cols.length < 3) continue;
+
+    const originalUrl = cols[0].trim();
+    const name = cols[1].trim();
+    const thb = parseFloat(cols[2].trim()) || 0;
+    const sgd = cols[3] && cols[3].trim() !== '' ? parseFloat(cols[3].trim()) : null;
+
+    const urlParts = originalUrl.split('/');
+    const rawFilename = urlParts[urlParts.length - 1] || `image-${i}.jpg`;
+    const ext = path.extname(rawFilename) || '.jpg';
+    const filename = `seed-${path.basename(rawFilename, ext)}${ext}`;
+
+    products.push({ originalUrl, name, thb, sgd, filename });
+  }
+
+  console.log(`Found ${products.length} products to seed.`);
+
+  console.log('Fetching/Generating mock images and uploading to local R2...');
+  for (let i = 0; i < products.length; i++) {
+    const p = products[i];
+    const filePath = path.join(tempDir, p.filename);
+    
+    console.log(`[${i+1}/${products.length}] Processing ${p.name}...`);
+    if (fs.existsSync(filePath)) {
+      console.log(`  -> Image already exists locally at seed/images/${p.filename}, skipping download.`);
+    } else {
+      const success = await downloadImage(p.originalUrl, filePath);
+      if (!success) {
+        const bgColor = bgColors[i % bgColors.length];
+        console.log(`  -> Downloading failed. Generating fallback placeholder for ${p.name} with color ${bgColor}...`);
+        await generatePlaceholderImage(filePath, p.name, bgColor);
+      } else {
+        console.log(`  -> Downloaded successfully.`);
+      }
+    }
+
+    console.log(`  -> Uploading to ${envLabel} R2 bucket ${BUCKET_NAME}...`);
+    execSync(`npx wrangler r2 object put ${BUCKET_NAME}/${p.filename} ${wranglerFlag} --file=${filePath}`, { stdio: 'inherit' });
+  }
+
+  // Generate SQL file for seeding
+  console.log('Preparing D1 seed SQL statements...');
+  const sqlLines: string[] = [];
+
+  // 1. Insert Products
+  products.forEach((p) => {
+    const imageUrl = `${R2_PUBLIC_URL}/${p.filename}`;
+    const sgpPrice = p.sgd !== null ? p.sgd : 'NULL';
+    sqlLines.push(
+      `INSERT INTO Product (name, tha_price, sgp_price, idn_price, deu_price, jpn_price, chn_price, twn_price, kor_price, image_url) ` +
+      `VALUES ('${p.name.replace(/'/g, "''")}', ${p.thb}, ${sgpPrice}, NULL, NULL, NULL, NULL, NULL, NULL, '${imageUrl}');`
+    );
+  });
+
+  // 2. Insert Transactions
+  // We match product IDs which start at 1 up to products.length
+  // Note: 
+  // ID 1: Frame card resin (THB 220, SGD 15)
+  // ID 2: Frame card stand (THB 250, SGD 20)
+  // ID 7: Frame card morudoll M (THB 350, SGD 25)
+  // ID 9: Cherry S (THB 90, SGD 5)
+  // ID 10: Cat head band M (THB 120, SGD 10)
+  // ID 11: Cat head band S (THB 90, SGD 5)
+  // ID 12: Flower head band (THB 90, SGD 12)
+  // ID 14: Doll hat M (THB 200, SGD 12)
+  // ID 15: Keyring (THB 150, SGD null)
+  // ID 18: Flower S (THB 120, SGD null)
+  const transactions = [
+    { currency: 'THB', income: 400.0, sold: 3, items: [{ pid: 1, qty: 1, price: 220 }, { pid: 9, qty: 2, price: 90 }] },
+    { currency: 'SGD', income: 30.0, sold: 2, items: [{ pid: 2, qty: 1, price: 20 }, { pid: 10, qty: 1, price: 10 }] },
+    { currency: 'THB', income: 420.0, sold: 3, items: [{ pid: 15, qty: 2, price: 150 }, { pid: 18, qty: 1, price: 120 }] },
+    { currency: 'SGD', income: 36.0, sold: 3, items: [{ pid: 12, qty: 2, price: 12 }, { pid: 14, qty: 1, price: 12 }] },
+    { currency: 'THB', income: 530.0, sold: 3, items: [{ pid: 7, qty: 1, price: 350 }, { pid: 11, qty: 2, price: 90 }] },
+  ];
+
+  transactions.forEach((tx, idx) => {
+    const txId = idx + 1;
+    sqlLines.push(
+      `INSERT INTO "Transaction" (id, currency_code, total_income, total_product_sold, created_at) ` +
+      `VALUES (${txId}, '${tx.currency}', ${tx.income}, ${tx.sold}, datetime('now'));`
+    );
+    tx.items.forEach((item) => {
+      sqlLines.push(
+        `INSERT INTO Transaction_Item (transaction_id, product_id, quantity, price_per_unit) ` +
+        `VALUES (${txId}, ${item.pid}, ${item.qty}, ${item.price});`
+      );
+    });
+  });
+
+  const sqlFile = path.resolve(process.cwd(), 'seed_temp.sql');
+  fs.writeFileSync(sqlFile, sqlLines.join('\n'));
+
+  console.log(`Executing seed SQL in ${envLabel} D1...`);
+  execSync(`npx wrangler d1 execute charnipos-db ${wranglerFlag} --file=${sqlFile}`, { stdio: 'inherit' });
+
+  // Cleanup
+  console.log('Cleaning up temporary SQL file...');
+  fs.unlinkSync(sqlFile);
+
+  console.log('Seeding completed successfully!');
+}
+
+run().catch((err) => {
+  console.error('Seeding failed:', err);
+  process.exit(1);
+});

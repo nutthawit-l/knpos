@@ -28,3 +28,10 @@ dist-ssr
 
 # Wrangler cache
 .wrangler
+
+# Gemini cache/scratch/logs
+.gemini/*
+!.gemini/settings.json
+
+# Seed data
+seed/images/*
