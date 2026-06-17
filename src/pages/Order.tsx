@@ -1,27 +1,28 @@
 import { useState, useEffect } from 'react';
 import {
-  Calendar,
-  ChevronRight,
+  Bell,
+  Search,
+  Scan,
   Plus,
   Minus,
-  Check,
+  CreditCard,
+  AlertCircle,
+  ArrowLeft,
 } from 'lucide-react';
-import Header from '../components/Header';
+import MascotLogo from '../components/MascotLogo';
 import ConfirmOrderModal from '../components/ConfirmOrderModal';
-
 import CurrencySortControls from '../components/CurrencySortControls';
+import CategoryFilter from '../components/CategoryFilter';
 import { useOrderStore } from '../store/useOrderStore';
-
 import BottomNavigation from '../components/BottomNavigation';
+import { type Product } from '../components/SwipeableProductRow';
 
-// Dynamic products are fetched from the API.
-
-interface OrderProps {
-  onNavigate?: (tab: string) => void;
-  onMenuClick?: () => void;
+export interface OrderProps {
+  readonly onNavigate?: (tab: string) => void;
+  readonly onMenuClick?: () => void;
 }
 
-export default function Order({ onNavigate, onMenuClick }: OrderProps) {
+export default function Order({ onNavigate }: OrderProps) {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const {
@@ -30,19 +31,21 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
     setCurrency: setSelectedCurrency,
     incrementItem: handleIncrement,
     decrementItem: handleDecrement,
-    removeItem,
     clearOrder,
   } = useOrderStore();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
   useEffect(() => {
     fetch('/api/product')
       .then((res) => res.json())
       .then((data) => {
-        setProducts(data);
+        if (Array.isArray(data)) {
+          setProducts(data);
+        }
         setIsLoading(false);
       })
       .catch((err) => {
@@ -51,17 +54,42 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
       });
   }, []);
 
-  // Increments and decrements are handled globally via useOrderStore
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getPrice = (product: any, currencyCode: string) => {
-    return parseFloat(product.prices?.[currencyCode]) || 0;
+  const getPrice = (product: Product, currencyCode: string) => {
+    const val = product.prices?.[currencyCode];
+    return typeof val === 'number' ? val : (typeof val === 'string' ? parseFloat(val) : 0);
   };
+
+  const getProductCategory = (name: string): string => {
+    const n = name.toLowerCase();
+    if (n.includes('treat') || n.includes('bite') || n.includes('beef') || n.includes('snack') || n.includes('food')) {
+      return 'Treats';
+    }
+    if (n.includes('toy') || n.includes('rope') || n.includes('doll') || n.includes('hat') || n.includes('badge') || n.includes('stand') || n.includes('keyring') || n.includes('resin')) {
+      return 'Toys';
+    }
+    if (n.includes('bow') || n.includes('collar') || n.includes('ribbon') || n.includes('band') || n.includes('tie') || n.includes('clip')) {
+      return 'Accessories';
+    }
+    if (n.includes('balm') || n.includes('paw') || n.includes('organic') || n.includes('groom') || n.includes('cherry') || n.includes('flower')) {
+      return 'Grooming';
+    }
+    return 'Accessories'; // fallback category
+  };
+
+  const categories = ['All', 'Accessories', 'Treats', 'Toys', 'Grooming'] as const;
+
+  const filteredProducts = products.filter((product) => {
+    const category = getProductCategory(product.name);
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'All' || category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const totalCount = Object.values(quantities).reduce(
     (sum, qty) => sum + qty,
     0,
   );
+
   const totalCost = products.reduce((sum, product) => {
     const qty = quantities[product.id] || 0;
     return sum + getPrice(product, selectedCurrency.code) * qty;
@@ -69,7 +97,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
 
   return (
     <div className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'>
-      <div className='bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
+      <div className='bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern'>
         {isConfirmModalOpen && (
           <ConfirmOrderModal
             totalItems={totalCount}
@@ -79,7 +107,6 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
             onCancel={() => setIsConfirmModalOpen(false)}
             onConfirm={async () => {
               setIsConfirming(true);
-              
               const orderItems = products
                 .filter((p) => quantities[p.id] > 0)
                 .map((p) => ({
@@ -130,141 +157,182 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
           />
         )}
 
-        <Header
-          onMenuClick={onMenuClick}
-          rightElement={
-            <button className='p-1' onClick={() => onNavigate?.('create-event')}>
-              <Calendar className='w-5 h-5 text-foreground' />
+        {/* TopAppBar */}
+        <header className="bg-[#fff8f8] flex justify-between items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20 shrink-0">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onNavigate?.('dashboard')}
+              className="mr-1 hover:opacity-80 transition-opacity duration-200 bg-transparent border-none cursor-pointer p-1 -ml-1 text-[#805062]"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="w-6 h-6" />
             </button>
-          }
-        />
+            <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">Order</h1>
+          </div>
+          <button className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer border-none bg-transparent">
+            <Bell className="w-5 h-5" />
+          </button>
+        </header>
 
         {/* Content */}
-        <div className='flex-1 flex flex-col overflow-hidden px-5 pb-[80px] bg-white'>
-          {/* Summary Banner */}
-          <button
-            className='bg-primary rounded-[14px] w-full px-4 py-3 mb-5 flex items-center justify-between shadow-sm border-none cursor-pointer'
-            onClick={() => {
-              if (totalCount > 0) setIsConfirmModalOpen(true);
-            }}
-          >
-            <div className='flex items-center gap-2'>
-              <span className='font-semibold text-[13px] text-white'>
-                Total Order
-              </span>
-              <div className='bg-white rounded-full h-[22px] min-w-[22px] px-1.5 flex items-center justify-center'>
-                <span className='font-bold text-primary text-[12px]'>
-                  {totalCount}
-                </span>
-              </div>
-              <span className='font-semibold text-[13px] text-white/80'>·</span>
-              <span className='font-bold text-[13px] text-white'>
-                {selectedCurrency.symbol}
-                {totalCost.toFixed(2)}
-              </span>
-            </div>
-            <ChevronRight className='w-[18px] h-[18px] text-white' />
-          </button>
-
-          {/* Product Table Data */}
-          <div className='flex-1 border border-gray-200 rounded-[14px] overflow-hidden flex flex-col bg-white'>
-            {/* Table Header */}
-            <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white'>
-              <h2 className='font-semibold text-foreground text-[14px]'>
-                Order Items
-              </h2>
-              <CurrencySortControls
-                selectedCurrency={selectedCurrency}
-                onSelectCurrency={setSelectedCurrency}
+        <div className="flex-grow overflow-y-auto px-5 pb-44 pt-4 space-y-4 no-scrollbar">
+          {/* Search Bar */}
+          <section className="shrink-0">
+            <div className="relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline-variant-warm group-focus-within:text-[#805062] transition-colors" />
+              <input
+                type="text"
+                placeholder="Find treats, toys, and more..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-12 pl-12 pr-12 bg-[#f6ebed] rounded-full border-none focus:ring-2 focus:ring-brand-pink/50 text-[14px] font-medium text-text-brown placeholder:text-outline-variant-warm/60 outline-none"
               />
+              <button
+                type="button"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant-warm hover:text-[#805062] transition-colors bg-transparent border-none cursor-pointer p-1"
+                aria-label="Scan barcode"
+              >
+                <Scan className="w-5 h-5" />
+              </button>
             </div>
+          </section>
 
-            {/* List Items */}
-            <div className='flex-1 flex flex-col overflow-y-auto'>
-              {isLoading ? (
-                <div className='p-4 text-center text-[13px] text-gray-500 font-medium'>
-                  Loading products...
-                </div>
-              ) : (
-                products.map((product, index) => {
+          {/* Categories header with Currency switcher */}
+          <div className="flex items-center justify-between shrink-0">
+            <span className="text-[12px] font-bold uppercase tracking-wider text-text-brown opacity-60 pl-2">Categories</span>
+            <CurrencySortControls
+              selectedCurrency={selectedCurrency}
+              onSelectCurrency={setSelectedCurrency}
+            />
+          </div>
+
+          {/* Category tabs */}
+          <CategoryFilter
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+          />
+
+          {/* Products List/Grid */}
+          <section className="pb-4">
+            {isLoading ? (
+              <div className="p-8 text-center text-[14px] text-text-brown font-medium">
+                Loading products...
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <AlertCircle className="w-12 h-12 text-outline-variant-warm mb-3" />
+                <p className="text-[14px] text-outline-variant-warm font-bold">No products found.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                {filteredProducts.map((product) => {
                   const qty = quantities[product.id] || 0;
                   const isSelected = qty > 0;
+                  const price = getPrice(product, selectedCurrency.code);
 
                   return (
                     <div
                       key={product.id}
-                      className={`flex items-center gap-3 px-4 py-3 bg-white ${
-                        index !== products.length - 1
-                          ? 'border-b border-gray-100'
-                          : ''
+                      className={`bg-white rounded-[20px] p-3 shadow-[0_4px_12px_rgba(78,52,46,0.05)] transition-all duration-200 flex flex-col border ${
+                        isSelected
+                          ? 'border-2 border-brand-pink ring-4 ring-brand-pink/10'
+                          : 'border-outline-warm/40'
                       }`}
                     >
-                      <button
-                        className={`w-4 h-4 rounded shrink-0 flex items-center justify-center transition-colors ${
-                          isSelected
-                            ? 'bg-primary border-primary drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)]'
-                            : 'border border-gray-300 bg-surface'
-                        }`}
-                        onClick={() =>
-                          isSelected
-                            ? removeItem(product.id)
-                            : handleIncrement(product.id)
-                        }
-                      >
-                        {isSelected && (
-                          <Check
-                            className='w-3 h-3 text-white'
-                            strokeWidth={3}
-                          />
-                        )}
-                      </button>
-                      <div className='w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0'>
+                      {/* Product Image */}
+                      <div className="aspect-square rounded-xl bg-peach-container/40 relative overflow-hidden mb-3 flex items-center justify-center p-2 border border-outline-warm/15">
                         <img
                           src={product.image_url}
                           alt={product.name}
-                          className='w-full h-full object-cover'
+                          className="w-full h-full object-contain mix-blend-multiply"
                         />
                       </div>
-                      <div className='flex-1 min-w-0 flex flex-col'>
-                        <span className='font-semibold text-foreground text-[13px] truncate'>
-                          {product.name}
-                        </span>
-                        <span className='text-gray-400 text-[11px] font-normal'>
-                          {selectedCurrency.symbol}
-                          {getPrice(product, selectedCurrency.code).toFixed(2)}
-                        </span>
-                      </div>
 
-                      {isSelected ? (
-                        <div className='flex items-center gap-2'>
-                          <button
-                            className='w-7 h-7 rounded-[10px] bg-primary flex items-center justify-center shrink-0'
-                            onClick={() => handleDecrement(product.id)}
-                          >
-                            <Minus className='w-4 h-4 text-white' />
-                          </button>
-                          <span className='w-5 text-center font-bold text-foreground text-[13px]'>
-                            {qty}
+                      {/* Info */}
+                      <h3 className="font-bold text-[14px] text-text-brown leading-tight mb-1 truncate">
+                        {product.name}
+                      </h3>
+                      <p className="text-[11px] text-outline-variant-warm font-medium mb-3">
+                        {getProductCategory(product.name)}
+                      </p>
+
+                      {/* Action / Price */}
+                      <div className="mt-auto">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-[14px] text-[#805062]">
+                            {selectedCurrency.symbol}{price.toFixed(2)}
                           </span>
-                          <button
-                            className='w-7 h-7 rounded-[10px] bg-primary flex items-center justify-center shrink-0'
-                            onClick={() => handleIncrement(product.id)}
-                          >
-                            <Plus className='w-4 h-4 text-white' />
-                          </button>
                         </div>
-                      ) : (
-                        <button
-                          className='w-8 h-8 rounded-[10px] bg-primary flex items-center justify-center shrink-0'
-                          onClick={() => handleIncrement(product.id)}
-                        >
-                          <Plus className='w-4 h-4 text-white' />
-                        </button>
-                      )}
+
+                        {isSelected ? (
+                          <div className="flex items-center justify-between bg-brand-pink/20 rounded-full p-1 border border-brand-pink/30">
+                            <button
+                              type="button"
+                              onClick={() => handleDecrement(product.id)}
+                              className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#805062] hover:bg-brand-pink/10 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
+                            >
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="font-bold text-text-brown text-sm">
+                              {qty}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleIncrement(product.id)}
+                              className="w-7 h-7 rounded-full bg-[#805062] flex items-center justify-center text-white hover:bg-[#805062]/90 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => handleIncrement(product.id)}
+                              className="w-8 h-8 rounded-full bg-[#ffd9e4] text-[#805062] hover:bg-brand-pink/30 active:scale-90 transition-transform flex items-center justify-center shadow-sm cursor-pointer border-none"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
-                })
-              )}
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* Empty state mascot illustration */}
+          <div className="flex flex-col items-center justify-center py-8 opacity-60">
+            <div className="relative">
+              <MascotLogo sizeClassName="w-20 h-20" className="border-4 border-white shadow-md floating-animation mb-3" />
+              <div className="absolute -bottom-1 -right-1 bg-[#805062] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">CHARNI</div>
+            </div>
+            <p className="font-bold text-[14px] text-text-brown">Need help finding something?</p>
+          </div>
+        </div>
+
+        {/* Bottom Docked Summary Bar */}
+        <div className="absolute bottom-20 left-0 w-full px-5 z-30 pointer-events-none">
+          <div className="bg-white/90 backdrop-blur-md rounded-[20px] p-4 shadow-2xl pointer-events-auto border border-outline-warm/40 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-[12px] text-text-brown/60 font-bold">Items: {totalCount}</span>
+                <span className="text-[20px] font-bold text-text-brown leading-none mt-1">
+                  {selectedCurrency.symbol}{totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+              <button
+                type="button"
+                disabled={totalCount === 0}
+                onClick={() => setIsConfirmModalOpen(true)}
+                className="h-12 px-6 bg-brand-pink hover:bg-brand-pink-hover text-text-brown font-bold uppercase rounded-full shadow-md transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer border-none"
+              >
+                <span>PROCESS PAYMENT</span>
+                <CreditCard className="w-5 h-5 text-text-brown" />
+              </button>
             </div>
           </div>
         </div>

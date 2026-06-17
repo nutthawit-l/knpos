@@ -3,6 +3,7 @@ import { ArrowLeft, Search, Plus, Minus, Trash2 } from 'lucide-react';
 import { type Product } from '../components/SwipeableProductRow';
 import { useInventoryStore } from '../store/useInventoryStore';
 import BottomNavigation from '../components/BottomNavigation';
+import CategoryFilter from '../components/CategoryFilter';
 
 export interface InventoryProps {
   readonly onNavigate?: (tab: string) => void;
@@ -130,24 +131,11 @@ export default function Inventory({ onNavigate, onEditProduct }: InventoryProps)
           </section>
 
           {/* Category Tabs (Horizontal Scroll) */}
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 shrink-0">
-            {categories.map((cat) => {
-              const isSelected = selectedCategory === cat;
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`whitespace-nowrap px-6 py-2 rounded-full font-bold text-[14px] transition-all duration-200 active:scale-95 cursor-pointer border ${
-                    isSelected
-                      ? 'bg-[#805062] text-white border-transparent shadow-sm'
-                      : 'bg-[#E0F7FA] text-[#37697d] border-outline-warm/30 hover:bg-[#E0F7FA]/80'
-                  }`}
-                >
-                  {cat}
-                </button>
-              );
-            })}
-          </div>
+          <CategoryFilter
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+          />
 
           {/* Product List */}
           <section className="flex flex-col gap-4">
