@@ -46,7 +46,7 @@ export default function AuthLayout({
   }, []);
 
   return (
-    <div className="bg-surface min-h-screen flex flex-col font-quicksand overflow-y-auto relative text-text-brown">
+    <div className="bg-surface h-dvh flex justify-center font-quicksand overflow-hidden relative text-text-brown">
       {/* Floating Atmosphere Elements */}
       <div className="absolute inset-0 pointer-events-none opacity-20 z-0">
         <div
@@ -59,33 +59,32 @@ export default function AuthLayout({
         />
       </div>
 
-      {/* Top App Bar (Optional Header) */}
-      {showHeader && (
-        <header className="w-full bg-background flex items-center px-4 h-16 max-w-7xl mx-auto z-40 relative">
-          <button
-            className="transition-transform duration-200 active:scale-95 text-text-brown p-2 rounded-full hover:bg-surface-variant-custom/10 flex items-center justify-center focus:outline-none"
-            type="button"
-            onClick={onBack}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h1 className="ml-4 text-[28px] leading-[36px] font-bold text-text-brown">
-            {headerTitle}
-          </h1>
-        </header>
-      )}
+      {/* Main Centered Shell (Mobile-sized device frame container) */}
+      <div className="bg-white/40 backdrop-blur-md flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl border-x border-outline-warm/30 overflow-hidden z-10">
+        {/* Top App Bar (Optional Header) */}
+        {showHeader && (
+          <header className="w-full bg-background flex items-center px-4 h-16 shrink-0 border-b border-outline-warm/20 relative z-20">
+            <button
+              className="transition-transform duration-200 active:scale-95 text-text-brown p-2 rounded-full hover:bg-surface-variant-custom/10 flex items-center justify-center focus:outline-none"
+              type="button"
+              onClick={onBack}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <h1 className="ml-4 text-[20px] leading-[28px] font-bold text-text-brown">
+              {headerTitle}
+            </h1>
+          </header>
+        )}
 
-      {/* Main Centered Shell */}
-      <div className="flex-1 flex items-center justify-center py-8 px-6 z-10 relative">
-        <div className="bg-white/40 backdrop-blur-md flex flex-col w-full max-w-md relative shadow-2xl rounded-[32px] border border-outline-warm/30 overflow-hidden">
-          <main
-            className={`w-full p-8 flex flex-col transition-all duration-700 ease-out ${
-              isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-            }`}
-          >
-            {children}
-          </main>
-        </div>
+        {/* Scrollable Main View Area */}
+        <main
+          className={`flex-1 overflow-y-auto px-6 py-8 flex flex-col transition-all duration-700 ease-out ${
+            isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}
+        >
+          {children}
+        </main>
       </div>
     </div>
   );
