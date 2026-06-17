@@ -30,7 +30,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-5 pb-24 space-y-6">
+        <div className="flex-1 overflow-y-auto px-5 pb-24 space-y-6 no-scrollbar">
           {/* Greeting Section */}
           <section className="flex items-end gap-4 pt-4">
             <MascotLogo sizeClassName="w-20 h-20" className="floating-animation" />
