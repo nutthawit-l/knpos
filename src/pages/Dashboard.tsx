@@ -1,14 +1,12 @@
 import {
   Bell,
-  ShoppingCart,
-  History,
-  Package,
-  Settings,
   Store,
   ArrowRight,
   PlusCircle,
+  Package,
 } from 'lucide-react';
 import MascotLogo from '../components/MascotLogo';
+import BottomNavigation from '../components/BottomNavigation';
 
 export interface DashboardProps {
   readonly onNavigate?: (tab: string) => void;
@@ -84,7 +82,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           <div className="space-y-4">
             {/* Primary CTA: Create Your Shop */}
             <button
-              onClick={() => onNavigate?.('register')}
+              onClick={() => onNavigate?.('create-shop')}
               className="w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 hover:shadow-md transition-all duration-300 active:scale-95 overflow-hidden relative group cursor-pointer"
             >
               <div className="flex flex-col h-full justify-between relative z-10">
@@ -109,7 +107,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
             {/* Add Product Block */}
             <button
-              onClick={() => onNavigate?.('products')}
+              onClick={() => onNavigate?.('add-product')}
               className="w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 hover:shadow-md transition-all duration-300 active:scale-95 overflow-hidden relative group opacity-70 cursor-pointer"
             >
               <div className="flex flex-col h-full justify-between relative z-10">
@@ -125,7 +123,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                   </p>
                 </div>
                 <div className="mt-8 flex items-center gap-2 text-[#326578] font-bold text-[14px]">
-                  <span>Go to Inventory</span>
+                  <span>Add Product</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
@@ -172,36 +170,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         </div>
 
         {/* Bottom Navigation */}
-        <nav className="absolute bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-[#fcf1f2] border-t border-outline-warm/30 shadow-[0_-2px_10px_rgba(78,52,46,0.05)] rounded-t-2xl">
-          <button
-            onClick={() => onNavigate?.('order')}
-            className="flex flex-col items-center justify-center text-surface-variant-custom px-5 py-1 hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none"
-          >
-            <ShoppingCart className="w-5 h-5 mb-0.5 text-[#504447]" />
-            <span className="text-[12px] font-bold text-[#504447]">Sales</span>
-          </button>
-          <button
-            onClick={() => onNavigate?.('transactions')}
-            className="flex flex-col items-center justify-center text-surface-variant-custom px-5 py-1 hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none"
-          >
-            <History className="w-5 h-5 mb-0.5 text-[#504447]" />
-            <span className="text-[12px] font-bold text-[#504447]">History</span>
-          </button>
-          <button
-            onClick={() => onNavigate?.('products')}
-            className="flex flex-col items-center justify-center text-surface-variant-custom px-5 py-1 hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none"
-          >
-            <Package className="w-5 h-5 mb-0.5 text-[#504447]" />
-            <span className="text-[12px] font-bold text-[#504447]">Inventory</span>
-          </button>
-          <button
-            onClick={() => onNavigate?.('settings')}
-            className="flex flex-col items-center justify-center text-surface-variant-custom px-5 py-1 hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none"
-          >
-            <Settings className="w-5 h-5 mb-0.5 text-[#504447]" />
-            <span className="text-[12px] font-bold text-[#504447]">Settings</span>
-          </button>
-        </nav>
+        <BottomNavigation activeTab="dashboard" onNavigate={onNavigate} />
       </div>
     </div>
   );

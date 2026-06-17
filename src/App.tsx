@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Dashboard from './pages/Dashboard';
+import CreateShop from './pages/CreateShop';
 import Order from './pages/Order';
 import Transactions from './pages/Transactions';
 import Products from './pages/Products';
@@ -40,6 +41,11 @@ function App() {
         <Dashboard
           onNavigate={handleNavigate}
           onMenuClick={() => setIsSidebarOpen(true)}
+        />
+      )}
+      {activeTab === 'create-shop' && (
+        <CreateShop
+          onNavigate={handleNavigate}
         />
       )}
       {activeTab === 'order' && (
