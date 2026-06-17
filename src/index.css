@@ -53,4 +53,18 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+  .floating-animation {
+    animation: floating 3s ease-in-out infinite;
+  }
+  .bg-pattern {
+    background-color: #fff8f8;
+    background-image: radial-gradient(#E0D0CC 0.5px, transparent 0.5px);
+    background-size: 24px 24px;
+  }
+}
+
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
 }

@@ -1,8 +1,9 @@
 import { Mail, CheckCircle } from 'lucide-react';
 import { useOTPForm } from '../hooks/useOTPForm';
-import { OTP_DATA, REGISTER_DATA } from '../data/mockData';
+import { OTP_DATA } from '../data/mockData';
 import AuthLayout from '../components/AuthLayout';
 import AuthButton from '../components/AuthButton';
+import MascotLogo from '../components/MascotLogo';
 
 export interface OTPVerifyProps {
   readonly onNavigate?: (tab: string) => void;
@@ -26,13 +27,7 @@ export default function OTPVerify({ onNavigate }: OTPVerifyProps) {
     >
       {/* Mascot / Logo Section with Mail Badge */}
       <div className="mb-8 relative flex justify-center">
-        <div className="w-24 h-24 rounded-full bg-pink-container flex items-center justify-center overflow-hidden shadow-sm border border-outline-warm">
-          <img
-            alt={REGISTER_DATA.logoAlt}
-            className="w-full h-full object-contain"
-            src={REGISTER_DATA.logoUrl}
-          />
-        </div>
+        <MascotLogo />
         <div className="absolute bottom-0 translate-x-8 bg-brand-blue p-2 rounded-full shadow-md border border-outline-warm text-text-brown flex items-center justify-center">
           <Mail className="w-4 h-4" />
         </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Overview from './pages/Overview';
+import Dashboard from './pages/Dashboard';
 import Order from './pages/Order';
 import Transactions from './pages/Transactions';
 import Products from './pages/Products';
@@ -37,7 +37,7 @@ function App() {
         onNavigate={handleNavigate}
       />
       {activeTab === 'dashboard' && (
-        <Overview
+        <Dashboard
           onNavigate={handleNavigate}
           onMenuClick={() => setIsSidebarOpen(true)}
         />
