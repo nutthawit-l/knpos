@@ -74,12 +74,6 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
             </button>
             <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">Daily Sales Summary</h1>
           </div>
-          <button
-            onClick={() => setIsDatePickerOpen(true)}
-            className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer border-none bg-transparent"
-          >
-            <Calendar className="w-5 h-5" />
-          </button>
         </header>
 
         {/* Content */}
@@ -136,31 +130,28 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
               <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar shrink-0">
                 <button
                   onClick={() => setActiveTab('top5')}
-                  className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border cursor-pointer ${
-                    activeTab === 'top5'
+                  className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border cursor-pointer ${activeTab === 'top5'
                       ? 'bg-[#805062] text-white border-transparent'
                       : 'bg-white text-surface-variant-custom border-outline-warm hover:bg-[#eae0e1]/20'
-                  }`}
+                    }`}
                 >
                   Top 5
                 </button>
                 <button
                   onClick={() => setActiveTab('all')}
-                  className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border cursor-pointer ${
-                    activeTab === 'all'
+                  className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border cursor-pointer ${activeTab === 'all'
                       ? 'bg-[#805062] text-white border-transparent'
                       : 'bg-white text-surface-variant-custom border-outline-warm hover:bg-[#eae0e1]/20'
-                  }`}
+                    }`}
                 >
                   All Items
                 </button>
                 <button
                   onClick={() => setActiveTab('orders')}
-                  className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border cursor-pointer ${
-                    activeTab === 'orders'
+                  className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-colors border cursor-pointer ${activeTab === 'orders'
                       ? 'bg-[#805062] text-white border-transparent'
                       : 'bg-white text-surface-variant-custom border-outline-warm hover:bg-[#eae0e1]/20'
-                  }`}
+                    }`}
                 >
                   Order by Order
                 </button>
@@ -234,11 +225,10 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
                             />
                           </div>
                           <div
-                            className={`absolute -top-2 -left-2 w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs border-2 border-white shadow-sm ${
-                              rank === 1
+                            className={`absolute -top-2 -left-2 w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs border-2 border-white shadow-sm ${rank === 1
                                 ? 'bg-brand-peach text-text-brown'
                                 : 'bg-[#eae0e1] text-surface-variant-custom'
-                            }`}
+                              }`}
                           >
                             {rank}
                           </div>
