@@ -38,3 +38,6 @@ seed/images/*
 
 # Agent skills
 .agents/
+
+# Stitch output & cache
+.stitch/
