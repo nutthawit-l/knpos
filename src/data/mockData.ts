@@ -28,3 +28,11 @@ export const REGISTER_DATA = {
   loginPrompt: 'Already part of the pack?',
   loginButtonText: 'LOG IN',
 } as const;
+
+export const OTP_DATA = {
+  title: 'Verify your Email',
+  subtitle: "We've sent a code to your inbox",
+  verifyButtonText: 'VERIFY',
+  resendPrompt: "Didn't receive a code?",
+  resendButtonText: 'Resend Code',
+} as const;

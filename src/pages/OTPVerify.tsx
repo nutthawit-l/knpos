@@ -1,103 +1,98 @@
-import { Package } from 'lucide-react';
-import { useState } from 'react';
+import { Mail, CheckCircle } from 'lucide-react';
+import { useOTPForm } from '../hooks/useOTPForm';
+import { OTP_DATA, REGISTER_DATA } from '../data/mockData';
+import AuthLayout from '../components/AuthLayout';
+import AuthButton from '../components/AuthButton';
 
-export default function OTPVerify({
-  onNavigate,
-}: {
-  onNavigate?: (tab: string) => void;
-}) {
-  const [otp, setOtp] = useState(['', '', '', '', '']);
+export interface OTPVerifyProps {
+  readonly onNavigate?: (tab: string) => void;
+}
 
-  const handleChange = (index: number, value: string) => {
-    // Only allow numbers
-    if (value && !/^\d+$/.test(value)) return;
-
-    if (value.length > 1) {
-      // If pasting or similar, just take the first digit
-      value = value[0];
-    }
-
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    // Auto focus next input
-    if (value && index < 4) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      nextInput?.focus();
-    }
-  };
-
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`);
-      prevInput?.focus();
-    }
-  };
+export default function OTPVerify({ onNavigate }: OTPVerifyProps) {
+  const {
+    otp,
+    isLoading,
+    inputRefs,
+    handleChange,
+    handleKeyDown,
+    handleVerifySubmit,
+  } = useOTPForm({ onNavigate });
 
   return (
-    <div className='bg-surface min-h-screen flex justify-center'>
-      <div className='bg-border flex flex-col h-screen w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
-        {/* Logo Section */}
-        <div className='flex items-center justify-center gap-2 py-6 shrink-0'>
-          <div className='bg-primary w-9 h-9 rounded-[14px] flex items-center justify-center'>
-            <Package className='w-5 h-5 text-white' />
-          </div>
-          <span className='text-[20px] font-bold text-foreground'>Olsera</span>
+    <AuthLayout
+      headerTitle="Charni POS"
+      showHeader
+      onBack={() => onNavigate?.('register')}
+    >
+      {/* Mascot / Logo Section with Mail Badge */}
+      <div className="mb-8 relative flex justify-center">
+        <div className="w-24 h-24 rounded-full bg-pink-container flex items-center justify-center overflow-hidden shadow-sm border border-outline-warm">
+          <img
+            alt={REGISTER_DATA.logoAlt}
+            className="w-full h-full object-contain"
+            src={REGISTER_DATA.logoUrl}
+          />
         </div>
-
-        {/* OTP Card */}
-        <div className='flex-1 px-5 overflow-y-auto'>
-          <div className='bg-background rounded-[24px] p-6 shadow-[0px_1px_1.5px_rgba(0,0,0,0.1),0px_1px_1px_rgba(0,0,0,0.1)] flex flex-col items-center'>
-            <h1 className='text-[20px] font-bold text-foreground mb-1.5'>
-              OTP Verification
-            </h1>
-            <p className='text-[13px] text-foreground-subtle text-center mb-6'>
-              We have sent a verification code to email address{' '}
-              <span className='font-bold text-foreground'>
-                johndoe@examle.com
-              </span>
-            </p>
-
-            <div className='flex gap-2.5 mb-6'>
-              {otp.map((digit, index) => (
-                <input
-                  key={index}
-                  id={`otp-${index}`}
-                  type='text'
-                  inputMode='numeric'
-                  value={digit}
-                  onChange={(e) => handleChange(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  className={`w-12 h-[52px] border-2 rounded-[14px] text-center text-[18px] font-bold focus:outline-none transition-all ${
-                    digit
-                      ? 'border-primary bg-primary-light'
-                      : 'border-border bg-white'
-                  }`}
-                />
-              ))}
-            </div>
-
-            <button
-              className='w-full bg-primary text-white text-[15px] font-semibold py-3.5 rounded-[14px] mb-5 shadow-sm active:scale-[0.98] transition-all'
-              onClick={() => onNavigate?.('dashboard')}
-            >
-              Verify
-            </button>
-
-            <p className='text-[13px] text-foreground-subtle'>
-              Resend code in{' '}
-              <span className='font-bold text-primary ml-1'>00:35</span>
-            </p>
-          </div>
-
-          <div className='py-8 flex justify-center'>
-            <p className='text-[11px] text-foreground-subtle'>
-              © 2026 Olsera. All right reserved.
-            </p>
-          </div>
+        <div className="absolute bottom-0 translate-x-8 bg-brand-blue p-2 rounded-full shadow-md border border-outline-warm text-text-brown flex items-center justify-center">
+          <Mail className="w-4 h-4" />
         </div>
       </div>
-    </div>
+
+      {/* Title & Subtext */}
+      <h2 className="text-[28px] leading-[36px] font-bold text-text-brown text-center mb-2">
+        {OTP_DATA.title}
+      </h2>
+      <p className="text-[16px] leading-[24px] text-surface-variant-custom text-center mb-10 px-4">
+        {OTP_DATA.subtitle}
+      </p>
+
+      {/* Verification Form */}
+      <form className="w-full" onSubmit={handleVerifySubmit}>
+        {/* OTP Input Grid */}
+        <div className="grid grid-cols-6 gap-2 mb-10 w-full">
+          {otp.map((digit, index) => (
+            <input
+              key={index}
+              ref={(el) => {
+                inputRefs.current[index] = el;
+              }}
+              aria-label={`Digit ${index + 1}`}
+              className="w-full h-14 sm:h-16 text-center text-2xl font-bold bg-surface border-2 border-outline-warm rounded-2xl text-text-brown transition-all focus:outline-none focus:border-brand-pink focus:ring-4 focus:ring-brand-pink/20"
+              inputMode="numeric"
+              maxLength={1}
+              type="text"
+              value={digit}
+              onChange={(e) => handleChange(index, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(index, e.key)}
+            />
+          ))}
+        </div>
+
+        {/* Action Button */}
+        <div className="mb-8">
+          <AuthButton
+            icon={CheckCircle}
+            isLoading={isLoading}
+            type="submit"
+            variant="primary"
+          >
+            {OTP_DATA.verifyButtonText}
+          </AuthButton>
+        </div>
+      </form>
+
+      {/* Resend Code Link */}
+      <div className="flex flex-col gap-2 items-center">
+        <p className="text-[12px] leading-[16px] text-surface-variant-custom font-medium">
+          {OTP_DATA.resendPrompt}
+        </p>
+        <button
+          className="text-[14px] leading-[20px] font-bold text-secondary-custom bg-brand-blue/20 px-4 py-2 rounded-full hover:bg-brand-blue/30 transition-colors focus:outline-none cursor-pointer"
+          type="button"
+        >
+          {OTP_DATA.resendButtonText}
+        </button>
+      </div>
+    </AuthLayout>
   );
 }
