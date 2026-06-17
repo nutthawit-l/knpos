@@ -6,7 +6,7 @@ import {
   Settings,
   Store,
   ArrowRight,
-  Plus,
+  PlusCircle,
 } from 'lucide-react';
 import MascotLogo from '../components/MascotLogo';
 
@@ -43,13 +43,13 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           </section>
 
           {/* Quick Guide */}
-          <section className="bg-brand-blue/10 rounded-[20px] p-5 border border-brand-blue/20">
-            <h3 className="font-bold text-[12px] tracking-widest text-[#2d5c6e] uppercase mb-4">
+          <section className="bg-[#b5e7fe] rounded-[20px] p-5">
+            <h3 className="font-bold text-[12px] tracking-widest text-[#37697d] uppercase mb-4">
               Quick Guide
             </h3>
             <ul className="space-y-4">
               <li className="flex gap-3 items-start">
-                <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0 border border-brand-blue/30 shadow-sm">
+                <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0">
                   1
                 </span>
                 <p className="font-medium text-[16px] text-text-brown">
@@ -57,7 +57,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 </p>
               </li>
               <li className="flex gap-3 items-start opacity-60">
-                <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0 border border-brand-blue/30 shadow-sm">
+                <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0">
                   2
                 </span>
                 <p className="font-medium text-[16px] text-text-brown">
@@ -65,7 +65,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 </p>
               </li>
               <li className="flex gap-3 items-start opacity-60">
-                <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0 border border-brand-blue/30 shadow-sm">
+                <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0">
                   3
                 </span>
                 <p className="font-medium text-[16px] text-text-brown">
@@ -73,8 +73,8 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 </p>
               </li>
             </ul>
-            <div className="mt-6 pt-6 border-t border-brand-blue/10">
-              <p className="font-medium text-[12px] italic text-[#2d5c6e]">
+            <div className="mt-6 pt-6 border-t border-[#326578]/10">
+              <p className="font-medium text-[12px] italic text-[#154d5f]">
                 Tip: You can change these later in Settings.
               </p>
             </div>
@@ -85,66 +85,66 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             {/* Primary CTA: Create Your Shop */}
             <button
               onClick={() => onNavigate?.('register')}
-              className="w-full text-left bg-white border-2 border-brand-pink/30 rounded-[20px] p-5 hover:shadow-md transition-all duration-300 active:scale-95 overflow-hidden relative group cursor-pointer"
+              className="w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 hover:shadow-md transition-all duration-300 active:scale-95 overflow-hidden relative group cursor-pointer"
             >
               <div className="flex flex-col h-full justify-between relative z-10">
                 <div>
-                  <div className="w-14 h-14 bg-brand-pink/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Store className="w-7 h-7 text-brand-pink-hover" />
+                  <div className="w-14 h-14 bg-[#f8bbd0] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Store className="w-7 h-7 text-[#805062]" />
                   </div>
-                  <h3 className="font-bold text-[20px] text-text-brown mb-2">
+                  <h3 className="text-[28px] leading-[36px] font-bold text-text-brown mb-2">
                     Create Your Shop
                   </h3>
-                  <p className="font-medium text-[14px] text-surface-variant-custom">
+                  <p className="text-[16px] leading-[24px] text-[#504447]">
                     Set your shop name, logo, and currency to begin.
                   </p>
                 </div>
-                <div className="mt-8 flex items-center gap-2 text-brand-pink-hover font-bold text-[14px]">
+                <div className="mt-8 flex items-center gap-2 text-[#805062] font-bold text-[14px]">
                   <span>Get Started</span>
                   <ArrowRight className="w-4 h-4 animate-pulse" />
                 </div>
               </div>
-              <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-brand-pink/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#f8bbd0] opacity-20 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
             </button>
 
             {/* Add Product Block */}
             <button
               onClick={() => onNavigate?.('products')}
-              className="w-full text-left bg-white border-2 border-outline-warm/30 rounded-[20px] p-5 hover:shadow-md transition-all duration-300 active:scale-95 overflow-hidden relative group opacity-70 cursor-pointer"
+              className="w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 hover:shadow-md transition-all duration-300 active:scale-95 overflow-hidden relative group opacity-70 cursor-pointer"
             >
               <div className="flex flex-col h-full justify-between relative z-10">
                 <div>
-                  <div className="w-14 h-14 bg-brand-blue/10 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Package className="w-7 h-7 text-brand-blue" />
+                  <div className="w-14 h-14 bg-[#b5e7fe] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Package className="w-7 h-7 text-[#326578]" />
                   </div>
-                  <h3 className="font-bold text-[20px] text-text-brown mb-2">
+                  <h3 className="text-[28px] leading-[36px] font-bold text-text-brown mb-2">
                     Add Product
                   </h3>
-                  <p className="font-medium text-[14px] text-surface-variant-custom">
+                  <p className="text-[16px] leading-[24px] text-[#504447]">
                     Fill your inventory with your amazing items.
                   </p>
                 </div>
-                <div className="mt-8 flex items-center gap-2 text-brand-blue font-bold text-[14px]">
+                <div className="mt-8 flex items-center gap-2 text-[#326578] font-bold text-[14px]">
                   <span>Go to Inventory</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
-              <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-brand-blue/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#b5e7fe] opacity-10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
             </button>
 
             {/* Create New Event Block */}
             <section className="opacity-70">
               <button
                 onClick={() => onNavigate?.('order')}
-                className="w-full bg-white/50 border-2 border-dashed border-outline-warm py-8 px-6 rounded-[20px] group hover:bg-brand-pink/10 transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+                className="w-full bg-[#fcf1f2] border-2 border-dashed border-[#805062]/30 py-8 px-6 rounded-[20px] group hover:bg-[#ffd9e4]/10 transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
               >
-                <div className="w-14 h-14 rounded-full bg-pink-container flex items-center justify-center text-brand-pink-hover group-hover:scale-110 transition-transform duration-300">
-                  <Plus className="w-7 h-7" />
+                <div className="w-14 h-14 rounded-full bg-[#f8bbd0] flex items-center justify-center text-[#805062] group-hover:scale-110 transition-transform duration-300">
+                  <PlusCircle className="w-7 h-7" />
                 </div>
-                <h3 className="font-bold text-[20px] text-text-brown">
+                <h3 className="font-bold text-[#805062] text-[20px]">
                   Create New Event
                 </h3>
-                <p className="font-medium text-surface-variant-custom text-[14px] text-center max-w-xs">
+                <p className="text-[#504447] text-[14px] leading-[20px] text-center max-w-xs">
                   Start logging sales and managing products for your next event.
                 </p>
               </button>
@@ -164,7 +164,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               <h4 className="font-bold text-[20px] text-text-brown">
                 Every big dream starts small.
               </h4>
-              <p className="font-medium text-[16px] text-surface-variant-custom px-8">
+              <p className="font-medium text-[16px] text-[#504447] px-8">
                 Ready to transform this empty space into your dream boutique?
               </p>
             </div>
