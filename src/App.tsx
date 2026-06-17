@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import Overview from './pages/Overview';
+import Dashboard from './pages/Dashboard';
+import CreateShop from './pages/CreateShop';
 import Order from './pages/Order';
 import Transactions from './pages/Transactions';
-import Products from './pages/Products';
+import Inventory from './pages/Inventory';
 import AddProduct from './pages/AddProduct';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -37,9 +38,14 @@ function App() {
         onNavigate={handleNavigate}
       />
       {activeTab === 'dashboard' && (
-        <Overview
+        <Dashboard
           onNavigate={handleNavigate}
           onMenuClick={() => setIsSidebarOpen(true)}
+        />
+      )}
+      {activeTab === 'create-shop' && (
+        <CreateShop
+          onNavigate={handleNavigate}
         />
       )}
       {activeTab === 'order' && (
@@ -55,9 +61,8 @@ function App() {
         />
       )}
       {activeTab === 'products' && (
-        <Products
+        <Inventory
           onNavigate={handleNavigate}
-          onMenuClick={() => setIsSidebarOpen(true)}
           onEditProduct={handleEditProduct}
         />
       )}

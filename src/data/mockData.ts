@@ -36,3 +36,28 @@ export const OTP_DATA = {
   resendPrompt: "Didn't receive a code?",
   resendButtonText: 'Resend Code',
 } as const;
+
+export const CREATE_SHOP_DATA = {
+  mascotUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCbyiX19xuIZvx4Umy28SEHwNyIsMEBHG4Ohwfh-sAMzyYyeToDku2D9BVHIr6zB8nfxSrt3EDuCJHYnU7Ni9y9Eq69xqy2Bcyf-mZXYRYBmPD38DcuKWY5MdLx8zj92lETJqcHOQgx_DkzFi0cw4RLSYCIc6yECELpmwFu95D40ZFKoUFyOOImdep1b74_anczNZO3KQoo2cthwql3s4xTNLjPpRlp1tXEgcSxj-GYCKW92aq7iY_e8MHIyMUNXt-Hu6XIwZcoocE',
+  mascotAlt: 'Shop Creation Illustration',
+  mascotSpeech: "Let's build a cozy shop together!",
+  shopNameLabel: 'Shop Name',
+  shopNamePlaceholder: 'Enter your shop name',
+  descriptionLabel: 'Description',
+  descriptionPlaceholder: 'Tell us about your boutique',
+  createButtonText: 'CREATE SHOP',
+  termsText: "By creating a shop, you agree to Charni's Terms of Service.",
+} as const;
+
+export const ADD_PRODUCT_DATA = {
+  title: 'Add New Product',
+  editTitle: 'Edit Product',
+  mascotSpeech: "Let's add your first product.",
+  tapPhotoText: 'Tap to add product photo',
+  productNameLabel: 'Product Name',
+  productNamePlaceholder: 'e.g., Puppy Bow Tie',
+  saveButtonText: 'SAVE PRODUCT',
+  saveChangesButtonText: 'SAVE CHANGES',
+} as const;
+
+

@@ -4,6 +4,7 @@ import { LOGIN_DATA } from '../data/mockData';
 import AuthLayout from '../components/AuthLayout';
 import FormInput from '../components/FormInput';
 import AuthButton from '../components/AuthButton';
+import MascotLogo from '../components/MascotLogo';
 
 export interface LoginProps {
   readonly onNavigate?: (tab: string) => void;
@@ -22,13 +23,7 @@ export default function Login({ onNavigate }: LoginProps) {
     <AuthLayout>
       {/* Logo Section */}
       <header className="flex flex-col items-center mb-8">
-        <div className="w-24 h-24 mb-4 rounded-full bg-pink-container flex items-center justify-center overflow-hidden shadow-sm border border-outline-warm">
-          <img
-            alt={LOGIN_DATA.logoAlt}
-            className="w-full h-full object-contain"
-            src={LOGIN_DATA.logoUrl}
-          />
-        </div>
+        <MascotLogo className="mb-4" />
         <h1 className="text-[28px] leading-[36px] font-bold text-text-brown tracking-tight">
           {LOGIN_DATA.title}
         </h1>
