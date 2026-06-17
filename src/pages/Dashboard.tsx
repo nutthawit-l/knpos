@@ -1,12 +1,14 @@
 import {
-  LayoutDashboard,
+  Menu,
+  Bell,
+  ShoppingCart,
+  History,
   Package,
-  ReceiptText,
+  Settings,
   Store,
   ArrowRight,
   Plus,
 } from 'lucide-react';
-import Header from '../components/Header';
 import MascotLogo from '../components/MascotLogo';
 
 export interface DashboardProps {
@@ -18,7 +20,23 @@ export default function Dashboard({ onNavigate, onMenuClick }: DashboardProps) {
   return (
     <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
       <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
-        <Header onMenuClick={onMenuClick} showNotifications={true} />
+        {/* TopAppBar */}
+        <header className="bg-white flex justify-between items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20">
+          <div className="flex items-center gap-3">
+            {onMenuClick && (
+              <button
+                onClick={onMenuClick}
+                className="p-1 -ml-1 text-[#805062] hover:bg-[#fcf1f2] rounded-full transition-colors cursor-pointer"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            )}
+            <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">Charni POS</h1>
+          </div>
+          <button className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer">
+            <Bell className="w-5 h-5" />
+          </button>
+        </header>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-5 pb-24 space-y-6">
@@ -163,35 +181,36 @@ export default function Dashboard({ onNavigate, onMenuClick }: DashboardProps) {
         </div>
 
         {/* Bottom Navigation */}
-        <div className="absolute bottom-0 w-full max-w-[400px] bg-white border-t border-gray-100 flex items-center justify-between pb-safe z-10">
+        <nav className="absolute bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-[#fcf1f2] border-t border-outline-warm/30 shadow-[0_-2px_10px_rgba(78,52,46,0.05)] rounded-t-2xl">
           <button
-            className="flex-1 flex flex-col items-center justify-center py-3 gap-1 cursor-pointer"
-            onClick={() => onNavigate?.('dashboard')}
-          >
-            <LayoutDashboard className="w-5 h-5 text-primary" />
-            <span className="text-[10px] font-semibold text-primary">
-              Dashboard
-            </span>
-          </button>
-          <button
-            className="flex-1 flex flex-col items-center justify-center py-3 gap-1 cursor-pointer"
             onClick={() => onNavigate?.('order')}
+            className="flex flex-col items-center justify-center text-surface-variant-custom px-5 py-1 hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none"
           >
-            <Package className="w-5 h-5 text-gray-400" />
-            <span className="text-[10px] font-semibold text-gray-400">
-              Order
-            </span>
+            <ShoppingCart className="w-5 h-5 mb-0.5 text-[#504447]" />
+            <span className="text-[12px] font-bold text-[#504447]">Sales</span>
           </button>
           <button
-            className="flex-1 flex flex-col items-center justify-center py-3 gap-1 cursor-pointer"
             onClick={() => onNavigate?.('transactions')}
+            className="flex flex-col items-center justify-center text-surface-variant-custom px-5 py-1 hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none"
           >
-            <ReceiptText className="w-5 h-5 text-gray-400" />
-            <span className="text-[10px] font-semibold text-gray-400">
-              Transactions
-            </span>
+            <History className="w-5 h-5 mb-0.5 text-[#504447]" />
+            <span className="text-[12px] font-bold text-[#504447]">History</span>
           </button>
-        </div>
+          <button
+            onClick={() => onNavigate?.('products')}
+            className="flex flex-col items-center justify-center text-surface-variant-custom px-5 py-1 hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none"
+          >
+            <Package className="w-5 h-5 mb-0.5 text-[#504447]" />
+            <span className="text-[12px] font-bold text-[#504447]">Inventory</span>
+          </button>
+          <button
+            onClick={() => onNavigate?.('settings')}
+            className="flex flex-col items-center justify-center text-surface-variant-custom px-5 py-1 hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none"
+          >
+            <Settings className="w-5 h-5 mb-0.5 text-[#504447]" />
+            <span className="text-[12px] font-bold text-[#504447]">Settings</span>
+          </button>
+        </nav>
       </div>
     </div>
   );
