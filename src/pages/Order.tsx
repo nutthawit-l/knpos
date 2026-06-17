@@ -10,7 +10,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import MascotLogo from '../components/MascotLogo';
-import ConfirmOrderModal from '../components/ConfirmOrderModal';
+import PaymentModal from '../components/PaymentModal';
 import CurrencySortControls from '../components/CurrencySortControls';
 import CategoryFilter from '../components/CategoryFilter';
 import { useOrderStore } from '../store/useOrderStore';
@@ -99,12 +99,23 @@ export default function Order({ onNavigate }: OrderProps) {
     <div className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'>
       <div className='bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern'>
         {isConfirmModalOpen && (
-          <ConfirmOrderModal
-            totalItems={totalCount}
-            totalPrice={totalCost}
+          <PaymentModal
+            isOpen={isConfirmModalOpen}
+            items={products
+              .filter((p) => (quantities[p.id] || 0) > 0)
+              .map((p) => ({
+                id: p.id,
+                name: p.name,
+                quantity: quantities[p.id],
+                pricePerUnit: getPrice(p, selectedCurrency.code),
+              }))}
             currencySymbol={selectedCurrency.symbol}
             isLoading={isConfirming}
-            onCancel={() => setIsConfirmModalOpen(false)}
+            onCancel={() => {
+              clearOrder();
+              setIsConfirmModalOpen(false);
+            }}
+            onEdit={() => setIsConfirmModalOpen(false)}
             onConfirm={async () => {
               setIsConfirming(true);
               const orderItems = products
@@ -315,30 +326,34 @@ export default function Order({ onNavigate }: OrderProps) {
         </div>
 
         {/* Bottom Docked Summary Bar */}
-        <div className="absolute bottom-20 left-0 w-full px-5 z-30 pointer-events-none">
-          <div className="bg-white/90 backdrop-blur-md rounded-[20px] p-4 shadow-2xl pointer-events-auto border border-outline-warm/40 flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className="text-[12px] text-text-brown/60 font-bold">Items: {totalCount}</span>
-                <span className="text-[20px] font-bold text-text-brown leading-none mt-1">
-                  {selectedCurrency.symbol}{totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
+        {!isConfirmModalOpen && (
+          <div className="absolute bottom-20 left-0 w-full px-5 z-30 pointer-events-none">
+            <div className="bg-white/90 backdrop-blur-md rounded-[20px] p-4 shadow-2xl pointer-events-auto border border-outline-warm/40 flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[12px] text-text-brown/60 font-bold">Items: {totalCount}</span>
+                  <span className="text-[20px] font-bold text-text-brown leading-none mt-1">
+                    {selectedCurrency.symbol}{totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  disabled={totalCount === 0}
+                  onClick={() => setIsConfirmModalOpen(true)}
+                  className="h-12 px-6 bg-brand-pink hover:bg-brand-pink-hover text-text-brown font-bold uppercase rounded-full shadow-md transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer border-none"
+                >
+                  <span>PROCESS PAYMENT</span>
+                  <CreditCard className="w-5 h-5 text-text-brown" />
+                </button>
               </div>
-              <button
-                type="button"
-                disabled={totalCount === 0}
-                onClick={() => setIsConfirmModalOpen(true)}
-                className="h-12 px-6 bg-brand-pink hover:bg-brand-pink-hover text-text-brown font-bold uppercase rounded-full shadow-md transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer border-none"
-              >
-                <span>PROCESS PAYMENT</span>
-                <CreditCard className="w-5 h-5 text-text-brown" />
-              </button>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Bottom Navigation */}
-        <BottomNavigation activeTab="order" onNavigate={onNavigate} />
+        {!isConfirmModalOpen && (
+          <BottomNavigation activeTab="order" onNavigate={onNavigate} />
+        )}
       </div>
     </div>
   );
