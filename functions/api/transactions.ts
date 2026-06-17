@@ -171,10 +171,27 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       .bind(offsetStr, startOffsetStr, offsetStr, endOffsetStr, currency)
       .all<{ product_id: number; product_name: string; image_url: string; total_sold_today: number }>();
 
+    // Query 3: Individual orders today using range queries utilizing the timezone offset
+    const { results: ordersResult } = await context.env.DB.prepare(
+      `SELECT 
+          id,
+          total_income,
+          total_product_sold,
+          created_at
+       FROM "order"
+       WHERE created_at >= datetime('now', ?, 'start of day', ?)
+         AND created_at < datetime('now', ?, 'start of day', ?)
+         AND currency_code = ?
+       ORDER BY created_at DESC`
+    )
+      .bind(offsetStr, startOffsetStr, offsetStr, endOffsetStr, currency)
+      .all<{ id: number; total_income: number; total_product_sold: number; created_at: string }>();
+
     return new Response(
       JSON.stringify({
         summary: summaryResult || { daily_total_income: 0, daily_total_product_sold: 0 },
         products: productsResult,
+        orders: ordersResult || [],
       }),
       {
         headers: { 'Content-Type': 'application/json' },
