@@ -46,7 +46,7 @@ export default function AuthLayout({
   }, []);
 
   return (
-    <div className="bg-surface min-h-screen flex flex-col font-quicksand overflow-hidden relative text-text-brown">
+    <div className="bg-surface min-h-screen flex flex-col font-quicksand overflow-y-auto relative text-text-brown">
       {/* Floating Atmosphere Elements */}
       <div className="absolute inset-0 pointer-events-none opacity-20 z-0">
         <div
@@ -76,7 +76,7 @@ export default function AuthLayout({
       )}
 
       {/* Main Centered Shell */}
-      <div className="flex-1 flex items-center justify-center px-6 z-10 relative">
+      <div className="flex-1 flex items-center justify-center py-8 px-6 z-10 relative">
         <div className="bg-white/40 backdrop-blur-md flex flex-col w-full max-w-md relative shadow-2xl rounded-[32px] border border-outline-warm/30 overflow-hidden">
           <main
             className={`w-full p-8 flex flex-col transition-all duration-700 ease-out ${
