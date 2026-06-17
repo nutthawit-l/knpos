@@ -67,13 +67,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     // Retrieve shop name
-    const shop: any = await context.env.DB.prepare(
-      "SELECT name FROM shop WHERE id = ?"
-    )
-      .bind(user.shop_id)
-      .first();
-
-    const shopName = shop ? shop.name : "My Shop";
+    let shopName: string | null = null;
+    if (user.shop_id) {
+      const shop: any = await context.env.DB.prepare(
+        "SELECT name FROM shop WHERE id = ?"
+      )
+        .bind(user.shop_id)
+        .first();
+      if (shop) {
+        shopName = shop.name;
+      }
+    }
 
     // Create session
     const sessionId = generateUUID();

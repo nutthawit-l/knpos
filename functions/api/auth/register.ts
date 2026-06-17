@@ -8,9 +8,9 @@ export interface Env {
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const body: any = await context.request.json();
-    const { shopName, email, password } = body;
+    const { email, password } = body;
 
-    if (!shopName || !email || !password) {
+    if (!email || !password) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
@@ -28,7 +28,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const hash = await hashPassword(password, salt);
 
     let userId: number;
-    let shopId: number;
 
     if (existingUser) {
       if (existingUser.is_verified === 1) {
@@ -41,40 +40,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         );
       }
 
-      // Existing unverified user: update password and shop name
-      shopId = existingUser.shop_id;
+      // Existing unverified user: update password
       userId = existingUser.id;
 
-      const updateShop = context.env.DB.prepare(
-        "UPDATE shop SET name = ? WHERE id = ?"
-      ).bind(shopName, shopId);
-
-      const updateUser = context.env.DB.prepare(
+      await context.env.DB.prepare(
         'UPDATE "user" SET password_hash = ?, password_salt = ? WHERE id = ?'
-      ).bind(hash, salt, userId);
-
-      await context.env.DB.batch([updateShop, updateUser]);
+      ).bind(hash, salt, userId).run();
     } else {
-      // Create new shop and user
-      // D1 doesn't return the last inserted ID in a batch directly without SELECT last_insert_rowid(),
-      // so we execute them sequentially or run a batch with SELECT.
-      // D1 prepare().run() returns meta with last_row_id. Let's use standard transactions or batch.
-      const shopResult = await context.env.DB.prepare(
-        "INSERT INTO shop (name) VALUES (?)"
-      )
-        .bind(shopName)
-        .run();
-
-      shopId = shopResult.meta.last_row_id;
-
-      if (!shopId) {
-        throw new Error("Failed to insert shop record.");
-      }
-
+      // Create new user (shop_id is NULL)
       const userResult = await context.env.DB.prepare(
-        'INSERT INTO "user" (shop_id, email, password_hash, password_salt, is_verified) VALUES (?, ?, ?, ?, 0)'
+        'INSERT INTO "user" (shop_id, email, password_hash, password_salt, is_verified) VALUES (NULL, ?, ?, ?, 0)'
       )
-        .bind(shopId, email, hash, salt)
+        .bind(email, hash, salt)
         .run();
 
       userId = userResult.meta.last_row_id;

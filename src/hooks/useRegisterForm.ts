@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 
 export function useRegisterForm() {
-  const [shopName, setShopName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
@@ -14,7 +13,7 @@ export function useRegisterForm() {
     e.preventDefault();
     clearError();
 
-    const result = await register(shopName, email, password);
+    const result = await register(email, password);
     if (result.success) {
       navigate('/verify-otp');
     } else {
@@ -23,8 +22,6 @@ export function useRegisterForm() {
   };
 
   return {
-    shopName,
-    setShopName,
     email,
     setEmail,
     password,

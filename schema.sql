@@ -68,7 +68,7 @@ CREATE TABLE shop (
 
 CREATE TABLE "user" (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    shop_id INTEGER NOT NULL,
+    shop_id INTEGER,
     email TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     password_salt TEXT NOT NULL,

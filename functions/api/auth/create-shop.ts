@@ -5,7 +5,7 @@ export interface Env {
   DB: D1Database;
 }
 
-export const onRequestGet: PagesFunction<Env> = async (context) => {
+export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const cookieHeader = context.request.headers.get("Cookie");
     const token = getCookie(cookieHeader, "session_token");
@@ -33,30 +33,47 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     const expiresAt = new Date(session.expires_at).getTime();
     if (expiresAt < Date.now()) {
-      // Clean up expired session
-      await context.env.DB.prepare("DELETE FROM session WHERE id = ?")
-        .bind(token)
-        .run();
-
       return new Response(JSON.stringify({ error: "Session expired" }), {
         status: 401,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    // Retrieve user and shop info
-    const userProfile: any = await context.env.DB.prepare(
-      'SELECT u.id, u.email, s.name as shop_name FROM "user" u LEFT JOIN shop s ON u.shop_id = s.id WHERE u.id = ?'
-    )
-      .bind(session.user_id)
-      .first();
+    const body: any = await context.request.json();
+    const { shopName } = body;
 
-    if (!userProfile) {
-      return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 401,
+    if (!shopName || !shopName.trim()) {
+      return new Response(JSON.stringify({ error: "Shop name is required" }), {
+        status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
+
+    // Insert shop
+    const shopResult = await context.env.DB.prepare(
+      "INSERT INTO shop (name) VALUES (?)"
+    )
+      .bind(shopName)
+      .run();
+
+    const shopId = shopResult.meta.last_row_id;
+    if (!shopId) {
+      throw new Error("Failed to create shop record.");
+    }
+
+    // Update user's shop_id
+    await context.env.DB.prepare(
+      'UPDATE "user" SET shop_id = ? WHERE id = ?'
+    )
+      .bind(shopId, session.user_id)
+      .run();
+
+    // Fetch updated user profile
+    const userProfile: any = await context.env.DB.prepare(
+      'SELECT u.id, u.email, s.name as shop_name FROM "user" u JOIN shop s ON u.shop_id = s.id WHERE u.id = ?'
+    )
+      .bind(session.user_id)
+      .first();
 
     return new Response(
       JSON.stringify({
@@ -64,7 +81,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         user: {
           id: userProfile.id,
           email: userProfile.email,
-          shopName: userProfile.shop_name || null,
+          shopName: userProfile.shop_name,
         },
       }),
       {

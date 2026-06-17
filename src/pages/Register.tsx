@@ -10,8 +10,6 @@ import MascotLogo from '../components/MascotLogo';
 export default function Register() {
   const navigate = useNavigate();
   const {
-    shopName,
-    setShopName,
     email,
     setEmail,
     password,
@@ -40,15 +38,6 @@ export default function Register() {
 
       {/* Register Form */}
       <form className="space-y-6" onSubmit={handleRegisterSubmit}>
-        <FormInput
-          id="shop_name"
-          label={REGISTER_DATA.shopNameLabel}
-          placeholder={REGISTER_DATA.shopNamePlaceholder}
-          required
-          type="text"
-          value={shopName}
-          onChange={setShopName}
-        />
 
         <FormInput
           id="email"

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { useAuthStore } from '../store/useAuthStore';
 
 interface UseCreateShopFormProps {
   readonly onNavigate?: (tab: string) => void;
@@ -8,19 +9,21 @@ export function useCreateShopForm({ onNavigate }: UseCreateShopFormProps) {
   const [shopName, setShopName] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { createShop } = useAuthStore();
 
-  const handleCreateShopSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleCreateShopSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!shopName.trim()) return;
 
     setIsLoading(true);
+    const result = await createShop(shopName);
+    setIsLoading(false);
 
-    // Simulate async shop creation request (1.5s delay matching design scripts)
-    setTimeout(() => {
-      setIsLoading(true);
-      setIsLoading(false);
+    if (result.success) {
       onNavigate?.('dashboard');
-    }, 1500);
+    } else {
+      alert(result.error || 'Failed to create shop');
+    }
   };
 
   return {

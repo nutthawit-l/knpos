@@ -3,7 +3,7 @@ import { create } from 'zustand';
 export interface UserProfile {
   id: number;
   email: string;
-  shopName: string;
+  shopName: string | null;
 }
 
 interface AuthState {
@@ -15,7 +15,8 @@ interface AuthState {
   setRegisteringEmail: (email: string | null) => void;
   checkAuth: () => Promise<UserProfile | null>;
   login: (email: string, password: string) => Promise<{ success: boolean; verificationRequired?: boolean; email?: string; error?: string }>;
-  register: (shopName: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  createShop: (shopName: string) => Promise<{ success: boolean; error?: string }>;
   verifyOtp: (email: string, code: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   clearError: () => void;
@@ -85,13 +86,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  register: async (shopName, email, password) => {
+  register: async (email, password) => {
     set({ isLoading: true, error: null });
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shopName, email, password }),
+        body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -101,6 +102,29 @@ export const useAuthStore = create<AuthState>((set) => ({
       } else {
         set({ error: data.error || 'Registration failed', isLoading: false });
         return { success: false, error: data.error || 'Registration failed' };
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'An error occurred';
+      set({ error: msg, isLoading: false });
+      return { success: false, error: msg };
+    }
+  },
+
+  createShop: async (shopName) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await fetch('/api/auth/create-shop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shopName }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        set({ user: data.user, isLoading: false });
+        return { success: true };
+      } else {
+        set({ error: data.error || 'Failed to create shop', isLoading: false });
+        return { success: false, error: data.error || 'Failed to create shop' };
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'An error occurred';
