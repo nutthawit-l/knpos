@@ -12,3 +12,19 @@ export const LOGIN_DATA = {
   signUpLinkText: 'Sign up',
   footerText: 'Handcrafted POS',
 } as const;
+
+export const REGISTER_DATA = {
+  logoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDIPTRYjFiXcVj1MFOQGHBz5pYeWXu1SN31Dzygc61tqt7mYoMxuKC2xRxra_KjF5L8dGnhG1vSpp_pM8q4v6QRd411dom_-1e_wOTxIgLzW5J8Efed03TwWYpPGXJiJ_0W843u5YbjXAlmmi9XFDMgJ4Az29xQ4e3rPt72XNy3yqBSCw4uGtnBCO_qF5eqIVbfa-re7PvJS4Qq83wloAnW9mxyWZSZYXgS93zmbcYHkHCHT8nkeiabePmMYv8fqZSuuGCJhR3zjJg',
+  logoAlt: 'Charni POS Logo',
+  title: 'Create your Account',
+  subtitle: 'Join the most delightful POS experience for boutique shops.',
+  shopNameLabel: 'Shop Name',
+  shopNamePlaceholder: 'E.g. Sweet Paw Pastries',
+  emailLabel: 'Email',
+  emailPlaceholder: 'your@email.com',
+  passwordLabel: 'Password',
+  passwordPlaceholder: '••••••••',
+  signUpButtonText: 'SIGN UP',
+  loginPrompt: 'Already part of the pack?',
+  loginButtonText: 'LOG IN',
+} as const;
