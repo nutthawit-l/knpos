@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 import sharp from 'sharp';
+import crypto from 'crypto';
 
 // Disable TLS reject unauthorized for local developer testing image downloads
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -118,6 +119,23 @@ async function run() {
   // Generate SQL file for seeding
   console.log('Preparing D1 seed SQL statements...');
   const sqlLines: string[] = [];
+
+  // 0. Seed default shop and user
+  const defaultShopId = 1;
+  const defaultUserId = 1;
+  const defaultShopName = 'Charni Test Shop';
+  const defaultEmail = 'test@example.com';
+  const defaultPassword = 'password123';
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.createHash('sha256').update(defaultPassword + salt).digest('hex');
+
+  sqlLines.push(
+    `INSERT INTO shop (id, name) VALUES (${defaultShopId}, '${defaultShopName}');`
+  );
+  sqlLines.push(
+    `INSERT INTO "user" (id, shop_id, email, password_hash, password_salt, is_verified) ` +
+    `VALUES (${defaultUserId}, ${defaultShopId}, '${defaultEmail}', '${hash}', '${salt}', 1);`
+  );
 
   // 1. Insert Products and Prices
   products.forEach((p, idx) => {

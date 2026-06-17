@@ -1,4 +1,5 @@
 import { PawPrint } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useRegisterForm } from '../hooks/useRegisterForm';
 import { REGISTER_DATA } from '../data/mockData';
 import AuthLayout from '../components/AuthLayout';
@@ -6,11 +7,8 @@ import FormInput from '../components/FormInput';
 import AuthButton from '../components/AuthButton';
 import MascotLogo from '../components/MascotLogo';
 
-export interface RegisterProps {
-  readonly onNavigate?: (tab: string) => void;
-}
-
-export default function Register({ onNavigate }: RegisterProps) {
+export default function Register() {
+  const navigate = useNavigate();
   const {
     shopName,
     setShopName,
@@ -19,14 +17,15 @@ export default function Register({ onNavigate }: RegisterProps) {
     password,
     setPassword,
     isLoading,
+    error,
     handleRegisterSubmit,
-  } = useRegisterForm({ onNavigate });
+  } = useRegisterForm();
 
   return (
     <AuthLayout
       headerTitle="Charni POS"
       showHeader
-      onBack={() => onNavigate?.('login')}
+      onBack={() => navigate('/login')}
     >
       {/* Branding/Logo Area */}
       <div className="flex flex-col items-center mb-6">
@@ -71,6 +70,12 @@ export default function Register({ onNavigate }: RegisterProps) {
           onChange={setPassword}
         />
 
+        {error && (
+          <div className="text-red-500 text-[14px] text-center font-medium bg-red-50 p-2 rounded-xl border border-red-100">
+            {error}
+          </div>
+        )}
+
         {/* Action Button */}
         <div className="pt-2">
           <AuthButton
@@ -89,13 +94,15 @@ export default function Register({ onNavigate }: RegisterProps) {
         <p className="text-[12px] leading-[16px] text-surface-variant-custom font-medium">
           {REGISTER_DATA.loginPrompt}
         </p>
-        <AuthButton
-          fullWidth={false}
-          variant="secondary"
-          onClick={() => onNavigate?.('login')}
-        >
-          {REGISTER_DATA.loginButtonText}
-        </AuthButton>
+        <Link to="/login" className="w-full flex justify-center">
+          <AuthButton
+            fullWidth={true}
+            variant="secondary"
+            type="button"
+          >
+            {REGISTER_DATA.loginButtonText}
+          </AuthButton>
+        </Link>
       </div>
     </AuthLayout>
   );

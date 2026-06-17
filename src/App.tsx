@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuthStore } from './store/useAuthStore';
 import Dashboard from './pages/Dashboard';
 import CreateShop from './pages/CreateShop';
 import CreateEvent from './pages/CreateEvent';
@@ -13,12 +15,21 @@ import Setting from './pages/Setting';
 import Sidebar from './components/Sidebar';
 import { type Product } from './components/SwipeableProductRow';
 
-function App() {
+function DashboardLayout() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
 
+  const { logout } = useAuthStore();
+
   const handleNavigate = (tab: string) => {
+    if (tab === 'logout') {
+      const confirmLogout = window.confirm('Are you sure you want to logout?');
+      if (confirmLogout) {
+        logout();
+      }
+      return;
+    }
     setActiveTab(tab);
     setIsSidebarOpen(false);
     if (tab !== 'add-product') {
@@ -80,11 +91,56 @@ function App() {
           productToEdit={editingProduct}
         />
       )}
-      {activeTab === 'login' && <Login onNavigate={handleNavigate} />}
-      {activeTab === 'register' && <Register onNavigate={handleNavigate} />}
-      {activeTab === 'otp-verify' && <OTPVerify onNavigate={handleNavigate} />}
       {activeTab === 'settings' && <Setting onNavigate={handleNavigate} />}
     </>
+  );
+}
+
+function App() {
+  const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-dvh items-center justify-center bg-[#fff8f8] font-quicksand text-text-brown">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-brand-pink border-t-transparent rounded-full animate-spin"></div>
+          <p className="font-bold text-[16px]">Loading Charni POS...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />}
+      />
+      <Route
+        path="/register"
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />}
+      />
+      <Route
+        path="/verify-otp"
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <OTPVerify />}
+      />
+      <Route
+        path="/dashboard"
+        element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/"
+        element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />}
+      />
+      <Route
+        path="*"
+        element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />}
+      />
+    </Routes>
   );
 }
 

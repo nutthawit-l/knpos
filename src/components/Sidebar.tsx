@@ -8,6 +8,7 @@ import {
   X
 } from 'lucide-react';
 import avatarImg from '../assets/avatar.png';
+import { useAuthStore } from '../store/useAuthStore';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -30,6 +31,14 @@ const footerItems = [
 ];
 
 export default function Sidebar({ isOpen, onClose, activeTab, onNavigate }: SidebarProps) {
+  const { user } = useAuthStore();
+
+  const filteredFooterItems = footerItems.filter(item => {
+    // Hide login button when inside the dashboard (authenticated)
+    if (item.id === 'login') return false;
+    return true;
+  });
+
   return (
     <>
       {/* Overlay */}
@@ -54,8 +63,8 @@ export default function Sidebar({ isOpen, onClose, activeTab, onNavigate }: Side
                   <img src={avatarImg} alt='User avatar' className='w-full h-full object-cover rounded-full' />
                 </div>
                 <div>
-                  <p className='text-[15px] font-bold text-foreground leading-tight'>John Smith</p>
-                  <p className='text-[12px] text-foreground-subtle'>Store Manager</p>
+                  <p className='text-[15px] font-bold text-foreground leading-tight'>{user?.shopName || 'Charni POS'}</p>
+                  <p className='text-[12px] text-foreground-subtle'>{user?.email || 'Store Owner'}</p>
                 </div>
               </div>
               <button onClick={onClose} className='p-1 text-foreground-muted'>
@@ -99,7 +108,7 @@ export default function Sidebar({ isOpen, onClose, activeTab, onNavigate }: Side
               <div className='px-2 mb-3'>
                 <div className='h-px bg-border' />
               </div>
-              {footerItems.map((item) => {
+              {filteredFooterItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <button

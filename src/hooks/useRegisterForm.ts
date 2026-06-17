@@ -1,24 +1,25 @@
 import { useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
 
-interface UseRegisterFormProps {
-  onNavigate?: (tab: string) => void;
-}
-
-export function useRegisterForm({ onNavigate }: UseRegisterFormProps) {
+export function useRegisterForm() {
   const [shopName, setShopName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  
+  const navigate = useNavigate();
+  const { register, isLoading, error, clearError } = useAuthStore();
 
-  const handleRegisterSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleRegisterSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
+    clearError();
 
-    // Simulate async registration request (e.g. 1.5s delay matching design scripts)
-    setTimeout(() => {
-      setIsLoading(false);
-      onNavigate?.('otp-verify');
-    }, 1500);
+    const result = await register(shopName, email, password);
+    if (result.success) {
+      navigate('/verify-otp');
+    } else {
+      alert(result.error || 'Failed to register');
+    }
   };
 
   return {
@@ -29,6 +30,7 @@ export function useRegisterForm({ onNavigate }: UseRegisterFormProps) {
     password,
     setPassword,
     isLoading,
+    error,
     handleRegisterSubmit,
   };
 }

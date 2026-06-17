@@ -1,13 +1,13 @@
 import { useState, useRef, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
 
-interface UseOTPFormProps {
-  onNavigate?: (tab: string) => void;
-}
-
-export function useOTPForm({ onNavigate }: UseOTPFormProps) {
+export function useOTPForm() {
   const [otp, setOtp] = useState<readonly string[]>(['', '', '', '', '', '']);
-  const [isLoading, setIsLoading] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  
+  const navigate = useNavigate();
+  const { verifyOtp, registeringEmail, isLoading, clearError } = useAuthStore();
 
   const handleChange = (index: number, value: string) => {
     // Only allow digits
@@ -31,15 +31,28 @@ export function useOTPForm({ onNavigate }: UseOTPFormProps) {
     }
   };
 
-  const handleVerifySubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleVerifySubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
+    clearError();
 
-    // Simulate verification delay (e.g. 1.5 seconds)
-    setTimeout(() => {
-      setIsLoading(false);
-      onNavigate?.('dashboard');
-    }, 1500);
+    const code = otp.join('');
+    if (code.length < 6) {
+      alert('Please enter all 6 digits.');
+      return;
+    }
+
+    if (!registeringEmail) {
+      alert('Email not found. Please register again.');
+      navigate('/register');
+      return;
+    }
+
+    const result = await verifyOtp(registeringEmail, code);
+    if (result.success) {
+      navigate('/dashboard');
+    } else {
+      alert(result.error || 'Failed to verify code.');
+    }
   };
 
   return {
