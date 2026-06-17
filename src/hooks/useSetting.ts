@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { SETTINGS_DATA } from '../data/mockData';
+import { useAuthStore } from '../store/useAuthStore';
 
 interface UseSettingProps {
   readonly onNavigate?: (tab: string) => void;
@@ -7,6 +8,7 @@ interface UseSettingProps {
 
 export function useSetting({ onNavigate }: UseSettingProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const { logout } = useAuthStore();
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -23,9 +25,10 @@ export function useSetting({ onNavigate }: UseSettingProps) {
     }
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     const confirmSignOut = window.confirm(SETTINGS_DATA.signOutConfirm);
     if (confirmSignOut) {
+      await logout();
       onNavigate?.('login');
     }
   };

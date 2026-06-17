@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/useAuthStore';
 import Dashboard from './pages/Dashboard';
 import CreateShop from './pages/CreateShop';
@@ -16,11 +16,23 @@ import Sidebar from './components/Sidebar';
 import { type Product } from './components/SwipeableProductRow';
 
 function DashboardLayout() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(() => {
+    return (location.state as any)?.activeTab || 'dashboard';
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
 
   const { logout } = useAuthStore();
+
+  useEffect(() => {
+    if (location.state && (location.state as any).activeTab) {
+      setActiveTab((location.state as any).activeTab);
+      // Clean up location state so that fresh page reload doesn't trigger the old tab
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, location.pathname]);
 
   const handleNavigate = (tab: string) => {
     if (tab === 'logout') {
@@ -28,6 +40,10 @@ function DashboardLayout() {
       if (confirmLogout) {
         logout();
       }
+      return;
+    }
+    if (tab === 'settings') {
+      navigate('/setting');
       return;
     }
     setActiveTab(tab);
@@ -91,13 +107,13 @@ function DashboardLayout() {
           productToEdit={editingProduct}
         />
       )}
-      {activeTab === 'settings' && <Setting onNavigate={handleNavigate} />}
     </>
   );
 }
 
 function App() {
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     checkAuth();
@@ -113,6 +129,16 @@ function App() {
       </div>
     );
   }
+
+  const handleSettingNavigate = (tab: string) => {
+    if (tab === 'login') {
+      navigate('/login');
+    } else if (tab === 'settings') {
+      navigate('/setting');
+    } else {
+      navigate('/dashboard', { state: { activeTab: tab } });
+    }
+  };
 
   return (
     <Routes>
@@ -131,6 +157,10 @@ function App() {
       <Route
         path="/dashboard"
         element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/setting"
+        element={isAuthenticated ? <Setting onNavigate={handleSettingNavigate} /> : <Navigate to="/login" replace />}
       />
       <Route
         path="/"
