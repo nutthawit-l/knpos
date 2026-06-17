@@ -180,9 +180,6 @@ export default function Order({ onNavigate }: OrderProps) {
             </button>
             <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">Order</h1>
           </div>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer border-none bg-transparent">
-            <Bell className="w-5 h-5" />
-          </button>
         </header>
 
         {/* Content */}
@@ -245,11 +242,10 @@ export default function Order({ onNavigate }: OrderProps) {
                   return (
                     <div
                       key={product.id}
-                      className={`bg-white rounded-[20px] p-3 shadow-[0_4px_12px_rgba(78,52,46,0.05)] transition-all duration-200 flex flex-col border ${
-                        isSelected
+                      className={`bg-white rounded-[20px] p-3 shadow-[0_4px_12px_rgba(78,52,46,0.05)] transition-all duration-200 flex flex-col border ${isSelected
                           ? 'border-2 border-brand-pink ring-4 ring-brand-pink/10'
                           : 'border-outline-warm/40'
-                      }`}
+                        }`}
                     >
                       {/* Product Image */}
                       <div className="aspect-square rounded-xl bg-peach-container/40 relative overflow-hidden mb-3 flex items-center justify-center p-2 border border-outline-warm/15">
