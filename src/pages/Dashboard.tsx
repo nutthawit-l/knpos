@@ -20,7 +20,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
     <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
       <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
         {/* TopAppBar */}
-        <header className="bg-white flex justify-between items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20">
+        <header className="bg-[#fff8f8] flex justify-between items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20">
           <div className="flex items-center gap-3">
             <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">Charni POS</h1>
           </div>
