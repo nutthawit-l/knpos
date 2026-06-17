@@ -1,5 +1,4 @@
 import {
-  Menu,
   Bell,
   ShoppingCart,
   History,
@@ -16,21 +15,13 @@ export interface DashboardProps {
   readonly onMenuClick?: () => void;
 }
 
-export default function Dashboard({ onNavigate, onMenuClick }: DashboardProps) {
+export default function Dashboard({ onNavigate }: DashboardProps) {
   return (
     <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
       <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
         {/* TopAppBar */}
         <header className="bg-white flex justify-between items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20">
           <div className="flex items-center gap-3">
-            {onMenuClick && (
-              <button
-                onClick={onMenuClick}
-                className="p-1 -ml-1 text-[#805062] hover:bg-[#fcf1f2] rounded-full transition-colors cursor-pointer"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-            )}
             <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">Charni POS</h1>
           </div>
           <button className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer">
