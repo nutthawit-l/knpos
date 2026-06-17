@@ -1,4 +1,5 @@
 import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useLoginForm } from '../hooks/useLoginForm';
 import { LOGIN_DATA } from '../data/mockData';
 import AuthLayout from '../components/AuthLayout';
@@ -6,18 +7,16 @@ import FormInput from '../components/FormInput';
 import AuthButton from '../components/AuthButton';
 import MascotLogo from '../components/MascotLogo';
 
-export interface LoginProps {
-  readonly onNavigate?: (tab: string) => void;
-}
-
-export default function Login({ onNavigate }: LoginProps) {
+export default function Login() {
   const {
     email,
     setEmail,
     password,
     setPassword,
+    isLoading,
+    error,
     handleLoginSubmit,
-  } = useLoginForm({ onNavigate });
+  } = useLoginForm();
 
   return (
     <AuthLayout>
@@ -63,9 +62,15 @@ export default function Login({ onNavigate }: LoginProps) {
           </div>
         </div>
 
+        {error && (
+          <div className="text-red-500 text-[14px] text-center font-medium bg-red-50 p-2 rounded-xl border border-red-100">
+            {error}
+          </div>
+        )}
+
         {/* Action Button */}
         <div className="pt-2">
-          <AuthButton icon={ArrowRight} type="submit" variant="primary">
+          <AuthButton icon={ArrowRight} type="submit" variant="primary" isLoading={isLoading}>
             {LOGIN_DATA.loginButtonText}
           </AuthButton>
         </div>
@@ -74,13 +79,12 @@ export default function Login({ onNavigate }: LoginProps) {
         <div className="text-center pt-2">
           <p className="text-[16px] leading-[24px] text-surface-variant-custom font-medium">
             {LOGIN_DATA.signUpPrompt}{' '}
-            <button
+            <Link
               className="text-text-brown font-bold hover:underline focus:outline-none"
-              type="button"
-              onClick={() => onNavigate?.('register')}
+              to="/register"
             >
               {LOGIN_DATA.signUpLinkText}
-            </button>
+            </Link>
           </p>
         </div>
       </form>

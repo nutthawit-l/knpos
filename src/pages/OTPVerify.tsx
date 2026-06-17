@@ -1,15 +1,15 @@
 import { Mail, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useOTPForm } from '../hooks/useOTPForm';
+import { useAuthStore } from '../store/useAuthStore';
 import { OTP_DATA } from '../data/mockData';
 import AuthLayout from '../components/AuthLayout';
 import AuthButton from '../components/AuthButton';
 import MascotLogo from '../components/MascotLogo';
 
-export interface OTPVerifyProps {
-  readonly onNavigate?: (tab: string) => void;
-}
-
-export default function OTPVerify({ onNavigate }: OTPVerifyProps) {
+export default function OTPVerify() {
+  const navigate = useNavigate();
+  const { error } = useAuthStore();
   const {
     otp,
     isLoading,
@@ -17,13 +17,13 @@ export default function OTPVerify({ onNavigate }: OTPVerifyProps) {
     handleChange,
     handleKeyDown,
     handleVerifySubmit,
-  } = useOTPForm({ onNavigate });
+  } = useOTPForm();
 
   return (
     <AuthLayout
       headerTitle="Charni POS"
       showHeader
-      onBack={() => onNavigate?.('register')}
+      onBack={() => navigate('/register')}
     >
       {/* Mascot / Logo Section with Mail Badge */}
       <div className="mb-8 relative flex justify-center">
@@ -44,7 +44,7 @@ export default function OTPVerify({ onNavigate }: OTPVerifyProps) {
       {/* Verification Form */}
       <form className="w-full" onSubmit={handleVerifySubmit}>
         {/* OTP Input Grid */}
-        <div className="grid grid-cols-6 gap-2 mb-10 w-full">
+        <div className="grid grid-cols-6 gap-2 mb-6 w-full">
           {otp.map((digit, index) => (
             <input
               key={index}
@@ -62,6 +62,12 @@ export default function OTPVerify({ onNavigate }: OTPVerifyProps) {
             />
           ))}
         </div>
+
+        {error && (
+          <div className="text-red-500 text-[14px] text-center font-medium bg-red-50 p-2 rounded-xl border border-red-100 mb-6">
+            {error}
+          </div>
+        )}
 
         {/* Action Button */}
         <div className="mb-8">

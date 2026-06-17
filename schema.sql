@@ -2,6 +2,10 @@
 -- WARNING: This is a destructive initialization script. Running it will drop existing tables and reset all data.
 PRAGMA foreign_keys = ON;
 
+DROP TABLE IF EXISTS session;
+DROP TABLE IF EXISTS otp_verification;
+DROP TABLE IF EXISTS "user";
+DROP TABLE IF EXISTS shop;
 DROP TABLE IF EXISTS Transaction_Item;
 DROP TABLE IF EXISTS sale_item;
 DROP TABLE IF EXISTS order_item;
@@ -55,3 +59,36 @@ CREATE TABLE IF NOT EXISTS order_item (
 CREATE INDEX IF NOT EXISTS idx_order_created_at ON "order"(created_at);
 CREATE INDEX IF NOT EXISTS idx_order_item_order_id ON order_item(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_item_product_id ON order_item(product_id);
+
+CREATE TABLE shop (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))
+);
+
+CREATE TABLE "user" (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    shop_id INTEGER,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    password_salt TEXT NOT NULL,
+    is_verified INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (shop_id) REFERENCES shop(id) ON DELETE CASCADE
+);
+
+CREATE TABLE otp_verification (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    code TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))
+);
+
+CREATE TABLE session (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    expires_at TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
+);
