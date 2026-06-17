@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -19,6 +20,19 @@
 
   /* Semantic UI */
   --color-destructive: #ef4444;
+
+  /* Custom Stitch Design System Tokens */
+  --font-quicksand: "Quicksand", sans-serif;
+  --color-brand-pink: #F8BBD0;
+  --color-brand-pink-hover: #f2b6cb;
+  --color-brand-blue: #B3E5FC;
+  --color-brand-peach: #FFE0B2;
+  --color-text-brown: #4E342E;
+  --color-outline-warm: #E0D0CC;
+  --color-outline-variant-warm: #d4c2c6;
+  --color-pink-container: #FFF0F5;
+  --color-peach-container: #FFF3E0;
+  --color-surface-variant-custom: #504447;
 }
 
 @layer base {
