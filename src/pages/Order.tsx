@@ -7,7 +7,6 @@ import {
   Check,
 } from 'lucide-react';
 import Header from '../components/Header';
-import CreateEventModal from '../components/CreateEventModal';
 import ConfirmOrderModal from '../components/ConfirmOrderModal';
 
 import CurrencySortControls from '../components/CurrencySortControls';
@@ -23,7 +22,6 @@ interface OrderProps {
 }
 
 export default function Order({ onNavigate, onMenuClick }: OrderProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const {
@@ -72,9 +70,6 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
   return (
     <div className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'>
       <div className='bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-sans'>
-        {isModalOpen && (
-          <CreateEventModal onClose={() => setIsModalOpen(false)} />
-        )}
         {isConfirmModalOpen && (
           <ConfirmOrderModal
             totalItems={totalCount}
@@ -138,7 +133,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
         <Header
           onMenuClick={onMenuClick}
           rightElement={
-            <button className='p-1' onClick={() => setIsModalOpen(true)}>
+            <button className='p-1' onClick={() => onNavigate?.('create-event')}>
               <Calendar className='w-5 h-5 text-foreground' />
             </button>
           }

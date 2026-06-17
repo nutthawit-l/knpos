@@ -133,7 +133,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             {/* Create New Event Block */}
             <section className="opacity-70">
               <button
-                onClick={() => onNavigate?.('order')}
+                onClick={() => onNavigate?.('create-event')}
                 className="w-full bg-[#fcf1f2] border-2 border-dashed border-[#805062]/30 py-8 px-6 rounded-[20px] group hover:bg-[#ffd9e4]/10 transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
               >
                 <div className="w-14 h-14 rounded-full bg-[#f8bbd0] flex items-center justify-center text-[#805062] group-hover:scale-110 transition-transform duration-300">

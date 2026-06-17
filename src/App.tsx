@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Dashboard from './pages/Dashboard';
 import CreateShop from './pages/CreateShop';
+import CreateEvent from './pages/CreateEvent';
 import Order from './pages/Order';
 import Transactions from './pages/Transactions';
 import Inventory from './pages/Inventory';
@@ -45,6 +46,11 @@ function App() {
       )}
       {activeTab === 'create-shop' && (
         <CreateShop
+          onNavigate={handleNavigate}
+        />
+      )}
+      {activeTab === 'create-event' && (
+        <CreateEvent
           onNavigate={handleNavigate}
         />
       )}
