@@ -9,6 +9,7 @@ import AddProduct from './pages/AddProduct';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import OTPVerify from './pages/OTPVerify';
+import Setting from './pages/Setting';
 import Sidebar from './components/Sidebar';
 import { type Product } from './components/SwipeableProductRow';
 
@@ -82,6 +83,7 @@ function App() {
       {activeTab === 'login' && <Login onNavigate={handleNavigate} />}
       {activeTab === 'register' && <Register onNavigate={handleNavigate} />}
       {activeTab === 'otp-verify' && <OTPVerify onNavigate={handleNavigate} />}
+      {activeTab === 'settings' && <Setting onNavigate={handleNavigate} />}
     </>
   );
 }

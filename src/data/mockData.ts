@@ -60,4 +60,46 @@ export const ADD_PRODUCT_DATA = {
   saveChangesButtonText: 'SAVE CHANGES',
 } as const;
 
+export const SETTINGS_DATA = {
+  headerTitle: 'Settings',
+  sectionTitle: 'Account Management',
+  menuItems: [
+    {
+      id: 'manage-account',
+      title: 'Manage Account',
+      description: 'Update your personal profile and security',
+      iconName: 'User',
+      action: 'alert',
+      message: 'Account settings will be available in the next release! 🐾',
+    },
+    {
+      id: 'manage-shop',
+      title: 'Manage Shop',
+      description: 'Open another boutique location',
+      iconName: 'Store',
+      action: 'navigate',
+      target: 'create-shop',
+    },
+    {
+      id: 'manage-event',
+      title: 'Manage Event',
+      description: 'Set up your booth for the next fair',
+      iconName: 'Calendar',
+      action: 'navigate',
+      target: 'create-event',
+    },
+    {
+      id: 'manage-members',
+      title: 'Manage members',
+      description: 'Manage your team and permissions',
+      iconName: 'Users',
+      action: 'alert',
+      message: 'Team management features will be available in the next release! 🐾',
+    },
+  ],
+  signOutText: 'Sign Out',
+  signOutConfirm: 'Are you sure you want to sign out?',
+} as const;
+
+
 
