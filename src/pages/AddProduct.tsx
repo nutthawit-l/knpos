@@ -137,7 +137,7 @@ export default function AddProduct({
         {/* TopAppBar */}
         <header className="bg-[#fff8f8] flex items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20 shrink-0">
           <button
-            onClick={() => onNavigate?.('products')}
+            onClick={() => onNavigate?.('dashboard')}
             className="mr-4 hover:opacity-80 transition-opacity duration-200 bg-transparent border-none cursor-pointer p-1 -ml-1 text-[#805062]"
             aria-label="Go back"
           >
@@ -172,20 +172,21 @@ export default function AddProduct({
                   </p>
                 </>
               )}
+            </div>
 
-              {/* Mascot Sticker Corner */}
-              <div className="absolute -bottom-4 -right-2 transform rotate-12 transition-transform group-hover:rotate-0 duration-300">
-                <div className="bg-white p-2 rounded-2xl shadow-md border-2 border-outline-warm relative flex items-center">
-                  <MascotLogo
-                    sizeClassName="w-14 h-14 shrink-0"
-                    className="rounded-full border border-pink-container"
-                  />
-                  <span className="absolute -top-2 -right-2 bg-[#805062] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">
-                    {productToEdit ? "Let's update!" : ADD_PRODUCT_DATA.mascotSpeech}
-                  </span>
-                </div>
+            {/* Mascot Sticker Corner */}
+            <div className="absolute -bottom-4 -right-2 z-10 transform rotate-12 transition-transform group-hover:rotate-0 duration-300">
+              <div className="bg-white p-2 rounded-2xl shadow-md border-2 border-outline-warm relative flex items-center">
+                <MascotLogo
+                  sizeClassName="w-14 h-14 shrink-0"
+                  className="rounded-full border border-pink-container"
+                />
+                <span className="absolute -top-2 -right-2 bg-[#805062] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">
+                  {productToEdit ? "Let's update!" : ADD_PRODUCT_DATA.mascotSpeech}
+                </span>
               </div>
             </div>
+
             <input
               type="file"
               ref={fileInputRef}
