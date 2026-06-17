@@ -137,7 +137,7 @@ export default function AddProduct({
         {/* TopAppBar */}
         <header className="bg-[#fff8f8] flex items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20 shrink-0">
           <button
-            onClick={() => onNavigate?.('dashboard')}
+            onClick={() => onNavigate?.('products')}
             className="mr-4 hover:opacity-80 transition-opacity duration-200 bg-transparent border-none cursor-pointer p-1 -ml-1 text-[#805062]"
             aria-label="Go back"
           >
@@ -186,7 +186,6 @@ export default function AddProduct({
                 </span>
               </div>
             </div>
-
             <input
               type="file"
               ref={fileInputRef}

@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react';
-import {
-  LayoutDashboard,
-  Package,
-  ReceiptText,
-} from 'lucide-react';
 import Header from '../components/Header';
 import { useOrderStore } from '../store/useOrderStore';
+import BottomNavigation from '../components/BottomNavigation';
 import CurrencySortControls from '../components/CurrencySortControls';
 
 export default function Transactions({
@@ -158,35 +154,7 @@ export default function Transactions({
         </div>
 
         {/* Bottom Navigation */}
-        <div className='absolute bottom-0 w-full max-w-[400px] bg-white border-t border-gray-100 flex items-center justify-between pb-safe z-10'>
-          <button
-            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
-            onClick={() => onNavigate?.('dashboard')}
-          >
-            <LayoutDashboard className='w-5 h-5 text-gray-400' />
-            <span className='text-[10px] font-semibold text-gray-400'>
-              Dashboard
-            </span>
-          </button>
-          <button
-            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
-            onClick={() => onNavigate?.('order')}
-          >
-            <Package className='w-5 h-5 text-gray-400' />
-            <span className='text-[10px] font-semibold text-gray-400'>
-              Order
-            </span>
-          </button>
-          <button
-            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
-            onClick={() => onNavigate?.('transactions')}
-          >
-            <ReceiptText className='w-5 h-5 text-primary' />
-            <span className='text-[10px] font-semibold text-primary'>
-              Transactions
-            </span>
-          </button>
-        </div>
+        <BottomNavigation activeTab="transactions" onNavigate={onNavigate} />
       </div>
     </div>
   );

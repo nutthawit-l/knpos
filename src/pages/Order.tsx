@@ -5,9 +5,6 @@ import {
   Plus,
   Minus,
   Check,
-  LayoutDashboard,
-  Package,
-  ReceiptText,
 } from 'lucide-react';
 import Header from '../components/Header';
 import CreateEventModal from '../components/CreateEventModal';
@@ -15,6 +12,8 @@ import ConfirmOrderModal from '../components/ConfirmOrderModal';
 
 import CurrencySortControls from '../components/CurrencySortControls';
 import { useOrderStore } from '../store/useOrderStore';
+
+import BottomNavigation from '../components/BottomNavigation';
 
 // Dynamic products are fetched from the API.
 
@@ -276,35 +275,7 @@ export default function Order({ onNavigate, onMenuClick }: OrderProps) {
         </div>
 
         {/* Bottom Navigation */}
-        <div className='absolute bottom-0 w-full max-w-[400px] bg-white border-t border-gray-100 flex items-center justify-between pb-safe z-10'>
-          <button
-            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
-            onClick={() => onNavigate?.('dashboard')}
-          >
-            <LayoutDashboard className='w-5 h-5 text-gray-400' />
-            <span className='text-[10px] font-semibold text-gray-400'>
-              Dashboard
-            </span>
-          </button>
-          <button
-            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
-            onClick={() => onNavigate?.('order')}
-          >
-            <Package className='w-5 h-5 text-primary' />
-            <span className='text-[10px] font-semibold text-primary'>
-              Order
-            </span>
-          </button>
-          <button
-            className='flex-1 flex flex-col items-center justify-center py-3 gap-1'
-            onClick={() => onNavigate?.('transactions')}
-          >
-            <ReceiptText className='w-5 h-5 text-gray-400' />
-            <span className='text-[10px] font-semibold text-gray-400'>
-              Transactions
-            </span>
-          </button>
-        </div>
+        <BottomNavigation activeTab="order" onNavigate={onNavigate} />
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import Dashboard from './pages/Dashboard';
 import CreateShop from './pages/CreateShop';
 import Order from './pages/Order';
 import Transactions from './pages/Transactions';
-import Products from './pages/Products';
+import Inventory from './pages/Inventory';
 import AddProduct from './pages/AddProduct';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -61,9 +61,8 @@ function App() {
         />
       )}
       {activeTab === 'products' && (
-        <Products
+        <Inventory
           onNavigate={handleNavigate}
-          onMenuClick={() => setIsSidebarOpen(true)}
           onEditProduct={handleEditProduct}
         />
       )}
