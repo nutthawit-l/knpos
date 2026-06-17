@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
   ArrowLeft,
-  Calendar,
   ShoppingBasket,
   ArrowRight,
   TrendingUp,

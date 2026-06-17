@@ -241,7 +241,7 @@ export default function Inventory({ onNavigate, onEditProduct }: InventoryProps)
         {/* Floating Action Button (FAB) for Add Product */}
         <button
           onClick={() => onNavigate?.('add-product')}
-          className="fixed right-6 bottom-24 w-14 h-14 bg-[#805062] text-white rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform z-50 cursor-pointer border-none hover:bg-[#805062]/95"
+          className="absolute right-6 bottom-24 w-14 h-14 bg-[#805062] text-white rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform z-50 cursor-pointer border-none hover:bg-[#805062]/95"
           aria-label="Add new product"
         >
           <Plus className="w-8 h-8" />

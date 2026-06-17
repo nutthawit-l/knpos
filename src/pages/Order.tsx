@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {
-  Bell,
   Search,
   Scan,
   Plus,
