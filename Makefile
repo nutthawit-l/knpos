@@ -8,7 +8,7 @@ help:
 	@echo "  make query-shops       Query all shops from local D1 database"
 	@echo "  make delete-shop       Delete a shop from local D1 database by prompting for ID"
 	@echo "  make delete-products   Delete all products from local D1 database"
-	@echo "  make dev               Run local dev server (wrangler pages dev)"
+	@echo "  make dev               Run local dev server & wrangler in separate tmux panes"
 	@echo "  make dev-with-seed     Seed local databases and run local dev server"
 	@echo "  make deploy            Build and deploy app to Cloudflare Pages"
 	@echo "  make deploy-with-seed  Seed remote databases, build, and deploy app to Cloudflare Pages"
@@ -32,16 +32,19 @@ delete-shop:
 delete-products:
 	./scripts/delete-products.sh
 
-
 dev:
-	pnpm dev:wrangler
-
-dev-with-seed: seed-local dev
+	@if [ -n "$$TMUX" ]; then \
+		PANE_ID=$$(tmux split-window -h -P -F '#{pane_id}' 'pnpm dev:wrangler'); \
+		pnpm dev; \
+		tmux kill-pane -t $$PANE_ID 2>/dev/null || true; \
+	else \
+		tmux kill-session -t knpos-dev 2>/dev/null || true; \
+		tmux new-session -d -s knpos-dev 'pnpm dev; tmux kill-session -t knpos-dev'; \
+		tmux split-window -h -t knpos-dev 'pnpm dev:wrangler; tmux kill-session -t knpos-dev'; \
+		tmux attach-session -t knpos-dev; \
+	fi
 
 deploy:
 	pnpm deploy
 
 deploy-with-seed: seed-remote deploy
-
-
-
