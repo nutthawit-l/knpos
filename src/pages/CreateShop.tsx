@@ -1,14 +1,15 @@
 import { ArrowLeft, Sparkles, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useCreateShopForm } from '../hooks/useCreateShopForm';
 import { CREATE_SHOP_DATA } from '../data/mockData';
 import FormInput from '../components/FormInput';
-import BottomNavigation from '../components/BottomNavigation';
 
 export interface CreateShopProps {
   readonly onNavigate?: (tab: string) => void;
 }
 
 export default function CreateShop({ onNavigate }: CreateShopProps) {
+  const navigate = useNavigate();
   const {
     shopName,
     setShopName,
@@ -18,13 +19,21 @@ export default function CreateShop({ onNavigate }: CreateShopProps) {
     handleCreateShopSubmit,
   } = useCreateShopForm({ onNavigate });
 
+  const handleBack = () => {
+    if (onNavigate) {
+      onNavigate('dashboard');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   return (
     <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
       <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
         {/* TopAppBar */}
         <header className="bg-[#fff8f8] flex items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20 shrink-0">
           <button
-            onClick={() => onNavigate?.('dashboard')}
+            onClick={handleBack}
             className="mr-4 hover:opacity-80 transition-opacity duration-200 bg-transparent border-none cursor-pointer p-1 -ml-1 text-[#805062]"
             aria-label="Go back"
           >
@@ -108,9 +117,6 @@ export default function CreateShop({ onNavigate }: CreateShopProps) {
             </div>
           </form>
         </div>
-
-        {/* Bottom Navigation */}
-        <BottomNavigation onNavigate={onNavigate} />
       </div>
     </div>
   );

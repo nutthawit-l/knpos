@@ -4,6 +4,8 @@ import { currencies, type Currency } from '../types/currency';
 interface OrderState {
   quantities: Record<number, number>; // productId -> quantity
   selectedCurrency: Currency;
+  hasEvent: boolean;
+  setHasEvent: (hasEvent: boolean) => void;
   setCurrency: (currency: Currency) => void;
   incrementItem: (productId: number) => void;
   decrementItem: (productId: number) => void;
@@ -14,6 +16,12 @@ interface OrderState {
 export const useOrderStore = create<OrderState>((set) => ({
   quantities: {},
   selectedCurrency: currencies.find((c) => c.code === 'THB') || currencies[0],
+  hasEvent: localStorage.getItem('has_event') === 'true',
+  
+  setHasEvent: (hasEvent) => {
+    localStorage.setItem('has_event', String(hasEvent));
+    set({ hasEvent });
+  },
   
   setCurrency: (currency) => set({ selectedCurrency: currency }),
   

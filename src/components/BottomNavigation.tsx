@@ -1,4 +1,5 @@
 import { ShoppingCart, History, Package, Settings } from 'lucide-react';
+import { useOrderStore } from '../store/useOrderStore';
 
 export interface BottomNavigationProps {
   readonly activeTab?: string;
@@ -9,6 +10,12 @@ export default function BottomNavigation({
   activeTab = '',
   onNavigate,
 }: BottomNavigationProps) {
+  const { hasEvent } = useOrderStore();
+
+  if (!hasEvent) {
+    return null;
+  }
+
   return (
     <nav className="absolute bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-[#fcf1f2] border-t border-outline-warm/30 shadow-[0_-2px_10px_rgba(78,52,46,0.05)] rounded-t-2xl">
       <button

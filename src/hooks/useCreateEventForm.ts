@@ -27,7 +27,7 @@ export function useCreateEventForm({ onNavigate }: UseCreateEventFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const { setCurrency } = useOrderStore();
+  const { setCurrency, setHasEvent } = useOrderStore();
 
   const handleCreateEventSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,6 +46,7 @@ export function useCreateEventForm({ onNavigate }: UseCreateEventFormProps) {
       if (matchedCurrency) {
         setCurrency(matchedCurrency);
       }
+      setHasEvent(true);
 
       // Navigate to order page after success feedback animation
       setTimeout(() => {

@@ -105,6 +105,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           id: user.id,
           email: user.email,
           shopName: shopName,
+          shopId: user.shop_id || null,
         },
       }),
       {

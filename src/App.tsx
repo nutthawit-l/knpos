@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/useAuthStore';
+import { useOrderStore } from './store/useOrderStore';
 import Dashboard from './pages/Dashboard';
 import CreateShop from './pages/CreateShop';
 import CreateEvent from './pages/CreateEvent';
@@ -18,13 +19,15 @@ import { type Product } from './components/SwipeableProductRow';
 function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuthStore();
+  const { hasEvent } = useOrderStore();
+  const hasNoShop = !user?.shopId;
+
   const [activeTab, setActiveTab] = useState(() => {
     return (location.state as any)?.activeTab || 'dashboard';
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
-
-  const { logout } = useAuthStore();
 
   useEffect(() => {
     if (location.state && (location.state as any).activeTab) {
@@ -40,6 +43,16 @@ function DashboardLayout() {
       if (confirmLogout) {
         logout();
       }
+      return;
+    }
+    if (tab === 'create-shop') {
+      navigate('/create-shop');
+      return;
+    }
+    if (hasNoShop) {
+      return;
+    }
+    if (!hasEvent && tab !== 'dashboard' && tab !== 'add-product' && tab !== 'create-event') {
       return;
     }
     if (tab === 'settings') {
@@ -58,49 +71,47 @@ function DashboardLayout() {
     setActiveTab('add-product');
   };
 
+  const isAllowedTab = activeTab === 'dashboard' || activeTab === 'add-product' || activeTab === 'create-event';
+  const activeTabToRender = hasNoShop ? 'dashboard' : (!hasEvent && !isAllowedTab ? 'dashboard' : activeTab);
+
   return (
     <>
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
-        activeTab={activeTab}
+        activeTab={activeTabToRender}
         onNavigate={handleNavigate}
       />
-      {activeTab === 'dashboard' && (
+      {activeTabToRender === 'dashboard' && (
         <Dashboard
           onNavigate={handleNavigate}
           onMenuClick={() => setIsSidebarOpen(true)}
         />
       )}
-      {activeTab === 'create-shop' && (
-        <CreateShop
-          onNavigate={handleNavigate}
-        />
-      )}
-      {activeTab === 'create-event' && (
+      {activeTabToRender === 'create-event' && (
         <CreateEvent
           onNavigate={handleNavigate}
         />
       )}
-      {activeTab === 'order' && (
+      {activeTabToRender === 'order' && (
         <Order
           onNavigate={handleNavigate}
           onMenuClick={() => setIsSidebarOpen(true)}
         />
       )}
-      {activeTab === 'transactions' && (
+      {activeTabToRender === 'transactions' && (
         <Transactions
           onNavigate={handleNavigate}
           onMenuClick={() => setIsSidebarOpen(true)}
         />
       )}
-      {activeTab === 'products' && (
+      {activeTabToRender === 'products' && (
         <Inventory
           onNavigate={handleNavigate}
           onEditProduct={handleEditProduct}
         />
       )}
-      {activeTab === 'add-product' && (
+      {activeTabToRender === 'add-product' && (
         <AddProduct
           onNavigate={handleNavigate}
           onMenuClick={() => setIsSidebarOpen(true)}
@@ -112,8 +123,9 @@ function DashboardLayout() {
 }
 
 function App() {
-  const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
+  const { isAuthenticated, isLoading, checkAuth, user } = useAuthStore();
   const navigate = useNavigate();
+  const hasNoShop = isAuthenticated && !user?.shopId;
 
   useEffect(() => {
     checkAuth();
@@ -155,12 +167,36 @@ function App() {
         element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <OTPVerify />}
       />
       <Route
+        path="/create-shop"
+        element={
+          isAuthenticated ? (
+            user?.shopId ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <CreateShop />
+            )
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
         path="/dashboard"
         element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />}
       />
       <Route
         path="/setting"
-        element={isAuthenticated ? <Setting onNavigate={handleSettingNavigate} /> : <Navigate to="/login" replace />}
+        element={
+          isAuthenticated ? (
+            hasNoShop ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Setting onNavigate={handleSettingNavigate} />
+            )
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
       />
       <Route
         path="/"

@@ -4,6 +4,7 @@ export interface UserProfile {
   id: number;
   email: string;
   shopName: string | null;
+  shopId: number | null;
 }
 
 interface AuthState {
@@ -164,6 +165,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (err) {
       console.error('Logout request failed:', err);
     } finally {
+      localStorage.removeItem('has_event');
+      try {
+        // Dynamic import or getState to prevent direct circular reference issues if any
+        const { useOrderStore } = await import('./useOrderStore');
+        useOrderStore.getState().setHasEvent(false);
+      } catch (e) {
+        console.error('Failed to reset order store on logout:', e);
+      }
       set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },
