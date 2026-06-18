@@ -20,28 +20,54 @@ export interface DashboardProps {
 export default function Dashboard({ onNavigate }: DashboardProps) {
   const { user, logout } = useAuthStore();
   const { hasEvent } = useOrderStore();
-  const hasShop = !!user?.shopId;
+  const [hasShop, setHasShop] = useState(false);
   const [hasProducts, setHasProducts] = useState(false);
-  const [hasFirstProduct, setHasFirstProduct] = useState(false);
-
-  // Read hasFirstProduct and setHasFirstProduct to prevent TS compiler unused variable error
-  if (hasFirstProduct) {
-    // future toggle logic placeholder
-    setHasFirstProduct(false);
-  }
 
   useEffect(() => {
-    if (hasShop) {
-      fetch('/api/product')
+    if (user?.id) {
+      fetch(`/api/shop?fields=shop_id&user_id=${user.id}`)
         .then((res) => res.json())
         .then((data) => {
-          if (Array.isArray(data) && data.length > 0) {
-            setHasProducts(true);
+          if (data.success && data.exists) {
+            setHasShop(true);
+            // Fetch products if user belongs to a shop
+            fetch('/api/product')
+              .then((res) => res.json())
+              .then((shop_id) => {
+                if (shop_id) {
+                  setHasProducts(true);
+                }
+              })
+              .catch((err) => console.error('Failed to fetch products:', err));
+          } else {
+            setHasShop(false);
           }
         })
-        .catch((err) => console.error('Failed to fetch products:', err));
+        .catch((err) => console.error('Failed to query shop member:', err));
+
+      if (hasShop) {
+        fetch(`/api/product?fields=shop_id&user_id=${user.id}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success && data.exists) {
+              setHasShop(true);
+              // Fetch products if user belongs to a shop
+              fetch('/api/product')
+                .then((res) => res.json())
+                .then((prodData) => {
+                  if (Array.isArray(prodData) && prodData.length > 0) {
+                    setHasProducts(true);
+                  }
+                })
+                .catch((err) => console.error('Failed to fetch products:', err));
+            } else {
+              setHasShop(false);
+            }
+          })
+          .catch((err) => console.error('Failed to query shop member:', err));
+      }
     }
-  }, [hasShop]);
+  }, [user?.id]);
 
   const handleLogout = () => {
     const confirmLogout = window.confirm('Are you sure you want to logout?');
