@@ -6,10 +6,27 @@ interface InventoryState {
   incrementStock: (productId: number) => void;
   decrementStock: (productId: number) => void;
   initializeStocks: (productIds: number[]) => void;
+  hasFirstProduct: boolean;
+  checkFirstProduct: () => Promise<boolean>;
 }
 
 export const useInventoryStore = create<InventoryState>((set) => ({
   stocks: {},
+  hasFirstProduct: false,
+  checkFirstProduct: async () => {
+    try {
+      const res = await fetch('/api/product');
+      if (res.ok) {
+        const data = await res.json();
+        const has = Array.isArray(data) && data.length > 0;
+        set({ hasFirstProduct: has });
+        return has;
+      }
+    } catch (err) {
+      console.error('Failed to check product:', err);
+    }
+    return false;
+  },
   setStock: (productId, stock) =>
     set((state) => ({
       stocks: { ...state.stocks, [productId]: Math.max(0, stock) },

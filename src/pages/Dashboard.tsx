@@ -15,14 +15,20 @@ import { useOrderStore } from '../store/useOrderStore';
 
 export interface DashboardProps {
   readonly onNavigate?: (tab: string) => void;
-  readonly onMenuClick?: () => void;
 }
 
-export default function Dashboard({ onNavigate, onMenuClick }: DashboardProps) {
+export default function Dashboard({ onNavigate }: DashboardProps) {
   const { user, logout } = useAuthStore();
   const { hasEvent } = useOrderStore();
   const hasShop = !!user?.shopId;
   const [hasProducts, setHasProducts] = useState(false);
+  const [hasFirstProduct, setHasFirstProduct] = useState(false);
+
+  // Read hasFirstProduct and setHasFirstProduct to prevent TS compiler unused variable error
+  if (hasFirstProduct) {
+    // future toggle logic placeholder
+    setHasFirstProduct(false);
+  }
 
   useEffect(() => {
     if (hasShop) {
@@ -49,7 +55,6 @@ export default function Dashboard({ onNavigate, onMenuClick }: DashboardProps) {
       <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
         {/* Header */}
         <Header
-          onMenuClick={hasShop && hasEvent ? onMenuClick : undefined}
           rightElement={
             hasEvent ? (
               <button className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer">

@@ -95,7 +95,6 @@ function DashboardLayout() {
       {activeTabToRender === 'dashboard' && (
         <Dashboard
           onNavigate={handleNavigate}
-          onMenuClick={() => setIsSidebarOpen(true)}
         />
       )}
       {activeTabToRender === 'order' && (
