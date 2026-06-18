@@ -152,8 +152,8 @@ async function run() {
     const productId = idx + 1;
     const imageUrl = `${R2_PUBLIC_URL}/${p.filename}`;
     sqlLines.push(
-      `INSERT INTO product (id, name, image_url) ` +
-      `VALUES (${productId}, '${p.name.replace(/'/g, "''")}', '${imageUrl}');`
+      `INSERT INTO product (id, name, image_url, shop_id) ` +
+      `VALUES (${productId}, '${p.name.replace(/'/g, "''")}', '${imageUrl}', ${defaultShopId});`
     );
     sqlLines.push(
       `INSERT INTO product_price (product_id, currency_code, price) ` +

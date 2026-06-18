@@ -4,6 +4,7 @@ import { type Currency } from '../types/currency';
 
 export interface Product {
   id: number;
+  shop_id?: number;
   name: string;
   image_url: string;
   prices: Record<string, number | null>;
