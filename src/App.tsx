@@ -52,6 +52,10 @@ function DashboardLayout() {
       navigate('/new-product');
       return;
     }
+    if (tab === 'create-event') {
+      navigate('/create-event');
+      return;
+    }
     if (hasNoShop) {
       return;
     }
@@ -85,11 +89,6 @@ function DashboardLayout() {
         <Dashboard
           onNavigate={handleNavigate}
           onMenuClick={() => setIsSidebarOpen(true)}
-        />
-      )}
-      {activeTabToRender === 'create-event' && (
-        <CreateEvent
-          onNavigate={handleNavigate}
         />
       )}
       {activeTabToRender === 'order' && (
@@ -180,6 +179,20 @@ function App() {
               <Navigate to="/dashboard" replace />
             ) : (
               <AddProduct />
+            )
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/create-event"
+        element={
+          isAuthenticated ? (
+            hasNoShop ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <CreateEvent />
             )
           ) : (
             <Navigate to="/login" replace />

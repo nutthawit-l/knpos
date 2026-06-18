@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useOrderStore } from '../store/useOrderStore';
 import { currencies } from '../types/currency';
 
@@ -13,7 +14,7 @@ const COUNTRY_CURRENCY_MAP: Record<string, string> = {
   'Japan': 'JPY',
 };
 
-export function useCreateEventForm({ onNavigate }: UseCreateEventFormProps) {
+export function useCreateEventForm({ onNavigate }: UseCreateEventFormProps = {}) {
   const [eventName, setEventName] = useState('');
   const [country, setCountry] = useState('Thailand');
   const [startDate, setStartDate] = useState('');
@@ -26,6 +27,7 @@ export function useCreateEventForm({ onNavigate }: UseCreateEventFormProps) {
   
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const { setCurrency, setHasEvent } = useOrderStore();
 
@@ -50,7 +52,11 @@ export function useCreateEventForm({ onNavigate }: UseCreateEventFormProps) {
 
       // Navigate to order page after success feedback animation
       setTimeout(() => {
-        onNavigate?.('order');
+        if (onNavigate) {
+          onNavigate('order');
+        } else {
+          navigate('/dashboard', { state: { activeTab: 'order' } });
+        }
       }, 1000);
     }, 1000);
   };
