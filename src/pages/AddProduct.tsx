@@ -23,10 +23,18 @@ export default function AddProduct({
   const productToEdit = propsProductToEdit || (location.state as any)?.productToEdit;
 
   const handleBack = () => {
-    if (onNavigate) {
-      onNavigate('products');
+    if (productToEdit) {
+      if (onNavigate) {
+        onNavigate('products');
+      } else {
+        navigate('/dashboard', { state: { activeTab: 'products' } });
+      }
     } else {
-      navigate('/dashboard', { state: { activeTab: 'products' } });
+      if (onNavigate) {
+        onNavigate('dashboard');
+      } else {
+        navigate('/dashboard', { state: { activeTab: 'dashboard' } });
+      }
     }
   };
 

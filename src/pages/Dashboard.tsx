@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   Bell,
   Store,
@@ -21,6 +22,20 @@ export default function Dashboard({ onNavigate, onMenuClick }: DashboardProps) {
   const { user, logout } = useAuthStore();
   const { hasEvent } = useOrderStore();
   const hasShop = !!user?.shopId;
+  const [hasProducts, setHasProducts] = useState(false);
+
+  useEffect(() => {
+    if (hasShop) {
+      fetch('/api/product')
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            setHasProducts(true);
+          }
+        })
+        .catch((err) => console.error('Failed to fetch products:', err));
+    }
+  }, [hasShop]);
 
   const handleLogout = () => {
     const confirmLogout = window.confirm('Are you sure you want to logout?');
@@ -79,7 +94,7 @@ export default function Dashboard({ onNavigate, onMenuClick }: DashboardProps) {
                   Create your shop
                 </p>
               </li>
-              <li className={`flex gap-3 items-start ${hasShop ? '' : 'opacity-60'}`}>
+              <li className={`flex gap-3 items-start ${hasShop && hasProducts ? 'line-through opacity-100' : (hasShop ? '' : 'opacity-60')}`}>
                 <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0">
                   2
                 </span>
@@ -87,7 +102,7 @@ export default function Dashboard({ onNavigate, onMenuClick }: DashboardProps) {
                   Add your products to inventory
                 </p>
               </li>
-              <li className="flex gap-3 items-start opacity-60">
+              <li className={`flex gap-3 items-start ${hasShop && hasProducts ? '' : 'opacity-60'}`}>
                 <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0">
                   3
                 </span>
@@ -134,8 +149,8 @@ export default function Dashboard({ onNavigate, onMenuClick }: DashboardProps) {
             {/* Add Product Block */}
             <button
               onClick={() => onNavigate?.('add-product')}
-              disabled={!hasShop}
-              className={`w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 transition-all duration-300 overflow-hidden relative ${hasShop ? 'hover:shadow-md active:scale-95 group cursor-pointer opacity-100' : 'opacity-40 pointer-events-none'}`}
+              disabled={!hasShop || hasProducts}
+              className={`w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 transition-all duration-300 overflow-hidden relative ${hasShop && !hasProducts ? 'hover:shadow-md active:scale-95 group cursor-pointer opacity-100' : 'opacity-40 pointer-events-none'}`}
             >
               <div className="flex flex-col h-full justify-between relative z-10">
                 <div>
@@ -151,7 +166,7 @@ export default function Dashboard({ onNavigate, onMenuClick }: DashboardProps) {
                 </div>
                 <div className="mt-8 flex items-center gap-2 text-[#326578] font-bold text-[14px]">
                   <span>Add Product</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className={`w-4 h-4 ${hasShop && !hasProducts ? 'animate-pulse' : ''}`} />
                 </div>
               </div>
               <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#b5e7fe] opacity-10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
@@ -160,8 +175,8 @@ export default function Dashboard({ onNavigate, onMenuClick }: DashboardProps) {
             {/* Create New Event Block */}
             <button
               onClick={() => onNavigate?.('create-event')}
-              disabled={!hasShop}
-              className={`w-full bg-[#fcf1f2] border-2 border-dashed border-[#805062]/30 py-8 px-6 rounded-[20px] transition-all duration-300 flex flex-col items-center justify-center gap-2 ${hasShop ? 'opacity-70 cursor-pointer hover:bg-[#ffd9e4]/10 group' : 'opacity-40 pointer-events-none'}`}
+              disabled={!hasShop || !hasProducts}
+              className={`w-full bg-[#fcf1f2] border-2 border-dashed border-[#805062]/30 py-8 px-6 rounded-[20px] transition-all duration-300 flex flex-col items-center justify-center gap-2 ${hasShop && hasProducts ? 'opacity-100 cursor-pointer hover:bg-[#ffd9e4]/10 group' : 'opacity-40 pointer-events-none'}`}
             >
               <div className="w-14 h-14 rounded-full bg-[#f8bbd0] flex items-center justify-center text-[#805062] group-hover:scale-110 transition-transform duration-300">
                 <PlusCircle className="w-7 h-7" />
