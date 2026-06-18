@@ -27,7 +27,6 @@ function DashboardLayout() {
     return (location.state as any)?.activeTab || 'dashboard';
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
 
   useEffect(() => {
     if (location.state && (location.state as any).activeTab) {
@@ -61,14 +60,10 @@ function DashboardLayout() {
     }
     setActiveTab(tab);
     setIsSidebarOpen(false);
-    if (tab !== 'add-product') {
-      setEditingProduct(undefined);
-    }
   };
 
   const handleEditProduct = (product: Product) => {
-    setEditingProduct(product);
-    setActiveTab('add-product');
+    navigate('/new-product', { state: { productToEdit: product } });
   };
 
   const isAllowedTab = activeTab === 'dashboard' || activeTab === 'add-product' || activeTab === 'create-event';
@@ -109,13 +104,6 @@ function DashboardLayout() {
         <Inventory
           onNavigate={handleNavigate}
           onEditProduct={handleEditProduct}
-        />
-      )}
-      {activeTabToRender === 'add-product' && (
-        <AddProduct
-          onNavigate={handleNavigate}
-          onMenuClick={() => setIsSidebarOpen(true)}
-          productToEdit={editingProduct}
         />
       )}
     </>
@@ -174,6 +162,20 @@ function App() {
               <Navigate to="/dashboard" replace />
             ) : (
               <CreateShop />
+            )
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/new-product"
+        element={
+          isAuthenticated ? (
+            hasNoShop ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <AddProduct />
             )
           ) : (
             <Navigate to="/login" replace />
