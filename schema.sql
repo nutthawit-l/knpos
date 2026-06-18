@@ -2,15 +2,21 @@
 -- WARNING: This is a destructive initialization script. Running it will drop existing tables and reset all data.
 PRAGMA foreign_keys = ON;
 
+-- Drop old tables if they exist
+DROP TABLE IF EXISTS Transaction_Item;
+DROP TABLE IF EXISTS "Transaction";
+DROP TABLE IF EXISTS Product;
+
+-- Drop new tables in correct dependency order (children first)
 DROP TABLE IF EXISTS session;
 DROP TABLE IF EXISTS otp_verification;
 DROP TABLE IF EXISTS order_item;
 DROP TABLE IF EXISTS product_price;
+DROP TABLE IF EXISTS event_member;
+DROP TABLE IF EXISTS shop_member;
 DROP TABLE IF EXISTS "order";
 DROP TABLE IF EXISTS product;
-DROP TABLE IF EXISTS event_member;
 DROP TABLE IF EXISTS event;
-DROP TABLE IF EXISTS shop_member;
 DROP TABLE IF EXISTS "user";
 DROP TABLE IF EXISTS shop;
 
@@ -124,3 +130,5 @@ CREATE TABLE session (
     created_at TEXT DEFAULT (datetime('now', 'localtime')),
     FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
 );
+
+PRAGMA foreign_keys = ON;
