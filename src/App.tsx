@@ -48,6 +48,10 @@ function DashboardLayout() {
       navigate('/create-shop');
       return;
     }
+    if (tab === 'add-product') {
+      navigate('/new-product');
+      return;
+    }
     if (hasNoShop) {
       return;
     }
