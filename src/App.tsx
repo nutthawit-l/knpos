@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-
 import { useAuthStore } from './store/useAuthStore';
 import { useOrderStore } from './store/useOrderStore';
 import Dashboard from './pages/Dashboard';
+import Dashboard2 from './pages/Dashboard2';
 import CreateShop from './pages/CreateShop';
 import CreateEvent from './pages/CreateEvent';
 import Order from './pages/Order';
@@ -16,6 +17,10 @@ import Setting from './pages/Setting';
 import Sidebar from './components/Sidebar';
 import { type Product } from './components/SwipeableProductRow';
 
+interface LocationState {
+  activeTab?: string;
+}
+
 function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,13 +29,15 @@ function DashboardLayout() {
   const hasNoShop = !user?.shopId;
 
   const [activeTab, setActiveTab] = useState(() => {
-    return (location.state as any)?.activeTab || 'dashboard';
+    return (location.state as LocationState)?.activeTab || 'dashboard';
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (location.state && (location.state as any).activeTab) {
-      setActiveTab((location.state as any).activeTab);
+    const state = location.state as LocationState;
+    if (state && state.activeTab) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveTab(state.activeTab);
       // Clean up location state so that fresh page reload doesn't trigger the old tab
       navigate(location.pathname, { replace: true, state: {} });
     }
@@ -87,6 +94,105 @@ function DashboardLayout() {
       />
       {activeTabToRender === 'dashboard' && (
         <Dashboard
+          onNavigate={handleNavigate}
+          onMenuClick={() => setIsSidebarOpen(true)}
+        />
+      )}
+      {activeTabToRender === 'order' && (
+        <Order
+          onNavigate={handleNavigate}
+          onMenuClick={() => setIsSidebarOpen(true)}
+        />
+      )}
+      {activeTabToRender === 'transactions' && (
+        <Transactions
+          onNavigate={handleNavigate}
+          onMenuClick={() => setIsSidebarOpen(true)}
+        />
+      )}
+      {activeTabToRender === 'products' && (
+        <Inventory
+          onNavigate={handleNavigate}
+          onEditProduct={handleEditProduct}
+        />
+      )}
+    </>
+  );
+}
+
+function Dashboard2Layout() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, logout } = useAuthStore();
+  const { hasEvent } = useOrderStore();
+  const hasNoShop = !user?.shopId;
+
+  const [activeTab, setActiveTab] = useState(() => {
+    return (location.state as LocationState)?.activeTab || 'dashboard';
+  });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const state = location.state as LocationState;
+    if (state && state.activeTab) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveTab(state.activeTab);
+      // Clean up location state so that fresh page reload doesn't trigger the old tab
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, location.pathname]);
+
+  const handleNavigate = (tab: string) => {
+    if (tab === 'logout') {
+      const confirmLogout = window.confirm('Are you sure you want to logout?');
+      if (confirmLogout) {
+        logout();
+      }
+      return;
+    }
+    if (tab === 'create-shop') {
+      navigate('/create-shop');
+      return;
+    }
+    if (tab === 'add-product') {
+      navigate('/new-product');
+      return;
+    }
+    if (tab === 'create-event') {
+      navigate('/create-event');
+      return;
+    }
+    if (hasNoShop) {
+      return;
+    }
+    if (!hasEvent && tab !== 'dashboard' && tab !== 'add-product' && tab !== 'create-event') {
+      return;
+    }
+    if (tab === 'settings') {
+      navigate('/setting');
+      return;
+    }
+    setActiveTab(tab);
+    setIsSidebarOpen(false);
+  };
+
+  const handleEditProduct = (product: Product) => {
+    navigate('/new-product', { state: { productToEdit: product } });
+  };
+
+  const isAllowedTab = activeTab === 'dashboard' || activeTab === 'add-product' || activeTab === 'create-event';
+  const activeTabToRender = hasNoShop ? 'dashboard' : (!hasEvent && !isAllowedTab ? 'dashboard' : activeTab);
+
+  return (
+    <>
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        activeTab={activeTabToRender}
+        onNavigate={handleNavigate}
+      />
+      {activeTabToRender === 'dashboard' && (
+        <Dashboard2
           onNavigate={handleNavigate}
           onMenuClick={() => setIsSidebarOpen(true)}
         />
@@ -202,6 +308,10 @@ function App() {
       <Route
         path="/dashboard"
         element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/dashboard2"
+        element={isAuthenticated ? <Dashboard2Layout /> : <Navigate to="/login" replace />}
       />
       <Route
         path="/setting"

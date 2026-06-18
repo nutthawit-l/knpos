@@ -101,5 +101,47 @@ export const SETTINGS_DATA = {
   signOutConfirm: 'Are you sure you want to sign out?',
 } as const;
 
+export const DASHBOARD2_DATA = {
+  headerTitle: 'Shop Summary',
+  totalSalesLabel: 'Total Sales',
+  totalSalesValue: '฿142,500',
+  totalSalesTrend: '+12.5% this month',
+  activeShopsLabel: 'Active Shops',
+  activeShopsValue: '3',
+  eventsYearLabel: 'Events this year',
+  eventsYearValue: '24',
+  pastEventsLabel: 'Past Events',
+  viewAllLabel: 'View All',
+  createEventTitle: 'Create New Event',
+  createEventSubtitle: 'Start logging sales and managing products for your next event.',
+  events: [
+    {
+      id: 'craft-fest-2023',
+      title: 'Craft Fest 2023',
+      date: '12 - 14 Nov 2023',
+      badge: 'Profit',
+      badgeType: 'profit',
+      totalSalesLabel: 'Total Sales',
+      totalSalesValue: '฿45,200',
+      netProfitLabel: 'Net Profit',
+      netProfitValue: '+฿12,800',
+      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA26HQI-qdJAvzLtbtiSB1a6t9L-M7mMng7ieiMdxU_iprolC16B8jxM4KCINz78XguSTlBa48kJ5M8bjmNj0oed6UkgLVSwUfxK7FYUCaujX1qK7erq6voKLWO9kLHTDK7oxMNr9D7IEqD5kNPhFhd3xEcROPYINGMBKaSribquSk4XXqCrDTDw7K8bbphMukuUDpALB9vC5cTMhvO_hBWPumziFEoHQd08ZXOlnXKAwNH2POhcH-Ssbt884610PJAcCcHv31qAz0',
+    },
+    {
+      id: 'minimalist-popup',
+      title: 'Minimalist Popup',
+      date: '5 - 6 Oct 2023',
+      badge: 'Accumulated Loss',
+      badgeType: 'loss',
+      totalSalesLabel: 'Total Sales',
+      totalSalesValue: '฿8,400',
+      netProfitLabel: 'Margin',
+      netProfitValue: '-฿2,100',
+      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAzzCCWPKVC8c4C6G8DNKs-aBMj-bte3RJF3klOsKETSlbpGqGjO_qmZOsvWFefamanxVHGdzXfhb6d1ENwxKmf-jd5L-dYcXxxd9UYiQuHjnBbn2N76OZ3h2WMa8wNBO4AplTsD28XLokhxmADvJLSKpbl_rrFnyL4EYHvAHr17fv0yxUVt4FnSM7dLn-yM6nlCf7xMzETZ3sO4CnQjz17lYnW6s2ynTnm6VggDerW8ji3ELBvle34wKnPYwQEjEJusag4oXx9Cgk',
+    },
+  ],
+} as const;
+
+
 
 
