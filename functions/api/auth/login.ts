@@ -19,7 +19,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // Retrieve user details
     const user: any = await context.env.DB.prepare(
-      'SELECT id, shop_id, email, password_hash, password_salt, is_verified FROM "user" WHERE email = ?'
+      'SELECT id, email, password_hash, password_salt, is_verified FROM "user" WHERE email = ?'
     )
       .bind(email)
       .first();
@@ -66,18 +66,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Retrieve shop name
-    let shopName: string | null = null;
-    if (user.shop_id) {
-      const shop: any = await context.env.DB.prepare(
-        "SELECT name FROM shop WHERE id = ?"
-      )
-        .bind(user.shop_id)
-        .first();
-      if (shop) {
-        shopName = shop.name;
-      }
-    }
+    // Retrieve shop details
+    const shopMember: any = await context.env.DB.prepare(
+      `SELECT sm.shop_id, s.name as shop_name 
+       FROM shop_member sm 
+       JOIN shop s ON sm.shop_id = s.id 
+       WHERE sm.user_id = ?`
+    )
+      .bind(user.id)
+      .first();
+
+    const shopId = shopMember ? shopMember.shop_id : null;
+    const shopName = shopMember ? shopMember.shop_name : null;
 
     // Create session
     const sessionId = generateUUID();
@@ -105,7 +105,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           id: user.id,
           email: user.email,
           shopName: shopName,
-          shopId: user.shop_id || null,
+          shopId: shopId,
         },
       }),
       {

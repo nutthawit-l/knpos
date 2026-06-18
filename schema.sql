@@ -4,16 +4,67 @@ PRAGMA foreign_keys = ON;
 
 DROP TABLE IF EXISTS session;
 DROP TABLE IF EXISTS otp_verification;
-DROP TABLE IF EXISTS "user";
-DROP TABLE IF EXISTS shop;
-DROP TABLE IF EXISTS Transaction_Item;
-DROP TABLE IF EXISTS sale_item;
 DROP TABLE IF EXISTS order_item;
 DROP TABLE IF EXISTS product_price;
-DROP TABLE IF EXISTS "Transaction";
-DROP TABLE IF EXISTS sale;
 DROP TABLE IF EXISTS "order";
 DROP TABLE IF EXISTS product;
+DROP TABLE IF EXISTS event_member;
+DROP TABLE IF EXISTS event;
+DROP TABLE IF EXISTS shop_member;
+DROP TABLE IF EXISTS "user";
+DROP TABLE IF EXISTS shop;
+
+CREATE TABLE shop (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))
+);
+
+CREATE TABLE "user" (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    password_salt TEXT NOT NULL,
+    is_verified INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))
+);
+
+CREATE TABLE shop_member (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    shop_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('owner', 'employee')),
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (shop_id) REFERENCES shop(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE,
+    UNIQUE(shop_id, user_id)
+);
+
+CREATE TABLE event (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    shop_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    country TEXT NOT NULL,
+    start_date TEXT NOT NULL, -- Format: YYYY-MM-DD
+    end_date TEXT NOT NULL,   -- Format: YYYY-MM-DD
+    booth_rental REAL DEFAULT 0,
+    travel REAL DEFAULT 0,
+    accommodation REAL DEFAULT 0,
+    food_allowance REAL DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (shop_id) REFERENCES shop(id) ON DELETE CASCADE
+);
+
+CREATE TABLE event_member (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('event_creator', 'shop_owner', 'employee')),
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (event_id) REFERENCES event(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE,
+    UNIQUE(event_id, user_id)
+);
 
 CREATE TABLE product (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,11 +79,7 @@ CREATE TABLE product_price (
     currency_code TEXT NOT NULL CHECK(length(currency_code) = 3), -- บังคับรหัส 3 ตัวอักษรตาม ISO
     price REAL NOT NULL,                                         -- เก็บเป็นทศนิยมใน SQLite หรือใช้ INTEGER หากเก็บเป็นสตางค์
     updated_at TEXT DEFAULT (datetime('now', 'localtime')),
-    
-    -- ลิงก์กลับไปที่ตารางสินค้า ถ้าลบสินค้า ให้ลบราคาตามไปด้วย (CASCADE)
     FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
-    
-    -- ข้อนี้สำคัญมาก: ห้ามไม่ให้สินค้า 1 ชิ้น มีราคาของสกุลเงินเดิมซ้ำซ้อน (เช่น เสื้อยืดมีราคา THB ได้แค่แถวเดียว)
     UNIQUE(product_id, currency_code)
 );
 
@@ -43,7 +90,9 @@ CREATE TABLE IF NOT EXISTS "order" (
     currency_code TEXT NOT NULL,         -- เก็บว่าใช้ราคาของประเทศไหน เช่น 'THB', 'SGD'
     total_income REAL NOT NULL,          -- รวมยอดเงินของออร์เดอร์นี้
     total_product_sold INTEGER NOT NULL, -- รวมจำนวนชิ้นที่ขายได้ในออร์เดอร์นี้
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    event_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (event_id) REFERENCES event(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS order_item (
@@ -59,23 +108,6 @@ CREATE TABLE IF NOT EXISTS order_item (
 CREATE INDEX IF NOT EXISTS idx_order_created_at ON "order"(created_at);
 CREATE INDEX IF NOT EXISTS idx_order_item_order_id ON order_item(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_item_product_id ON order_item(product_id);
-
-CREATE TABLE shop (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    created_at TEXT DEFAULT (datetime('now', 'localtime'))
-);
-
-CREATE TABLE "user" (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    shop_id INTEGER,
-    email TEXT NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL,
-    password_salt TEXT NOT NULL,
-    is_verified INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT DEFAULT (datetime('now', 'localtime')),
-    FOREIGN KEY (shop_id) REFERENCES shop(id) ON DELETE SET NULL
-);
 
 CREATE TABLE otp_verification (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

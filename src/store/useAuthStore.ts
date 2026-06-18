@@ -166,10 +166,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       console.error('Logout request failed:', err);
     } finally {
       localStorage.removeItem('has_event');
+      localStorage.removeItem('active_event_id');
+      localStorage.removeItem('active_event_name');
       try {
         // Dynamic import or getState to prevent direct circular reference issues if any
         const { useOrderStore } = await import('./useOrderStore');
         useOrderStore.getState().setHasEvent(false);
+        useOrderStore.getState().setActiveEvent(null, null);
       } catch (e) {
         console.error('Failed to reset order store on logout:', e);
       }

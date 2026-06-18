@@ -1,4 +1,5 @@
 import type { PagesFunction, D1Database } from "@cloudflare/workers-types";
+import { getCookie } from "./auth/helper";
 
 export interface Env {
   DB: D1Database;
@@ -10,6 +11,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       currency_code: string;
       total_income: number;
       total_product_sold: number;
+      event_id?: number | null;
       items: Array<{ product_id: number; quantity: number; price_per_unit: number }>;
     };
 
@@ -23,7 +25,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return new Response('Invalid request body', { status: 400 });
     }
 
-    const { currency_code, total_income, total_product_sold, items } = body;
+    const { currency_code, total_income, total_product_sold, items, event_id } = body;
 
     const supportedCurrencies = ['THB', 'SGD', 'JPY', 'CNY', 'TWD', 'KRW', 'IDR', 'EUR', 'USD'];
 
@@ -40,6 +42,56 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       items.length === 0
     ) {
       return new Response('Missing or invalid required fields', { status: 400 });
+    }
+
+    // Authenticate user and verify shop/event membership if event_id is provided
+    let validatedEventId: number | null = null;
+    if (event_id !== undefined && event_id !== null) {
+      const parsedEventId = Number(event_id);
+      if (Number.isInteger(parsedEventId) && parsedEventId > 0) {
+        validatedEventId = parsedEventId;
+      }
+    }
+
+    if (validatedEventId) {
+      let userShopId: number | null = null;
+      const cookieHeader = context.request.headers.get("Cookie");
+      const token = getCookie(cookieHeader, "session_token");
+
+      if (token) {
+        const session: any = await context.env.DB.prepare(
+          "SELECT user_id FROM session WHERE id = ?"
+        )
+          .bind(token)
+          .first();
+
+        if (session) {
+          const shopMember: any = await context.env.DB.prepare(
+            "SELECT shop_id FROM shop_member WHERE user_id = ?"
+          )
+            .bind(session.user_id)
+            .first();
+
+          if (shopMember) {
+            userShopId = shopMember.shop_id;
+          }
+        }
+      }
+
+      // Verify that the event exists and belongs to the user's shop (if authenticated)
+      const eventRecord: any = await context.env.DB.prepare(
+        "SELECT shop_id FROM event WHERE id = ?"
+      )
+        .bind(validatedEventId)
+        .first();
+
+      if (!eventRecord) {
+        return new Response('Event not found', { status: 400 });
+      }
+
+      if (userShopId && eventRecord.shop_id !== userShopId) {
+        return new Response('Unauthorized access to event', { status: 403 });
+      }
     }
 
     let calculatedIncome = 0;
@@ -75,9 +127,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // Insert master transaction and child items in a single D1 transaction batch for atomicity
     const insertTx = context.env.DB.prepare(
-      `INSERT INTO "order" (currency_code, total_income, total_product_sold) 
-       VALUES (?, ?, ?)`
-    ).bind(currency_code, total_income, total_product_sold);
+      `INSERT INTO "order" (currency_code, total_income, total_product_sold, event_id) 
+       VALUES (?, ?, ?, ?)`
+    ).bind(currency_code, total_income, total_product_sold, validatedEventId);
 
     // Use (SELECT MAX(id) FROM "order") to obtain the correct transaction ID.
     // last_insert_rowid() changes as soon as the first item is inserted, which breaks multi-item inserts.
