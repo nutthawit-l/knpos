@@ -19,7 +19,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     // Check if user already exists
     const existingUser: any = await context.env.DB.prepare(
-      'SELECT id, shop_id, is_verified FROM "user" WHERE email = ?'
+      'SELECT id, is_verified FROM "user" WHERE email = ?'
     )
       .bind(email)
       .first();
@@ -47,9 +47,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         'UPDATE "user" SET password_hash = ?, password_salt = ? WHERE id = ?'
       ).bind(hash, salt, userId).run();
     } else {
-      // Create new user (shop_id is NULL)
+      // Create new user
       const userResult = await context.env.DB.prepare(
-        'INSERT INTO "user" (shop_id, email, password_hash, password_salt, is_verified) VALUES (NULL, ?, ?, ?, 0)'
+        'INSERT INTO "user" (email, password_hash, password_salt, is_verified) VALUES (?, ?, ?, 0)'
       )
         .bind(email, hash, salt)
         .run();

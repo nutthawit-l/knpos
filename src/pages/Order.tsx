@@ -31,6 +31,7 @@ export default function Order({ onNavigate }: OrderProps) {
     incrementItem: handleIncrement,
     decrementItem: handleDecrement,
     clearOrder,
+    activeEventId,
   } = useOrderStore();
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -133,6 +134,7 @@ export default function Order({ onNavigate }: OrderProps) {
                     currency_code: selectedCurrency.code,
                     total_income: totalCost,
                     total_product_sold: totalCount,
+                    event_id: activeEventId,
                     items: orderItems,
                   }),
                 });

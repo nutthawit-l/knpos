@@ -1,8 +1,8 @@
 import { ArrowLeft, Calendar, Store, PlaneTakeoff, Hotel, Utensils, Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useCreateEventForm } from '../hooks/useCreateEventForm';
 import FormInput from '../components/FormInput';
 import FormSelect from '../components/FormSelect';
-import BottomNavigation from '../components/BottomNavigation';
 import MascotLogo from '../components/MascotLogo';
 
 export interface CreateEventProps {
@@ -10,6 +10,7 @@ export interface CreateEventProps {
 }
 
 export default function CreateEvent({ onNavigate }: CreateEventProps) {
+  const navigate = useNavigate();
   const {
     eventName,
     setEventName,
@@ -35,13 +36,21 @@ export default function CreateEvent({ onNavigate }: CreateEventProps) {
 
   const countries = ['Thailand', 'Singapore', 'USA', 'Japan'] as const;
 
+  const handleBack = () => {
+    if (onNavigate) {
+      onNavigate('dashboard');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   return (
     <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
       <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
         {/* TopAppBar */}
         <header className="bg-[#fff8f8] flex items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20 shrink-0">
           <button
-            onClick={() => onNavigate?.('dashboard')}
+            onClick={handleBack}
             className="mr-4 hover:opacity-80 transition-opacity duration-200 bg-transparent border-none cursor-pointer p-1 -ml-1 text-[#805062]"
             aria-label="Go back"
           >
@@ -262,9 +271,6 @@ export default function CreateEvent({ onNavigate }: CreateEventProps) {
             </p>
           </div>
         </form>
-
-        {/* Bottom Navigation */}
-        <BottomNavigation activeTab="create-event" onNavigate={onNavigate} />
       </div>
     </div>
   );

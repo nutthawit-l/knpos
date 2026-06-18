@@ -1,9 +1,13 @@
-.PHONY: help seed-local seed-remote dev dev-with-seed deploy deploy-with-seed
+.PHONY: help seed-local seed-remote dev dev-with-seed deploy deploy-with-seed query-users query-shops delete-shop delete-products
 
 help:
 	@echo "Usage:"
 	@echo "  make seed-local        Seed data to local R2 and D1 databases"
 	@echo "  make seed-remote       Seed data to remote R2 and D1 databases"
+	@echo "  make query-users       Query all users from local D1 database"
+	@echo "  make query-shops       Query all shops from local D1 database"
+	@echo "  make delete-shop       Delete a shop from local D1 database by prompting for ID"
+	@echo "  make delete-products   Delete all products from local D1 database"
 	@echo "  make dev               Run local dev server (wrangler pages dev)"
 	@echo "  make dev-with-seed     Seed local databases and run local dev server"
 	@echo "  make deploy            Build and deploy app to Cloudflare Pages"
@@ -15,6 +19,20 @@ seed-local:
 seed-remote:
 	npx tsx scripts/seed.ts --remote
 
+query-users:
+	./scripts/query-users.sh
+
+query-shops:
+	./scripts/query-shops.sh
+
+delete-shop:
+	@read -p "Enter Shop ID to delete: " shop_id; \
+	./scripts/delete-shop.sh $$shop_id
+
+delete-products:
+	./scripts/delete-products.sh
+
+
 dev:
 	pnpm dev:wrangler
 
@@ -24,3 +42,6 @@ deploy:
 	pnpm deploy
 
 deploy-with-seed: seed-remote deploy
+
+
+

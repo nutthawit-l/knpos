@@ -61,16 +61,20 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       throw new Error("Failed to create shop record.");
     }
 
-    // Update user's shop_id
+    // Insert membership into shop_member
     await context.env.DB.prepare(
-      'UPDATE "user" SET shop_id = ? WHERE id = ?'
+      'INSERT INTO shop_member (shop_id, user_id, role) VALUES (?, ?, ?)'
     )
-      .bind(shopId, session.user_id)
+      .bind(shopId, session.user_id, 'owner')
       .run();
 
     // Fetch updated user profile
     const userProfile: any = await context.env.DB.prepare(
-      'SELECT u.id, u.email, s.name as shop_name FROM "user" u JOIN shop s ON u.shop_id = s.id WHERE u.id = ?'
+      `SELECT u.id, u.email, sm.shop_id, s.name as shop_name 
+       FROM "user" u 
+       JOIN shop_member sm ON u.id = sm.user_id 
+       JOIN shop s ON sm.shop_id = s.id 
+       WHERE u.id = ?`
     )
       .bind(session.user_id)
       .first();
@@ -82,6 +86,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           id: userProfile.id,
           email: userProfile.email,
           shopName: userProfile.shop_name,
+          shopId: userProfile.shop_id,
         },
       }),
       {

@@ -133,8 +133,18 @@ async function run() {
     `INSERT INTO shop (id, name) VALUES (${defaultShopId}, '${defaultShopName}');`
   );
   sqlLines.push(
-    `INSERT INTO "user" (id, shop_id, email, password_hash, password_salt, is_verified) ` +
-    `VALUES (${defaultUserId}, ${defaultShopId}, '${defaultEmail}', '${hash}', '${salt}', 1);`
+    `INSERT INTO "user" (id, email, password_hash, password_salt, is_verified) ` +
+    `VALUES (${defaultUserId}, '${defaultEmail}', '${hash}', '${salt}', 1);`
+  );
+  sqlLines.push(
+    `INSERT INTO shop_member (shop_id, user_id, role) VALUES (${defaultShopId}, ${defaultUserId}, 'owner');`
+  );
+  sqlLines.push(
+    `INSERT INTO event (id, shop_id, name, country, start_date, end_date, booth_rental, travel, accommodation, food_allowance) ` +
+    `VALUES (1, ${defaultShopId}, 'Pop-up Craft Fair 2026', 'Thailand', '2026-03-01', '2026-03-31', 1500, 500, 1000, 200);`
+  );
+  sqlLines.push(
+    `INSERT INTO event_member (event_id, user_id, role) VALUES (1, ${defaultUserId}, 'event_creator');`
   );
 
   // 1. Insert Products and Prices
@@ -181,8 +191,8 @@ async function run() {
   transactions.forEach((tx, idx) => {
     const txId = idx + 1;
     sqlLines.push(
-      `INSERT INTO "order" (id, currency_code, total_income, total_product_sold, created_at) ` +
-      `VALUES (${txId}, '${tx.currency}', ${tx.income}, ${tx.sold}, datetime('now'));`
+      `INSERT INTO "order" (id, currency_code, total_income, total_product_sold, event_id, created_at) ` +
+      `VALUES (${txId}, '${tx.currency}', ${tx.income}, ${tx.sold}, 1, datetime('now'));`
     );
     tx.items.forEach((item) => {
       sqlLines.push(

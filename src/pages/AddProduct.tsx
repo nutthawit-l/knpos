@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Camera, Plus, Loader2 } from 'lucide-react';
 import { type Product } from '../components/SwipeableProductRow';
 import { currencies } from '../types/currency';
@@ -15,8 +16,36 @@ export interface AddProductProps {
 
 export default function AddProduct({
   onNavigate,
-  productToEdit,
+  productToEdit: propsProductToEdit,
 }: AddProductProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const productToEdit = propsProductToEdit || (location.state as any)?.productToEdit;
+
+  const handleBack = () => {
+    if (productToEdit) {
+      if (onNavigate) {
+        onNavigate('products');
+      } else {
+        navigate('/dashboard', { state: { activeTab: 'products' } });
+      }
+    } else {
+      if (onNavigate) {
+        onNavigate('dashboard');
+      } else {
+        navigate('/dashboard', { state: { activeTab: 'dashboard' } });
+      }
+    }
+  };
+
+  const handleBottomNavigate = (tab: string) => {
+    if (onNavigate) {
+      onNavigate(tab);
+    } else {
+      navigate('/dashboard', { state: { activeTab: tab } });
+    }
+  };
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
     productToEdit ? productToEdit.image_url : null,
@@ -110,7 +139,7 @@ export default function AddProduct({
       });
 
       if (res.ok) {
-        onNavigate?.('products');
+        handleBack();
       } else {
         const errorText = await res.text();
         alert('Failed to save product: ' + errorText);
@@ -137,7 +166,7 @@ export default function AddProduct({
         {/* TopAppBar */}
         <header className="bg-[#fff8f8] flex items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20 shrink-0">
           <button
-            onClick={() => onNavigate?.('products')}
+            onClick={handleBack}
             className="mr-4 hover:opacity-80 transition-opacity duration-200 bg-transparent border-none cursor-pointer p-1 -ml-1 text-[#805062]"
             aria-label="Go back"
           >
@@ -302,7 +331,7 @@ export default function AddProduct({
         </div>
 
         {/* Bottom Navigation */}
-        <BottomNavigation activeTab="products" onNavigate={onNavigate} />
+        <BottomNavigation activeTab="products" onNavigate={handleBottomNavigate} />
       </div>
     </div>
   );

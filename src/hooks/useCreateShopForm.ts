@@ -1,15 +1,17 @@
 import { useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 
 interface UseCreateShopFormProps {
   readonly onNavigate?: (tab: string) => void;
 }
 
-export function useCreateShopForm({ onNavigate }: UseCreateShopFormProps) {
+export function useCreateShopForm({ onNavigate }: UseCreateShopFormProps = {}) {
   const [shopName, setShopName] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { createShop } = useAuthStore();
+  const navigate = useNavigate();
 
   const handleCreateShopSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -20,7 +22,11 @@ export function useCreateShopForm({ onNavigate }: UseCreateShopFormProps) {
     setIsLoading(false);
 
     if (result.success) {
-      onNavigate?.('dashboard');
+      if (onNavigate) {
+        onNavigate('dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     } else {
       alert(result.error || 'Failed to create shop');
     }

@@ -1,65 +1,64 @@
 import React from 'react';
 import { Menu, ChevronLeft, FileDown, Plus } from 'lucide-react';
-import avatarImg from '../assets/avatar.png';
 
-interface HeaderProps {
-  onMenuClick?: () => void;
-  onBackClick?: () => void;
-  showSearch?: boolean;
-  showNotifications?: boolean;
-  rightElement?: React.ReactNode;
-  onImportClick?: () => void;
-  onAddClick?: () => void;
+export interface HeaderProps {
+  readonly title?: string;
+  readonly onMenuClick?: () => void;
+  readonly onBackClick?: () => void;
+  readonly rightElement?: React.ReactNode;
+  readonly onImportClick?: () => void;
+  readonly onAddClick?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({
+export default function Header({
+  title = 'Charni POS',
   onMenuClick,
   onBackClick,
   rightElement,
   onImportClick,
   onAddClick,
-}) => {
+}: HeaderProps) {
   return (
-    <div className='flex items-center justify-between px-5 h-14 shrink-0 bg-white'>
-      <div className='flex items-center'>
+    <header className="bg-[#fff8f8] flex justify-between items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20 shrink-0 select-none">
+      <div className="flex items-center gap-3">
         {onBackClick ? (
-          <button className='p-1 -ml-1' onClick={onBackClick}>
-            <ChevronLeft className='w-6 h-6 text-foreground' />
+          <button
+            onClick={onBackClick}
+            className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer"
+          >
+            <ChevronLeft className="w-6 h-6" />
           </button>
         ) : (
-          <button className='p-1 -ml-1' onClick={onMenuClick}>
-            <Menu className='w-6 h-6 text-foreground' />
-          </button>
+          onMenuClick && (
+            <button
+              onClick={onMenuClick}
+              className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+          )
         )}
+        <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">{title}</h1>
       </div>
-      <div className='flex items-center gap-2'>
+      <div className="flex items-center gap-2">
         {onImportClick && (
           <button
             onClick={onImportClick}
-            className='p-2 border border-gray-200 rounded-[12px] bg-white text-gray-400'
+            className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer"
           >
-            <FileDown className='w-4 h-4' />
+            <FileDown className="w-5 h-5" />
           </button>
         )}
         {onAddClick && (
           <button
             onClick={onAddClick}
-            className='p-2 bg-primary rounded-[12px] text-white shadow-sm'
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-[#805062] text-white hover:bg-[#805062]/90 transition-colors active:scale-95 duration-150 cursor-pointer shadow-sm"
           >
-            <Plus className='w-4 h-4' />
+            <Plus className="w-5 h-5" />
           </button>
         )}
         {rightElement}
-        <button className='w-8 h-8 rounded-full border border-gray-200 overflow-hidden bg-gray-300 ml-2'>
-          <img
-            src={avatarImg}
-            alt='Avatar'
-            className='w-full h-full object-cover'
-          />
-        </button>
       </div>
-    </div>
+    </header>
   );
-};
-
-export default Header;
+}

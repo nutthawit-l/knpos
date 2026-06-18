@@ -46,7 +46,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     // Retrieve user and shop info
     const userProfile: any = await context.env.DB.prepare(
-      'SELECT u.id, u.email, s.name as shop_name FROM "user" u LEFT JOIN shop s ON u.shop_id = s.id WHERE u.id = ?'
+      `SELECT u.id, u.email, sm.shop_id, s.name as shop_name 
+       FROM "user" u 
+       LEFT JOIN shop_member sm ON u.id = sm.user_id 
+       LEFT JOIN shop s ON sm.shop_id = s.id 
+       WHERE u.id = ?`
     )
       .bind(session.user_id)
       .first();
@@ -65,6 +69,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           id: userProfile.id,
           email: userProfile.email,
           shopName: userProfile.shop_name || null,
+          shopId: userProfile.shop_id || null,
         },
       }),
       {
