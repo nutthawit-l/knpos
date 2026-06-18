@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import MascotLogo from '../components/MascotLogo';
 import BottomNavigation from '../components/BottomNavigation';
+import Header from '../components/Header';
 
 export interface DashboardProps {
   readonly onNavigate?: (tab: string) => void;
@@ -17,15 +18,14 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   return (
     <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
       <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
-        {/* TopAppBar */}
-        <header className="bg-[#fff8f8] flex justify-between items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20">
-          <div className="flex items-center gap-3">
-            <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">Charni POS</h1>
-          </div>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer">
-            <Bell className="w-5 h-5" />
-          </button>
-        </header>
+        {/* Header */}
+        <Header
+          rightElement={
+            <button className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer">
+              <Bell className="w-5 h-5" />
+            </button>
+          }
+        />
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-5 pb-24 space-y-6 no-scrollbar">
