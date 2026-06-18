@@ -48,13 +48,13 @@ export default function Dashboard2({ onNavigate, onMenuClick }: Dashboard2Props)
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-5 pb-24 space-y-6 no-scrollbar pt-4">
-          
+
           {/* Shop Summary Section */}
           <section className="space-y-3">
             <h2 className="font-bold text-[12px] tracking-widest text-[#4E342E] opacity-60 uppercase">
               {DASHBOARD2_DATA.headerTitle}
             </h2>
-            
+
             {/* Bento Grid */}
             <div className="grid grid-cols-2 gap-4">
               {/* Total Sales Card */}
@@ -130,11 +130,10 @@ export default function Dashboard2({ onNavigate, onMenuClick }: Dashboard2Props)
                         src={event.imageUrl}
                       />
                       <div
-                        className={`absolute top-4 right-4 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${
-                          isProfit
+                        className={`absolute top-4 right-4 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${isProfit
                             ? 'bg-[#f8bbd0]/90 text-[#76485a]'
                             : 'bg-[#b5e7fe]/90 text-[#37697d]'
-                        }`}
+                          }`}
                       >
                         {event.badge}
                       </div>
@@ -164,9 +163,8 @@ export default function Dashboard2({ onNavigate, onMenuClick }: Dashboard2Props)
                             {event.netProfitLabel}
                           </p>
                           <p
-                            className={`font-bold text-[16px] ${
-                              isProfit ? 'text-[#805062]' : 'text-[#326578]'
-                            }`}
+                            className={`font-bold text-[16px] ${isProfit ? 'text-[#805062]' : 'text-[#326578]'
+                              }`}
                           >
                             {event.netProfitValue}
                           </p>
@@ -200,7 +198,7 @@ export default function Dashboard2({ onNavigate, onMenuClick }: Dashboard2Props)
         </div>
 
         {/* Bottom Navigation */}
-        {hasShop && <BottomNavigation activeTab="dashboard" onNavigate={onNavigate} />}
+        {hasShop && hasEvent && <BottomNavigation activeTab="dashboard" onNavigate={onNavigate} />}
       </div>
     </div>
   );

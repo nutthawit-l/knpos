@@ -7,6 +7,7 @@ import { ADD_PRODUCT_DATA } from '../data/mockData';
 import FormInput from '../components/FormInput';
 import MascotLogo from '../components/MascotLogo';
 import BottomNavigation from '../components/BottomNavigation';
+import { useOrderStore } from '../store/useOrderStore';
 
 export interface AddProductProps {
   readonly onNavigate?: (tab: string) => void;
@@ -21,6 +22,7 @@ export default function AddProduct({
   const navigate = useNavigate();
   const location = useLocation();
   const productToEdit = propsProductToEdit || (location.state as any)?.productToEdit;
+  const { hasEvent } = useOrderStore();
 
   const handleBack = () => {
     if (productToEdit) {
@@ -331,7 +333,7 @@ export default function AddProduct({
         </div>
 
         {/* Bottom Navigation */}
-        <BottomNavigation activeTab="products" onNavigate={handleBottomNavigate} />
+        {hasEvent && <BottomNavigation activeTab="products" onNavigate={handleBottomNavigate} />}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { ArrowLeft, LogOut } from 'lucide-react';
 import BottomNavigation from '../components/BottomNavigation';
+import { useOrderStore } from '../store/useOrderStore';
 import SettingItem from '../components/SettingItem';
 import MascotLogo from '../components/MascotLogo';
 import { SETTINGS_DATA } from '../data/mockData';
@@ -12,6 +13,7 @@ export interface SettingProps {
 
 export default function Setting({ onNavigate }: SettingProps) {
   const { toastMessage, handleItemClick, handleSignOut } = useSetting({ onNavigate });
+  const { hasEvent } = useOrderStore();
 
   return (
     <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
@@ -107,7 +109,7 @@ export default function Setting({ onNavigate }: SettingProps) {
         )}
 
         {/* Bottom Navigation */}
-        <BottomNavigation activeTab="settings" onNavigate={onNavigate} />
+        {hasEvent && <BottomNavigation activeTab="settings" onNavigate={onNavigate} />}
       </div>
     </div>
   );

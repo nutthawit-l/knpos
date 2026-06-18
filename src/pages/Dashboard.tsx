@@ -211,7 +211,7 @@ export default function Dashboard({ onNavigate, onMenuClick }: DashboardProps) {
         </div>
 
         {/* Bottom Navigation */}
-        {hasShop && <BottomNavigation activeTab="dashboard" onNavigate={onNavigate} />}
+        {hasShop && hasEvent && <BottomNavigation activeTab="dashboard" onNavigate={onNavigate} />}
       </div>
     </div>
   );
