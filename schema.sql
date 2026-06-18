@@ -74,7 +74,7 @@ CREATE TABLE "user" (
     password_salt TEXT NOT NULL,
     is_verified INTEGER NOT NULL DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now', 'localtime')),
-    FOREIGN KEY (shop_id) REFERENCES shop(id) ON DELETE CASCADE
+    FOREIGN KEY (shop_id) REFERENCES shop(id) ON DELETE SET NULL
 );
 
 CREATE TABLE otp_verification (
