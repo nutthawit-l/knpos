@@ -19,42 +19,25 @@ export interface DashboardProps {
 }
 
 export default function Dashboard({ onNavigate }: DashboardProps) {
-  const { user, logout } = useAuthStore();
+  const { logout } = useAuthStore();
+  const { shopId } = useInventoryStore();
   const { hasEvent } = useOrderStore();
-  const setShopId = useInventoryStore((state) => state.setShopId);
-  const [hasShop, setHasShop] = useState(false);
-  const [hasProducts, setHasProducts] = useState(false);
+  const [hasProduct, setHasProduct] = useState(false);
 
   useEffect(() => {
-    if (user?.id) {
-
-
-      if (hasShop) {
-        fetch(`/api/product?fields=shop_id&user_id=${user.id}`)
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success && data.exists) {
-              setHasShop(true);
-              fetch('/api/product')
-                .then((res) => res.json())
-                .then((prodData) => {
-                  if (Array.isArray(prodData) && prodData.length > 0) {
-                    setHasProducts(true);
-                    const actualShopId = typeof data.shopId === 'object' && data.shopId !== null
-                      ? data.shopId.shop_id
-                      : data.shopId;
-                    setShopId(actualShopId);
-                  }
-                })
-                .catch((err) => console.error('Failed to fetch products:', err));
-            } else {
-              setHasShop(false);
-            }
-          })
-          .catch((err) => console.error('Failed to query shop member:', err));
-      }
+    if (shopId) {
+      fetch(`/api/product?shop_id=${shopId}&limit=1&fields=id`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.exists) {
+            setHasProduct(true);
+          } else {
+            setHasProduct(false);
+          }
+        })
+        .catch((err) => console.error('Failed to query shop member:', err));
     }
-  }, [user?.id, setShopId, hasShop]);
+  }, [shopId]);
 
   const handleLogout = () => {
     const confirmLogout = window.confirm('Are you sure you want to logout?');
@@ -63,13 +46,15 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
     }
   };
 
+  console.log("shopId:",shopId)
+
   return (
     <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
       <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
         {/* Header */}
         <Header
           rightElement={
-            hasEvent ? (
+            hasProduct ? (
               <button className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer">
                 <Bell className="w-5 h-5" />
               </button>
@@ -104,7 +89,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               Quick Guide
             </h3>
             <ul className="space-y-4">
-              <li className={`flex gap-3 items-start ${hasShop ? 'line-through opacity-100' : ''}`}>
+              <li className={`flex gap-3 items-start ${shopId ? 'line-through opacity-100' : ''}`}>
                 <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0">
                   1
                 </span>
@@ -112,22 +97,22 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                   Create your shop
                 </p>
               </li>
-              <li className={`flex gap-3 items-start ${hasShop && hasProducts ? 'line-through opacity-100' : (hasShop ? '' : 'opacity-60')}`}>
+              {/*<li className={`flex gap-3 items-start ${hasShop && hasProducts ? 'line-through opacity-100' : (hasShop ? '' : 'opacity-60')}`}>
                 <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0">
                   2
                 </span>
                 <p className="font-medium text-[16px] text-text-brown">
                   Add your products to inventory
                 </p>
-              </li>
-              <li className={`flex gap-3 items-start ${hasShop && hasProducts ? '' : 'opacity-60'}`}>
+              </li>*/}
+              {/*<li className={`flex gap-3 items-start ${hasShop && hasProducts ? '' : 'opacity-60'}`}>
                 <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0">
                   3
                 </span>
                 <p className="font-medium text-[16px] text-text-brown">
                   Create your event
                 </p>
-              </li>
+              </li>*/}
             </ul>
             <div className="mt-6 pt-6 border-t border-[#326578]/10">
               <p className="font-medium text-[12px] italic text-[#154d5f]">
@@ -136,101 +121,101 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             </div>
           </section>
 
-          {/* Action Blocks */}
+          {/*Action Blocks*/}
           <div className="space-y-4">
-            {/* Primary CTA: Create Your Shop */}
+             {/*Primary CTA: Create Your Shop */}
             <button
               onClick={() => onNavigate?.('create-shop')}
-              disabled={hasShop}
-              className={`w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 transition-all duration-300 overflow-hidden relative ${hasShop ? 'opacity-40 pointer-events-none' : 'hover:shadow-md active:scale-95 group cursor-pointer'}`}
+              disabled={shopId ? true : false}
+              className={`w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 transition-all duration-300 overflow-hidden relative ${shopId ? 'opacity-40 pointer-events-none' : 'hover:shadow-md active:scale-95 group cursor-pointer'}`}
             >
-              <div className="flex flex-col h-full justify-between relative z-10">
-                <div>
-                  <div className="w-14 h-14 bg-[#f8bbd0] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Store className="w-7 h-7 text-[#805062]" />
-                  </div>
-                  <h3 className="text-[28px] leading-[36px] font-bold text-text-brown mb-2">
-                    Create Your Shop
-                  </h3>
-                  <p className="text-[16px] leading-[24px] text-[#504447]">
-                    Set your shop name, logo, and currency to begin.
-                  </p>
+            <div className="flex flex-col h-full justify-between relative z-10">
+              <div>
+                <div className="w-14 h-14 bg-[#f8bbd0] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Store className="w-7 h-7 text-[#805062]" />
                 </div>
-                <div className="mt-8 flex items-center gap-2 text-[#805062] font-bold text-[14px]">
-                  <span>Get Started</span>
-                  <ArrowRight className={`w-4 h-4 ${hasShop ? '' : 'animate-pulse'}`} />
-                </div>
+                <h3 className="text-[28px] leading-[36px] font-bold text-text-brown mb-2">
+                  Create Your Shop
+                </h3>
+                <p className="text-[16px] leading-[24px] text-[#504447]">
+                  Set your shop name, logo, and currency to begin.
+                </p>
               </div>
-              <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#f8bbd0] opacity-20 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-            </button>
+              <div className="mt-8 flex items-center gap-2 text-[#805062] font-bold text-[14px]">
+                <span>Get Started</span>
+                <ArrowRight className={`w-4 h-4 ${shopId ? '' : 'animate-pulse'}`} />
+              </div>
+            </div>
+            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#f8bbd0] opacity-20 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+          </button>
 
             {/* Add Product Block */}
-            <button
-              onClick={() => onNavigate?.('add-product')}
-              disabled={!hasShop || hasProducts}
-              className={`w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 transition-all duration-300 overflow-hidden relative ${hasShop && !hasProducts ? 'hover:shadow-md active:scale-95 group cursor-pointer opacity-100' : 'opacity-40 pointer-events-none'}`}
-            >
-              <div className="flex flex-col h-full justify-between relative z-10">
-                <div>
-                  <div className="w-14 h-14 bg-[#b5e7fe] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Package className="w-7 h-7 text-[#326578]" />
-                  </div>
-                  <h3 className="text-[28px] leading-[36px] font-bold text-text-brown mb-2">
-                    Add Product
-                  </h3>
-                  <p className="text-[16px] leading-[24px] text-[#504447]">
-                    Fill your inventory with your amazing items.
-                  </p>
+            {/* <button
+            onClick={() => onNavigate?.('add-product')}
+            disabled={!hasShop || hasProducts}
+            className={`w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 transition-all duration-300 overflow-hidden relative ${hasShop && !hasProducts ? 'hover:shadow-md active:scale-95 group cursor-pointer opacity-100' : 'opacity-40 pointer-events-none'}`}
+          >
+            <div className="flex flex-col h-full justify-between relative z-10">
+              <div>
+                <div className="w-14 h-14 bg-[#b5e7fe] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Package className="w-7 h-7 text-[#326578]" />
                 </div>
-                <div className="mt-8 flex items-center gap-2 text-[#326578] font-bold text-[14px]">
-                  <span>Add Product</span>
-                  <ArrowRight className={`w-4 h-4 ${hasShop && !hasProducts ? 'animate-pulse' : ''}`} />
-                </div>
+                <h3 className="text-[28px] leading-[36px] font-bold text-text-brown mb-2">
+                  Add Product
+                </h3>
+                <p className="text-[16px] leading-[24px] text-[#504447]">
+                  Fill your inventory with your amazing items.
+                </p>
               </div>
-              <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#b5e7fe] opacity-10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-            </button>
+              <div className="mt-8 flex items-center gap-2 text-[#326578] font-bold text-[14px]">
+                <span>Add Product</span>
+                <ArrowRight className={`w-4 h-4 ${hasShop && !hasProducts ? 'animate-pulse' : ''}`} />
+              </div>
+            </div>
+            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#b5e7fe] opacity-10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+          </button> */}
 
             {/* Create New Event Block */}
-            <button
-              onClick={() => onNavigate?.('create-event')}
-              disabled={!hasShop || !hasProducts}
-              className={`w-full bg-[#fcf1f2] border-2 border-dashed border-[#805062]/30 py-8 px-6 rounded-[20px] transition-all duration-300 flex flex-col items-center justify-center gap-2 ${hasShop && hasProducts ? 'opacity-100 cursor-pointer hover:bg-[#ffd9e4]/10 group' : 'opacity-40 pointer-events-none'}`}
-            >
-              <div className="w-14 h-14 rounded-full bg-[#f8bbd0] flex items-center justify-center text-[#805062] group-hover:scale-110 transition-transform duration-300">
-                <PlusCircle className="w-7 h-7" />
-              </div>
-              <h3 className="font-bold text-[#805062] text-[20px]">
-                Create New Event
-              </h3>
-              <p className="text-[#504447] text-[14px] leading-[20px] text-center max-w-xs">
-                Start logging sales and managing products for your next event.
-              </p>
-            </button>
+            {/* <button
+            onClick={() => onNavigate?.('create-event')}
+            disabled={!hasShop || !hasProducts}
+            className={`w-full bg-[#fcf1f2] border-2 border-dashed border-[#805062]/30 py-8 px-6 rounded-[20px] transition-all duration-300 flex flex-col items-center justify-center gap-2 ${hasShop && hasProducts ? 'opacity-100 cursor-pointer hover:bg-[#ffd9e4]/10 group' : 'opacity-40 pointer-events-none'}`}
+          >
+            <div className="w-14 h-14 rounded-full bg-[#f8bbd0] flex items-center justify-center text-[#805062] group-hover:scale-110 transition-transform duration-300">
+              <PlusCircle className="w-7 h-7" />
+            </div>
+            <h3 className="font-bold text-[#805062] text-[20px]">
+              Create New Event
+            </h3>
+            <p className="text-[#504447] text-[14px] leading-[20px] text-center max-w-xs">
+              Start logging sales and managing products for your next event.
+            </p>
+          </button> */}
           </div>
 
           {/* Footer Illustration Content */}
-          <section className="py-6 flex flex-col items-center text-center space-y-6">
-            <div className="w-full max-w-[280px] aspect-square bg-white rounded-[40px] shadow-sm border border-outline-warm flex items-center justify-center p-6 mx-auto">
-              <img
-                alt="Empty Shop"
-                className="w-full h-full object-contain"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWZ2jOhkWHoWtTZcH730W_qh0nGmJ6toLGpHWcwBSrbRkADHwAFGsDMoU1H3Erdfu2GZl13Lz-Hab2zRQw0fKIa5Vd0q6wc4dfst53kOjIG28w9NkZ5tSQkuWqSYMQa3pdh7nRyg__3y4OWT--X07l0On639t05qz_zn1BjkcX20ae8uZEJIbuoEQk59N9GWX_H419fSIPq79C1oc2zgm79lC60Ed-E99XIT3ALnpFhFv5k9FieGwYy8XNPpPmXMBgHa6ZArCZfGE"
-              />
-            </div>
-            <div className="space-y-2 pb-6">
-              <h4 className="font-bold text-[20px] text-text-brown">
-                Every big dream starts small.
-              </h4>
-              <p className="font-medium text-[16px] text-[#504447] px-8">
-                Ready to transform this empty space into your dream boutique?
-              </p>
-            </div>
-          </section>
+          {/* <section className="py-6 flex flex-col items-center text-center space-y-6">
+          <div className="w-full max-w-[280px] aspect-square bg-white rounded-[40px] shadow-sm border border-outline-warm flex items-center justify-center p-6 mx-auto">
+            <img
+              alt="Empty Shop"
+              className="w-full h-full object-contain"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWZ2jOhkWHoWtTZcH730W_qh0nGmJ6toLGpHWcwBSrbRkADHwAFGsDMoU1H3Erdfu2GZl13Lz-Hab2zRQw0fKIa5Vd0q6wc4dfst53kOjIG28w9NkZ5tSQkuWqSYMQa3pdh7nRyg__3y4OWT--X07l0On639t05qz_zn1BjkcX20ae8uZEJIbuoEQk59N9GWX_H419fSIPq79C1oc2zgm79lC60Ed-E99XIT3ALnpFhFv5k9FieGwYy8XNPpPmXMBgHa6ZArCZfGE"
+            />
+          </div>
+          <div className="space-y-2 pb-6">
+            <h4 className="font-bold text-[20px] text-text-brown">
+              Every big dream starts small.
+            </h4>
+            <p className="font-medium text-[16px] text-[#504447] px-8">
+              Ready to transform this empty space into your dream boutique?
+            </p>
+          </div>
+        </section> */}
         </div>
 
         {/* Bottom Navigation */}
-        {hasShop && hasEvent && <BottomNavigation activeTab="dashboard" onNavigate={onNavigate} />}
+        {/* {hasShop && hasEvent && <BottomNavigation activeTab="dashboard" onNavigate={onNavigate} />} */}
       </div>
-    </div>
+    </div >
   );
 }

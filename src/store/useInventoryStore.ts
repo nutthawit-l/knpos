@@ -20,7 +20,7 @@ export const useInventoryStore = create<InventoryState>((set) => ({
   shopId: null,
   firstProductId: null,
   fetchShopId: async (userId) => {
-    fetch(`/api/shop?fields=shop_id&user_id=${userId}`)
+    fetch(`/api/shop?user_id=${userId}&limit=1&fields=id`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.exists) {

@@ -14,6 +14,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const url = new URL(context.request.url);
     const fields = url.searchParams.get('fields');
+    const limit = url.searchParams.get('limit');
     let userIdStr = url.searchParams.get("user_id");
 
     // Fallback: if user_id query parameter is not present, try to get it from the authenticated session
@@ -59,7 +60,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       );
     }
 
-    if (fields == "shop_id") {
+    if (fields == "id" && limit == "1") {
       // Query shop_member details
       const shopId = await context.env.DB.prepare(
         `SELECT shop_id

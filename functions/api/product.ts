@@ -7,6 +7,7 @@ export interface Env {
   R2_PUBLIC_URL: string;
 }
 
+
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const cookieHeader = context.request.headers.get("Cookie");
@@ -52,10 +53,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
 
     const { results } = await context.env.DB.prepare(`
-      SELECT 
-        p.id, 
-        p.name, 
-        p.image_url, 
+      SELECT
+        p.id,
+        p.name,
+        p.image_url,
         p.created_at,
         p.shop_id,
         pp.currency_code,
@@ -186,7 +187,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       .filter(([_, price]) => price !== null && price !== undefined && !isNaN(price))
       .map(([currency, price]) =>
         context.env.DB.prepare(
-          `INSERT INTO product_price (product_id, currency_code, price) 
+          `INSERT INTO product_price (product_id, currency_code, price)
            VALUES ((SELECT MAX(id) FROM product WHERE shop_id = ?), ?, ?)`
         ).bind(shopMember.shop_id, currency.toUpperCase(), price)
       );
