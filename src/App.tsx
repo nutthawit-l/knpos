@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/useAuthStore';
 import { useOrderStore } from './store/useOrderStore';
+import { useInventoryStore } from './store/useInventoryStore';
 import Dashboard from './pages/Dashboard';
 import Dashboard2 from './pages/Dashboard2';
 import CreateShop from './pages/CreateShop';
@@ -220,12 +221,14 @@ function Dashboard2Layout() {
 
 function App() {
   const { isAuthenticated, isLoading, checkAuth, user } = useAuthStore();
+  const { fetchShopId } = useInventoryStore();
   const navigate = useNavigate();
   const hasNoShop = isAuthenticated && !user?.shopId;
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+    fetchShopId(user?.id);
+  }, [checkAuth, user?.id, fetchShopId]);
 
   if (isLoading) {
     return (
