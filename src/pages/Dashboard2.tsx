@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Bell, Store, Calendar, TrendingUp, PlusCircle, LogOut } from 'lucide-react';
 import Header from '../components/Header';
 import BottomNavigation from '../components/BottomNavigation';

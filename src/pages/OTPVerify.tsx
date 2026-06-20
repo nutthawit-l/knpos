@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Mail, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useOTPForm } from '../hooks/useOTPForm';

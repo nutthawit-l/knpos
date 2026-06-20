@@ -1,182 +1,68 @@
 import { create } from 'zustand';
 
-export interface UserProfile {
-  id: number;
+// Define User data
+export interface User {
+  id: string;
   email: string;
-  shopName: string | null;
-  shopId: number | null;
+  name: string;
+  isOnboardingComplete: boolean;
+  token?: string;
 }
 
+// Define Type for all State and Action in this store
 interface AuthState {
-  user: UserProfile | null;
+  user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  error: string | null;
-  registeringEmail: string | null;
-  setRegisteringEmail: (email: string | null) => void;
-  checkAuth: () => Promise<UserProfile | null>;
-  login: (email: string, password: string) => Promise<{ success: boolean; verificationRequired?: boolean; email?: string; error?: string }>;
-  register: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  createShop: (shopName: string) => Promise<{ success: boolean; error?: string }>;
-  verifyOtp: (email: string, code: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => Promise<void>;
-  clearError: () => void;
+  verifyUser: () => Promise<void>;
+  loginWithGoogleToken: (googleCredential: string) => Promise<void>;
+  logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
   isLoading: true,
-  error: null,
-  registeringEmail: localStorage.getItem('registering_email') || null,
 
-  setRegisteringEmail: (email) => {
-    if (email) {
-      localStorage.setItem('registering_email', email);
-    } else {
-      localStorage.removeItem('registering_email');
-    }
-    set({ registeringEmail: email });
-  },
-
-  clearError: () => set({ error: null }),
-
-  checkAuth: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const res = await fetch('/api/auth/me');
-      if (res.ok) {
-        const data = await res.json();
-        set({ user: data.user, isAuthenticated: true, isLoading: false });
-        return data.user;
-      } else {
-        set({ user: null, isAuthenticated: false, isLoading: false });
-        return null;
-      }
-    } catch (err) {
-      console.error('checkAuth failed:', err);
-      set({ user: null, isAuthenticated: false, isLoading: false });
-      return null;
-    }
-  },
-
-  login: async (email, password) => {
-    set({ isLoading: true, error: null });
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        set({ user: data.user, isAuthenticated: true, isLoading: false });
-        return { success: true };
-      } else if (res.status === 403) {
-        localStorage.setItem('registering_email', email);
-        set({ registeringEmail: email, isLoading: false });
-        return { success: false, verificationRequired: true, email };
-      } else {
-        set({ error: data.error || 'Login failed', isLoading: false });
-        return { success: false, error: data.error || 'Login failed' };
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'An error occurred';
-      set({ error: msg, isLoading: false });
-      return { success: false, error: msg };
-    }
-  },
-
-  register: async (email, password) => {
-    set({ isLoading: true, error: null });
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem('registering_email', email);
-        set({ registeringEmail: email, isLoading: false });
-        return { success: true };
-      } else {
-        set({ error: data.error || 'Registration failed', isLoading: false });
-        return { success: false, error: data.error || 'Registration failed' };
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'An error occurred';
-      set({ error: msg, isLoading: false });
-      return { success: false, error: msg };
-    }
-  },
-
-  createShop: async (shopName) => {
-    set({ isLoading: true, error: null });
-    try {
-      const res = await fetch('/api/auth/create-shop', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shopName }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        set({ user: data.user, isLoading: false });
-        return { success: true };
-      } else {
-        set({ error: data.error || 'Failed to create shop', isLoading: false });
-        return { success: false, error: data.error || 'Failed to create shop' };
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'An error occurred';
-      set({ error: msg, isLoading: false });
-      return { success: false, error: msg };
-    }
-  },
-
-  verifyOtp: async (email, code) => {
-    set({ isLoading: true, error: null });
-    try {
-      const res = await fetch('/api/auth/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.removeItem('registering_email');
-        set({ user: data.user, isAuthenticated: true, registeringEmail: null, isLoading: false });
-        return { success: true };
-      } else {
-        set({ error: data.error || 'OTP verification failed', isLoading: false });
-        return { success: false, error: data.error || 'OTP verification failed' };
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'An error occurred';
-      set({ error: msg, isLoading: false });
-      return { success: false, error: msg };
-    }
-  },
-
-  logout: async () => {
+  verifyUser: async () => {
     set({ isLoading: true });
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-    } catch (err) {
-      console.error('Logout request failed:', err);
+      // Mock API verify session from Backend
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const mockUser: User = {
+        id: "kanoon123",
+        email: "kanoon123@gmail.com",
+        name: "Kanoon",
+        isOnboardingComplete: false
+      };
+
+      set({ user: mockUser, isAuthenticated: true });
+    } catch (error) {
+      set({ isAuthenticated: false, user: null });
+      console.error(error);
     } finally {
-      localStorage.removeItem('has_event');
-      localStorage.removeItem('active_event_id');
-      localStorage.removeItem('active_event_name');
-      try {
-        // Dynamic import or getState to prevent direct circular reference issues if any
-        const { useOrderStore } = await import('./useOrderStore');
-        useOrderStore.getState().setHasEvent(false);
-        useOrderStore.getState().setActiveEvent(null, null);
-      } catch (e) {
-        console.error('Failed to reset order store on logout:', e);
-      }
-      set({ user: null, isAuthenticated: false, isLoading: false });
+      set({ isLoading: false });
     }
   },
+
+  loginWithGoogleToken: async () => {
+  // loginWithGoogleToken: async (googleCredential: string) => {
+    set({ isLoading: true });
+    try {
+      // Send credential to Backend
+      // const res =
+      //  await api.post('/auth/google', { token: googleCredential });
+      set({ isAuthenticated: true });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  logout: () => {
+    // Clear user data when Logout
+    set({ user: null, isAuthenticated: false });
+  }
 }));

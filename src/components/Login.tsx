@@ -2,10 +2,10 @@ import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLoginForm } from '../hooks/useLoginForm';
 import { LOGIN_DATA } from '../data/mockData';
-import AuthLayout from '../components/AuthLayout';
-import FormInput from '../components/FormInput';
-import AuthButton from '../components/AuthButton';
-import MascotLogo from '../components/MascotLogo';
+import AuthLayout from './AuthLayout';
+import FormInput from './FormInput';
+import AuthButton from './AuthButton';
+import MascotLogo from './MascotLogo';
 
 export default function Login() {
   const {
