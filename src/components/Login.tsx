@@ -1,14 +1,17 @@
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useLoginForm } from '../hooks/useLoginForm';
-import { GoogleLogin } from '@react-oauth/google';
+import { useAuthStore } from '../store/useAuthStore';
 import { LOGIN_DATA } from '../data/mockData';
 import AuthLayout from './AuthLayout';
 import FormInput from './FormInput';
 import AuthButton from './AuthButton';
 import MascotLogo from './MascotLogo';
 
-export default function Login() {
+export interface LoginProps {}
+
+export default function Login(_props: Readonly<LoginProps>) {
   const {
     email,
     setEmail,
@@ -18,6 +21,17 @@ export default function Login() {
     error,
     handleLoginSubmit,
   } = useLoginForm();
+
+  const { loginWithGoogleToken } = useAuthStore();
+
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      await loginWithGoogleToken(tokenResponse.access_token);
+    },
+    onError: () => {
+      console.error('Google Sign-In failed');
+    },
+  });
 
   return (
     <AuthLayout>
@@ -42,7 +56,7 @@ export default function Login() {
           onChange={setEmail}
         />
 
-        <div className="space-y-1">
+        <div className="space-y-2">
           <FormInput
             icon={Lock}
             id="password"
@@ -55,7 +69,7 @@ export default function Login() {
           />
           <div className="flex justify-end pr-2">
             <button
-              className="text-[12px] leading-[16px] font-bold text-secondary-custom hover:underline focus:outline-none"
+              className="text-[12px] leading-[16px] font-bold text-secondary-custom hover:underline focus:outline-none cursor-pointer"
               type="button"
             >
               {LOGIN_DATA.forgotPasswordText}
@@ -89,24 +103,27 @@ export default function Login() {
           </p>
         </div>
       </form>
-      <GoogleLogin
-        onSuccess={credentialResponse => {
-          console.log(credentialResponse);
-        }}
-        onError={() => {
-          console.log('Login Failed');
-        }}
-        useOneTap
-      />;
 
-      {/* Aesthetic Footer */}
-      <footer className="mt-12 flex items-center gap-4 text-outline-variant-warm justify-center">
-        <div className="h-[1px] w-12 bg-outline-warm" />
-        <span className="text-[12px] leading-[16px] uppercase tracking-widest font-bold">
-          {LOGIN_DATA.footerText}
-        </span>
-        <div className="h-[1px] w-12 bg-outline-warm" />
-      </footer>
+      {/* Aesthetic Google Divider & Button */}
+      <div className="w-full flex flex-col items-center gap-4 mt-8">
+        <div className="flex items-center gap-4 w-full text-text-brown">
+          <div className="h-[1px] flex-1 bg-outline-warm" />
+          <span className="text-[12px] leading-[16px] uppercase tracking-widest font-bold">OR</span>
+          <div className="h-[1px] flex-1 bg-outline-warm" />
+        </div>
+        <button
+          type="button"
+          onClick={() => loginWithGoogle()}
+          className="w-full h-14 bg-white border-2 border-outline-warm hover:bg-surface text-text-brown font-bold text-[18px] rounded-full shadow-sm active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none cursor-pointer"
+        >
+          <img
+            src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
+            alt="Google Logo"
+            className="w-6 h-6 object-contain"
+          />
+          <span>Sign in with Google</span>
+        </button>
+      </div>
     </AuthLayout>
   );
 }
