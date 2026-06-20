@@ -12,6 +12,7 @@
     "deploy": "pnpm build && wrangler pages deploy dist"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.13.5",
     "clsx": "^2.1.1",
     "lucide-react": "^1.17.0",
     "react": "^19.2.6",

@@ -1,6 +1,7 @@
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLoginForm } from '../hooks/useLoginForm';
+import { GoogleLogin } from '@react-oauth/google';
 import { LOGIN_DATA } from '../data/mockData';
 import AuthLayout from './AuthLayout';
 import FormInput from './FormInput';
@@ -88,6 +89,15 @@ export default function Login() {
           </p>
         </div>
       </form>
+      <GoogleLogin
+        onSuccess={credentialResponse => {
+          console.log(credentialResponse);
+        }}
+        onError={() => {
+          console.log('Login Failed');
+        }}
+        useOneTap
+      />;
 
       {/* Aesthetic Footer */}
       <footer className="mt-12 flex items-center gap-4 text-outline-variant-warm justify-center">
