@@ -1,6 +1,6 @@
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useGoogleLogin } from '@react-oauth/google';
+import { GoogleLogin } from '@react-oauth/google';
 import { useLoginForm } from '../hooks/useLoginForm';
 import { useAuthStore } from '../store/useAuthStore';
 import { LOGIN_DATA } from '../data/mockData';
@@ -23,15 +23,6 @@ export default function Login(_props: Readonly<LoginProps>) {
   } = useLoginForm();
 
   const loginWithGoogleToken = useAuthStore((state) => state.loginWithGoogleToken);
-
-  const loginWithGoogle = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      await loginWithGoogleToken(tokenResponse.access_token);
-    },
-    onError: () => {
-      console.error('Google Sign-In failed');
-    },
-  });
 
   return (
     <AuthLayout>
@@ -111,18 +102,21 @@ export default function Login(_props: Readonly<LoginProps>) {
           <span className="text-[12px] leading-[16px] uppercase tracking-widest font-bold">OR</span>
           <div className="h-[1px] flex-1 bg-outline-warm" />
         </div>
-        <button
-          type="button"
-          onClick={() => loginWithGoogle()}
-          className="w-full h-14 bg-white border-2 border-outline-warm hover:bg-surface text-text-brown font-bold text-[18px] rounded-full shadow-sm active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none cursor-pointer"
-        >
-          <img
-            src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
-            alt="Google Logo"
-            className="w-6 h-6 object-contain"
+        <div className="w-full flex justify-center">
+          <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+              if (credentialResponse.credential) {
+                await loginWithGoogleToken(credentialResponse.credential);
+              }
+            }}
+            onError={() => {
+              console.error('Google Sign-In failed');
+            }}
+            theme="outline"
+            shape="pill"
+            size="large"
           />
-          <span>Sign in with Google</span>
-        </button>
+        </div>
       </div>
     </AuthLayout>
   );
