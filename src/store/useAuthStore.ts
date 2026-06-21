@@ -48,16 +48,27 @@ export const useAuthStore = create<AuthState>()(
       }
     },
 
-    loginWithGoogleToken: async () => {
-    // loginWithGoogleToken: async (googleCredential: string) => {
+    loginWithGoogleToken: async (responseToken: string) => {
       set({ isLoading: true });
       try {
-        // Send credential to Backend
-        // const res =
-        //  await api.post('/auth/google', { token: googleCredential });
-        set({ isAuthenticated: true });
+        const response = await fetch('/api/auth/google', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token: responseToken}),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to login with Google');
+        }
+
+        set({ user: data.user, isAuthenticated: true });
       } catch (error) {
         console.error(error);
+        set({ isAuthenticated: false, user: null });
       } finally {
         set({ isLoading: false });
       }

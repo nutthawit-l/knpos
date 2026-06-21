@@ -22,7 +22,7 @@ export default function Login(_props: Readonly<LoginProps>) {
     handleLoginSubmit,
   } = useLoginForm();
 
-  const { loginWithGoogleToken } = useAuthStore();
+  const loginWithGoogleToken = useAuthStore((state) => state.loginWithGoogleToken);
 
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
