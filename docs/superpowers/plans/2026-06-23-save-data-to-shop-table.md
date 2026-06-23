@@ -2,9 +2,13 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Consolidate shop creation logic directly into `CreateShop.tsx`, save shop details via `/api/auth/create-shop`, fetch the new `shopId` using `/api/shop`, set the state in the store with onboarding marked as incomplete, and navigate back to `/get-started`.
+**Goal:** Remove `create-shop.ts`, add POST/GET support to `/api/shop` to create and query shop mappings, consolidate local form logic inside `CreateShop.tsx`, update user store state with onboarding marked as incomplete, and navigate back to `/get-started`.
 
-**Architecture:** Move form logic from a separate custom hook into local React component states in `CreateShop.tsx`. Query `/api/shop` to fetch the newly created shop ID, update Zustand auth store state directly, and navigate back to `/get-started`. Modify `useAuthStore` to set `isOnboardingComplete: false` globally for onboarding steps.
+**Architecture:** 
+- In `functions/api/shop.ts`, add POST request handling (`onRequestPost`) to insert a new shop and map the authenticated user as `'owner'` in the `shop_member` table. Fix the GET handler (`onRequestGet`) to return the `shopId` directly as a clean number.
+- Delete `functions/api/auth/create-shop.ts` completely.
+- Inline form states (`shopName`, `description`, `isLoading`) directly inside `CreateShop.tsx`, calling POST `/api/shop` and GET `/api/shop?user_id=...` to set `user.shopId` in Zustand.
+- Set global onboarding state `isOnboardingComplete` to `false` in `useAuthStore.ts`.
 
 **Tech Stack:** React, TypeScript, Zustand, Cloudflare Workers D1 database backend.
 
@@ -42,20 +46,83 @@ isOnboardingComplete: false,
 
 ---
 
-### Task 2: Refactor `/api/shop` API Endpoint
+### Task 2: Refactor `/api/shop` API Endpoint (GET and POST)
 
 **Files:**
 - Modify: `functions/api/shop.ts`
 
 **Interfaces:**
-- Consumes: None
-- Produces: JSON response for GET `/api/shop?fields=id&limit=1` returning a clean `shopId` number instead of a database row object.
+- Consumes: Database (D1Database)
+- Produces: 
+  - `onRequestGet`: Returns `{ success: true, exists: boolean, shopId: number | null }` where `shopId` is a clean number.
+  - `onRequestPost`: Creates shop in `shop` table and inserts mapping into `shop_member` table, returning `{ success: true, shopId: number }`.
 
-- [ ] **Step 1: Modify functions/api/shop.ts**
-  Modify [shop.ts](file:///home/tie/Projects/knpos/functions/api/shop.ts) to parse the database row result for `shop_id` and return a clean number.
+- [ ] **Step 1: Refactor functions/api/shop.ts**
+  Replace the contents of [shop.ts](file:///home/tie/Projects/knpos/functions/api/shop.ts) to implement both GET and POST requests.
 
-Replace lines 65 to 85 with:
 ```typescript
+import type { PagesFunction, D1Database } from "@cloudflare/workers-types";
+import { getCookie } from "./auth/helper";
+
+export interface Env {
+  DB: D1Database;
+}
+
+interface SessionRow {
+  user_id: number;
+  expires_at: string;
+}
+
+// GET: Retrieve shop ID for a user
+export const onRequestGet: PagesFunction<Env> = async (context) => {
+  try {
+    const url = new URL(context.request.url);
+    const fields = url.searchParams.get('fields');
+    const limit = url.searchParams.get('limit');
+    let userIdStr = url.searchParams.get("user_id");
+
+    if (!userIdStr) {
+      const cookieHeader = context.request.headers.get("Cookie");
+      const token = getCookie(cookieHeader, "session_token");
+
+      if (token) {
+        const session = await context.env.DB.prepare(
+          "SELECT user_id, expires_at FROM session WHERE id = ?"
+        )
+          .bind(token)
+          .first<SessionRow>();
+
+        if (session) {
+          const expiresAt = new Date(session.expires_at).getTime();
+          if (expiresAt >= Date.now()) {
+            userIdStr = String(session.user_id);
+          }
+        }
+      }
+    }
+
+    if (!userIdStr) {
+      return new Response(
+        JSON.stringify({ error: "user_id query parameter is required or user must be authenticated" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const userId = parseInt(userIdStr, 10);
+    if (isNaN(userId)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid user_id" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    if (fields == "id" && limit == "1") {
       const row = await context.env.DB.prepare(
         `SELECT shop_id
         FROM shop_member
@@ -79,31 +146,161 @@ Replace lines 65 to 85 with:
           }
         );
       }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          exists: true,
+          shopId: shopId,
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    } else {
+      return new Response(
+        JSON.stringify({ error: "Invalid fields" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+};
+
+// POST: Create a new shop and assign user as Owner
+export const onRequestPost: PagesFunction<Env> = async (context) => {
+  try {
+    const cookieHeader = context.request.headers.get("Cookie");
+    const token = getCookie(cookieHeader, "session_token");
+
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Not authenticated" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const session = await context.env.DB.prepare(
+      "SELECT user_id, expires_at FROM session WHERE id = ?"
+    )
+      .bind(token)
+      .first<SessionRow>();
+
+    if (!session) {
+      return new Response(JSON.stringify({ error: "Session invalid" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const expiresAt = new Date(session.expires_at).getTime();
+    if (expiresAt < Date.now()) {
+      return new Response(JSON.stringify({ error: "Session expired" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const body: any = await context.request.json();
+    const { shopName } = body;
+
+    if (!shopName || !shopName.trim()) {
+      return new Response(JSON.stringify({ error: "Shop name is required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Insert shop
+    const shopResult = await context.env.DB.prepare(
+      "INSERT INTO shop (name) VALUES (?)"
+    )
+      .bind(shopName.trim())
+      .run();
+
+    const shopId = shopResult.meta.last_row_id;
+    if (!shopId) {
+      throw new Error("Failed to create shop record.");
+    }
+
+    // Insert membership into shop_member as Owner
+    await context.env.DB.prepare(
+      'INSERT INTO shop_member (shop_id, user_id, role) VALUES (?, ?, ?)'
+    )
+      .bind(shopId, session.user_id, 'owner')
+      .run();
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        shopId: shopId,
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+};
 ```
 
 - [ ] **Step 2: Commit changes**
   Run command:
   ```bash
   git add functions/api/shop.ts
-  git commit -m "refactor: ensure /api/shop returns a clean shopId number"
+  git commit -m "feat: add POST method to /api/shop for shop creation and user mapping"
   ```
 
 ---
 
-### Task 3: Implement Inline Shop Creation and Delete Custom Hook
+### Task 3: Cleanup endpoints, components, and hooks
 
 **Files:**
 - Modify: `src/pages/CreateShop.tsx`
+- Delete: `functions/api/auth/create-shop.ts`
 - Delete: `src/hooks/useCreateShopForm.ts`
 
 **Interfaces:**
-- Consumes: `/api/auth/create-shop` POST, `/api/shop` GET
-- Produces: Form input binding and submit function directly inside the component.
+- Consumes: POST `/api/shop`, GET `/api/shop`
+- Produces: Clean user state update and navigation in `CreateShop.tsx`
 
-- [ ] **Step 1: Modify CreateShop.tsx**
-  Update [CreateShop.tsx](file:///home/tie/Projects/knpos/src/pages/CreateShop.tsx) to manage local states (`shopName`, `description`, `isLoading`), implement inline submission, update auth store, and navigate back to `/get-started`.
+- [ ] **Step 1: Delete create-shop.ts endpoint**
+  Delete [create-shop.ts](file:///home/tie/Projects/knpos/functions/api/auth/create-shop.ts).
 
-Replace the content of `CreateShop.tsx` with:
+  Run command:
+  ```bash
+  git rm functions/api/auth/create-shop.ts
+  ```
+
+- [ ] **Step 2: Delete useCreateShopForm.ts hook**
+  Delete [useCreateShopForm.ts](file:///home/tie/Projects/knpos/src/hooks/useCreateShopForm.ts).
+
+  Run command:
+  ```bash
+  git rm src/hooks/useCreateShopForm.ts
+  ```
+
+- [ ] **Step 3: Modify CreateShop.tsx**
+  Replace the contents of [CreateShop.tsx](file:///home/tie/Projects/knpos/src/pages/CreateShop.tsx) to use the new POST endpoint on `/api/shop`.
+
 ```typescript
 import { useState, type FormEvent } from 'react';
 import { ArrowLeft, Sparkles, Loader2 } from 'lucide-react';
@@ -124,7 +321,7 @@ export default function CreateShop() {
 
     setIsLoading(true);
     try {
-      const response = await fetch('/api/auth/create-shop', {
+      const response = await fetch('/api/shop', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -259,16 +456,9 @@ export default function CreateShop() {
 }
 ```
 
-- [ ] **Step 2: Delete useCreateShopForm.ts**
-  Delete [useCreateShopForm.ts](file:///home/tie/Projects/knpos/src/hooks/useCreateShopForm.ts) from the repository.
-
-```bash
-git rm src/hooks/useCreateShopForm.ts
-```
-
-- [ ] **Step 3: Commit changes**
+- [ ] **Step 4: Commit changes**
   Run command:
   ```bash
   git add src/pages/CreateShop.tsx
-  git commit -m "feat: inline form logic in CreateShop and remove separate hook file"
+  git commit -m "feat: complete shop endpoint consolidation and clean up unused files"
   ```
