@@ -7,7 +7,7 @@
 **Architecture:** 
 - In `functions/api/shop.ts`, add POST request handling (`onRequestPost`) to insert a new shop and map the authenticated user as `'owner'` in the `shop_member` table. Fix the GET handler (`onRequestGet`) to return the `shopId` directly as a clean number.
 - Delete `functions/api/auth/create-shop.ts` completely.
-- Inline form states (`shopName`, `description`, `isLoading`) directly inside `CreateShop.tsx`, calling POST `/api/shop` and GET `/api/shop?user_id=...` to set `user.shopId` in Zustand.
+- Inline form states (`shopName`, `description`, `isLoading`) directly inside `CreateShop.tsx`, calling POST `/api/shop` and using the returned `shopId` from the POST response directly to update the Zustand auth store (without making an extra GET request).
 - Set global onboarding state `isOnboardingComplete` to `false` in `useAuthStore.ts`.
 
 **Tech Stack:** React, TypeScript, Zustand, Cloudflare Workers D1 database backend.
@@ -279,7 +279,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 - Delete: `src/hooks/useCreateShopForm.ts`
 
 **Interfaces:**
-- Consumes: POST `/api/shop`, GET `/api/shop`
+- Consumes: POST `/api/shop`
 - Produces: Clean user state update and navigation in `CreateShop.tsx`
 
 - [ ] **Step 1: Delete create-shop.ts endpoint**
@@ -299,7 +299,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   ```
 
 - [ ] **Step 3: Modify CreateShop.tsx**
-  Replace the contents of [CreateShop.tsx](file:///home/tie/Projects/knpos/src/pages/CreateShop.tsx) to use the new POST endpoint on `/api/shop`.
+  Replace the contents of [CreateShop.tsx](file:///home/tie/Projects/knpos/src/pages/CreateShop.tsx) to use the new POST endpoint on `/api/shop` and directly extract the `shopId` from the POST response.
 
 ```typescript
 import { useState, type FormEvent } from 'react';
@@ -339,17 +339,10 @@ export default function CreateShop() {
         throw new Error('User not logged in');
       }
 
-      const shopResponse = await fetch(`/api/shop?user_id=${user.id}&fields=id&limit=1`);
-      const shopData = await shopResponse.json();
-
-      if (!shopResponse.ok || !shopData.success || !shopData.exists) {
-        throw new Error(shopData.error || 'Failed to query shop details');
-      }
-
       useAuthStore.setState({
         user: {
           ...user,
-          shopId: shopData.shopId,
+          shopId: data.shopId,
           shopName: shopName.trim(),
           isOnboardingComplete: false,
         },
