@@ -1,5 +1,5 @@
-// @ts-nocheck
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Bell,
   Store,
@@ -15,15 +15,19 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useOrderStore } from '../store/useOrderStore';
 import { useInventoryStore } from '../store/useInventoryStore';
 
-export interface DashboardProps {
-  readonly onNavigate?: (tab: string) => void;
-}
+// export interface GetStartedProps {
+//   readonly onNavigate?: (tab: string) => void;
+// }
 
-export default function Dashboard({ onNavigate }: DashboardProps) {
+export default function GetStarted() {
+  const navigate = useNavigate();
   const { logout } = useAuthStore();
-  const { shopId } = useInventoryStore();
-  const { hasEvent } = useOrderStore();
+  const user = useAuthStore((state) => state.user);
   const [hasProduct, setHasProduct] = useState(false);
+  // const { shopId } = useInventoryStore();
+  // const { hasEvent } = useOrderStore();
+
+  const shopId = user?.shopId
 
   useEffect(() => {
     if (shopId) {
@@ -38,7 +42,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         })
         .catch((err) => console.error('Failed to query shop member:', err));
     }
-  }, [shopId]);
+  }, [shopId])
 
   const handleLogout = () => {
     const confirmLogout = window.confirm('Are you sure you want to logout?');
@@ -47,7 +51,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
     }
   };
 
-  console.log("shopId:",shopId)
+  // console.log("shopId:",shopId)
 
   return (
     <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
@@ -126,7 +130,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           <div className="space-y-4">
              {/*Primary CTA: Create Your Shop */}
             <button
-              onClick={() => onNavigate?.('create-shop')}
+              onClick={() => navigate('/create-shop')}
               disabled={shopId ? true : false}
               className={`w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 transition-all duration-300 overflow-hidden relative ${shopId ? 'opacity-40 pointer-events-none' : 'hover:shadow-md active:scale-95 group cursor-pointer'}`}
             >

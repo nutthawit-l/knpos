@@ -5,6 +5,7 @@ import { useAuthStore } from "./store/useAuthStore";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./components/Login";
 import GetStarted from "./pages/GetStarted";
+import CreateShop from "./pages/CreateShop";
 
 function RootRedirect() {
   const user = useAuthStore((state) => state.user);
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: "/get-started",
         element: <GetStarted />
+      },
+      {
+        path: "/create-shop",
+        element: <CreateShop />
       }
     ]
   },
