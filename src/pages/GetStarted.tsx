@@ -6,12 +6,12 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useOrderStore } from '../store/useOrderStore';
 import { DASHBOARD2_DATA } from '../data/mockData';
 
-export interface Dashboard2Props {
+export interface GetStartedProps {
   readonly onNavigate?: (tab: string) => void;
   readonly onMenuClick?: () => void;
 }
 
-export default function Dashboard2({ onNavigate, onMenuClick }: Dashboard2Props) {
+export default function GetStarted({ onNavigate, onMenuClick }: GetStartedProps) {
   const { user, logout } = useAuthStore();
   const { hasEvent } = useOrderStore();
   const hasShop = !!user?.shopId;
