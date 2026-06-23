@@ -3,9 +3,11 @@ import { devtools } from 'zustand/middleware';
 
 // Define User data
 export interface User {
-  id: string;
+  id: number | string;
   email: string;
   name: string;
+  shopId?: number | null;
+  shopName?: string | null;
   isOnboardingComplete: boolean;
   token?: string;
 }
@@ -17,7 +19,7 @@ interface AuthState {
   isLoading: boolean;
   verifyUser: () => Promise<void>;
   loginWithGoogleToken: (googleCredential: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -29,20 +31,35 @@ export const useAuthStore = create<AuthState>()(
     verifyUser: async () => {
       set({ isLoading: true });
       try {
-        // Mock API verify session from Backend
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const response = await fetch('/api/auth/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-        const mockUser: User = {
-          id: "kanoon123",
-          email: "kanoon123@gmail.com",
-          name: "Kanoon",
-          isOnboardingComplete: false
-        };
+        if (!response.ok) {
+          throw new Error('Session invalid or expired');
+        }
 
-        set({ user: mockUser, isAuthenticated: true });
+        const data = await response.json();
+
+        if (data.success && data.user) {
+          const user: User = {
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.name || data.user.email.split('@')[0],
+            shopId: data.user.shopId,
+            shopName: data.user.shopName,
+            isOnboardingComplete: !!data.user.shopId,
+          };
+          set({ user, isAuthenticated: true });
+        } else {
+          set({ user: null, isAuthenticated: false });
+        }
       } catch (error) {
         set({ isAuthenticated: false, user: null });
-        console.error(error);
+        console.error('Session verification failed:', error);
       } finally {
         set({ isLoading: false });
       }
@@ -65,7 +82,19 @@ export const useAuthStore = create<AuthState>()(
           throw new Error(data.error || 'Failed to login with Google');
         }
 
-        set({ user: data.user, isAuthenticated: true });
+        if (data.success && data.user) {
+          const user: User = {
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.name || data.user.email.split('@')[0],
+            shopId: data.user.shopId,
+            shopName: data.user.shopName,
+            isOnboardingComplete: !!data.user.shopId,
+          };
+          set({ user, isAuthenticated: true });
+        } else {
+          throw new Error('Invalid user payload');
+        }
       } catch (error) {
         console.error(error);
         set({ isAuthenticated: false, user: null });
@@ -74,9 +103,20 @@ export const useAuthStore = create<AuthState>()(
       }
     },
 
-    logout: () => {
-      // Clear user data when Logout
-      set({ user: null, isAuthenticated: false });
+    logout: async () => {
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        console.error('Failed to log out from server:', error);
+      } finally {
+        // Always clear local authentication state regardless of network response
+        set({ user: null, isAuthenticated: false });
+      }
     }
   }), { name: 'AuthStore' }
   )
