@@ -4,16 +4,11 @@ import {
   Bell,
   Store,
   ArrowRight,
-  PlusCircle,
-  Package,
   LogOut,
 } from 'lucide-react';
 import MascotLogo from '../components/MascotLogo';
-import BottomNavigation from '../components/BottomNavigation';
 import Header from '../components/Header';
 import { useAuthStore } from '../store/useAuthStore';
-import { useOrderStore } from '../store/useOrderStore';
-import { useInventoryStore } from '../store/useInventoryStore';
 
 // export interface GetStartedProps {
 //   readonly onNavigate?: (tab: string) => void;
