@@ -51,7 +51,7 @@ export const useAuthStore = create<AuthState>()(
             name: data.user.name || data.user.email.split('@')[0],
             shopId: data.user.shopId,
             shopName: data.user.shopName,
-            isOnboardingComplete: !!data.user.shopId,
+            isOnboardingComplete: false,
           };
           set({ user, isAuthenticated: true });
         } else {
@@ -89,7 +89,7 @@ export const useAuthStore = create<AuthState>()(
             name: data.user.name || data.user.email.split('@')[0],
             shopId: data.user.shopId,
             shopName: data.user.shopName,
-            isOnboardingComplete: !!data.user.shopId,
+            isOnboardingComplete: false,
           };
           set({ user, isAuthenticated: true });
         } else {
