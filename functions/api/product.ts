@@ -39,6 +39,36 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       });
     }
 
+    const url = new URL(context.request.url);
+    const shopIdStr = url.searchParams.get("shop_id");
+    const limit = url.searchParams.get("limit");
+    const fields = url.searchParams.get("fields");
+
+    if (shopIdStr && limit === "1" && fields === "id") {
+      const targetShopId = parseInt(shopIdStr, 10);
+      if (isNaN(targetShopId)) {
+        return new Response(JSON.stringify({ success: true, exists: false }), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      const row = await context.env.DB.prepare(
+        "SELECT id FROM product WHERE shop_id = ? LIMIT 1"
+      )
+        .bind(targetShopId)
+        .first<{ id: number } | null>();
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          exists: row !== null,
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     // Get user's shop membership
     const shopMember: any = await context.env.DB.prepare(
       "SELECT shop_id FROM shop_member WHERE user_id = ?"
