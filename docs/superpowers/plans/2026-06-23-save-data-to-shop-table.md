@@ -137,24 +137,26 @@ export default function CreateShop() {
         throw new Error(data.error || 'Failed to create shop');
       }
 
-      const shopResponse = await fetch('/api/shop?fields=id&limit=1');
+      const user = useAuthStore.getState().user;
+      if (!user) {
+        throw new Error('User not logged in');
+      }
+
+      const shopResponse = await fetch(`/api/shop?user_id=${user.id}&fields=id&limit=1`);
       const shopData = await shopResponse.json();
 
       if (!shopResponse.ok || !shopData.success || !shopData.exists) {
         throw new Error(shopData.error || 'Failed to query shop details');
       }
 
-      const user = useAuthStore.getState().user;
-      if (user) {
-        useAuthStore.setState({
-          user: {
-            ...user,
-            shopId: shopData.shopId,
-            shopName: shopName.trim(),
-            isOnboardingComplete: false,
-          },
-        });
-      }
+      useAuthStore.setState({
+        user: {
+          ...user,
+          shopId: shopData.shopId,
+          shopName: shopName.trim(),
+          isOnboardingComplete: false,
+        },
+      });
 
       navigate('/get-started');
     } catch (err: any) {
