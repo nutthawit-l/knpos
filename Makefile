@@ -1,4 +1,4 @@
-.PHONY: help seed-local seed-remote dev dev-with-seed deploy deploy-with-seed query-users query-shops delete-shop delete-products
+.PHONY: help seed-local seed-remote dev dev-with-seed deploy deploy-with-seed query-users query-shops delete-shop delete-products clear-local clear-remote
 
 help:
 	@echo "Usage:"
@@ -8,6 +8,8 @@ help:
 	@echo "  make query-shops       Query all shops from local D1 database"
 	@echo "  make delete-shop       Delete a shop from local D1 database by prompting for ID"
 	@echo "  make delete-products   Delete all products from local D1 database"
+	@echo "  make clear-local       Clear all data from local D1 database"
+	@echo "  make clear-remote      Clear all data from remote D1 database"
 	@echo "  make dev               Run local dev server & wrangler in separate tmux panes"
 	@echo "  make dev-with-seed     Seed local databases and run local dev server"
 	@echo "  make deploy            Build and deploy app to Cloudflare Pages"
@@ -31,6 +33,12 @@ delete-shop:
 
 delete-products:
 	./scripts/delete-products.sh
+
+clear-local:
+	./scripts/clear-db.sh
+
+clear-remote:
+	./scripts/clear-db.sh --remote
 
 dev:
 	@if [ -n "$$TMUX" ]; then \
