@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, Loader2 } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
 import { currencies } from '../types/currency';
 import TextInput from '../components/TextInput';
 import MascotLogo from '../components/MascotLogo';
@@ -70,7 +71,16 @@ export default function AddProduct() {
       });
 
       if (res.ok) {
-        navigate(-1);
+        const user = useAuthStore.getState().user;
+        if (user) {
+          useAuthStore.setState({
+            user: {
+              ...user,
+              isOnboardingComplete: true,
+            },
+          });
+        }
+        navigate('/dashboard');
       } else {
         const errorText = await res.text();
         alert('Failed to save product: ' + errorText);
