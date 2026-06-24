@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import {
-  ArrowLeft,
   ShoppingBasket,
   ArrowRight,
   TrendingUp,
   ReceiptText,
 } from 'lucide-react';
 import MascotLogo from '../components/MascotLogo';
-import BottomNavigation from '../components/BottomNavigation';
 import CurrencySortControls from '../components/CurrencySortControls';
 import DatePickerModal from '../components/DatePickerModal';
 import { useOrderStore } from '../store/useOrderStore';
@@ -28,6 +26,7 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
 
   useEffect(() => {
     let active = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true);
 
     const tzOffset = -new Date().getTimezoneOffset() / 60;
@@ -59,24 +58,8 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
   const displayedItems = activeTab === 'top5' ? itemsSold.slice(0, 5) : itemsSold;
 
   return (
-    <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
-      <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
-        {/* TopAppBar - Reused from Order page */}
-        <header className="bg-[#fff8f8] flex justify-between items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20 shrink-0">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => onNavigate?.('dashboard')}
-              className="mr-1 hover:opacity-80 transition-opacity duration-200 bg-transparent border-none cursor-pointer p-1 -ml-1 text-[#805062]"
-              aria-label="Go back"
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </button>
-            <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">Daily Sales Summary</h1>
-          </div>
-        </header>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto px-5 pb-24 pt-4 space-y-5 no-scrollbar">
+    <>
+      <div className="space-y-5">
           {/* Currency Switcher Row */}
           <div className="flex items-center justify-between px-1">
             <span className="text-[12px] font-bold uppercase tracking-wider text-text-brown opacity-60">
@@ -299,20 +282,16 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
               </div>
             </div>
             <p className="font-bold text-xs text-text-brown">Great job today!</p>
-          </div>
-        </div>
-
-        {/* Date Picker Modal */}
-        {isDatePickerOpen && (
-          <DatePickerModal
-            onClose={() => setIsDatePickerOpen(false)}
-            onConfirm={() => setIsDatePickerOpen(false)}
-          />
-        )}
-
-        {/* Bottom Navigation - Reused from Order page */}
-        <BottomNavigation activeTab="transactions" onNavigate={onNavigate} />
       </div>
     </div>
+
+      {/* Date Picker Modal */}
+      {isDatePickerOpen && (
+        <DatePickerModal
+          onClose={() => setIsDatePickerOpen(false)}
+          onConfirm={() => setIsDatePickerOpen(false)}
+        />
+      )}
+    </>
   );
 }
