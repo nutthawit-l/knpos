@@ -4,6 +4,7 @@ import {
   Bell,
   Store,
   ArrowRight,
+  Package,
   LogOut,
 } from 'lucide-react';
 import MascotLogo from '../components/MascotLogo';
@@ -39,14 +40,14 @@ export default function GetStarted() {
     }
   }, [shopId])
 
+  console.log("hasProduct:", hasProduct);
+
   const handleLogout = () => {
     const confirmLogout = window.confirm('Are you sure you want to logout?');
     if (confirmLogout) {
       logout();
     }
   };
-
-  // console.log("shopId:",shopId)
 
   return (
     <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
@@ -97,14 +98,14 @@ export default function GetStarted() {
                   Create your shop
                 </p>
               </li>
-              {/*<li className={`flex gap-3 items-start ${hasShop && hasProducts ? 'line-through opacity-100' : (hasShop ? '' : 'opacity-60')}`}>
+              <li className={`flex gap-3 items-start ${shopId && hasProduct? 'line-through opacity-100' : (shopId ? '' : 'opacity-60')}`}>
                 <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0">
                   2
                 </span>
                 <p className="font-medium text-[16px] text-text-brown">
                   Add your products to inventory
                 </p>
-              </li>*/}
+              </li>
               {/*<li className={`flex gap-3 items-start ${hasShop && hasProducts ? '' : 'opacity-60'}`}>
                 <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0">
                   3
@@ -149,11 +150,11 @@ export default function GetStarted() {
             <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#f8bbd0] opacity-20 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
           </button>
 
-            {/* Add Product Block */}
-            {/* <button
-            onClick={() => onNavigate?.('add-product')}
-            disabled={!hasShop || hasProducts}
-            className={`w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 transition-all duration-300 overflow-hidden relative ${hasShop && !hasProducts ? 'hover:shadow-md active:scale-95 group cursor-pointer opacity-100' : 'opacity-40 pointer-events-none'}`}
+          {/* Add Product Block */}
+          <button
+            onClick={() => navigate('/add-product')}
+            disabled={!shopId|| hasProduct}
+            className={`w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 transition-all duration-300 overflow-hidden relative ${shopId && !hasProduct ? 'hover:shadow-md active:scale-95 group cursor-pointer opacity-100' : 'opacity-40 pointer-events-none'}`}
           >
             <div className="flex flex-col h-full justify-between relative z-10">
               <div>
@@ -169,11 +170,11 @@ export default function GetStarted() {
               </div>
               <div className="mt-8 flex items-center gap-2 text-[#326578] font-bold text-[14px]">
                 <span>Add Product</span>
-                <ArrowRight className={`w-4 h-4 ${hasShop && !hasProducts ? 'animate-pulse' : ''}`} />
+                <ArrowRight className={`w-4 h-4 ${shopId && !hasProduct ? 'animate-pulse' : ''}`} />
               </div>
             </div>
             <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#b5e7fe] opacity-10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-          </button> */}
+          </button>
 
             {/* Create New Event Block */}
             {/* <button
