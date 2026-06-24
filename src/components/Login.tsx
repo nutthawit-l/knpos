@@ -1,5 +1,5 @@
 import { Mail, Lock, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useLoginForm } from '../hooks/useLoginForm';
 import { useAuthStore } from '../store/useAuthStore';
@@ -8,6 +8,7 @@ import AuthLayout from './AuthLayout';
 import FormInput from './FormInput';
 import AuthButton from './AuthButton';
 import MascotLogo from './MascotLogo';
+import { useEffect } from 'react';
 
 export interface LoginProps {}
 
@@ -21,8 +22,13 @@ export default function Login(_props: Readonly<LoginProps>) {
     error,
     handleLoginSubmit,
   } = useLoginForm();
-
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const navigate = useNavigate();
   const loginWithGoogleToken = useAuthStore((state) => state.loginWithGoogleToken);
+
+  useEffect(() => {
+    if (isAuthenticated) navigate('/')
+  }, [isAuthenticated, navigate])
 
   return (
     <AuthLayout>
