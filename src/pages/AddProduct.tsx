@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Camera, Plus, Loader2 } from 'lucide-react';
 import { type Product } from '../components/SwipeableProductRow';
@@ -42,9 +42,29 @@ export default function AddProduct({
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  // Local UI categories
-  const [categories, setCategories] = useState<string[]>(['Accessories', 'Treats', 'Toys']);
-  const [selectedCategory, setSelectedCategory] = useState<string>('Accessories');
+  // Local UI categories loaded from API
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [stock, setStock] = useState<string>(
+    productToEdit && 'stock' in productToEdit ? String((productToEdit as any).stock) : '0'
+  );
+
+  useEffect(() => {
+    fetch('/api/category')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const names = data.map((c) => c.name);
+          setCategories(names);
+          if (productToEdit && 'category_name' in productToEdit && (productToEdit as any).category_name) {
+            setSelectedCategory((productToEdit as any).category_name);
+          } else if (names.length > 0) {
+            setSelectedCategory(names[0]);
+          }
+        }
+      })
+      .catch((err) => console.error('Failed to load categories:', err));
+  }, [productToEdit]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -77,6 +97,14 @@ export default function AddProduct({
       alert('Product Name is required.');
       return;
     }
+    if (!selectedCategory) {
+      alert('Category is required.');
+      return;
+    }
+    if (stock.trim() === '' || isNaN(parseInt(stock, 10)) || parseInt(stock, 10) < 0) {
+      alert('Stock Quantity must be a valid non-negative number.');
+      return;
+    }
     if (!prices['THB'] || isNaN(parseFloat(prices['THB']))) {
       alert('Thai Price (THB) is required.');
       return;
@@ -90,6 +118,9 @@ export default function AddProduct({
     try {
       const formData = new FormData();
       formData.append('name', name.trim());
+      formData.append('category_name', selectedCategory.trim());
+      formData.append('stock', parseInt(stock, 10).toString());
+      
       if (imageFile) {
         formData.append('image', imageFile);
       } else if (productToEdit) {
@@ -232,6 +263,17 @@ export default function AddProduct({
                 </button>
               </div>
             </div>
+
+            {/* Stock Quantity */}
+            <FormInput
+              id="stock_quantity"
+              label="Stock Quantity"
+              placeholder="0"
+              value={stock}
+              onChange={setStock}
+              type="number"
+              required
+            />
 
             {/* Pricing Section */}
             <div className="space-y-4 pt-2">
