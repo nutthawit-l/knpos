@@ -1,5 +1,6 @@
 import React from 'react';
 import { Menu, ChevronLeft, FileDown, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export interface HeaderProps {
   readonly title?: string;
@@ -38,7 +39,12 @@ export default function Header({
             </button>
           )
         )}
-        <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">{title}</h1>
+        <Link
+          to="/"
+          className="hover:opacity-80 active:opacity-75 transition-opacity cursor-pointer decoration-none"
+        >
+          <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">{title}</h1>
+        </Link>
       </div>
       <div className="flex items-center gap-2">
         {onImportClick && (
