@@ -147,13 +147,42 @@ async function run() {
     `INSERT INTO event_member (event_id, user_id, role) VALUES (1, ${defaultUserId}, 'event_creator');`
   );
 
+  // Seed categories
+  const categoriesList = ['Frame card', 'Hat', 'Head band', 'Flower'];
+  categoriesList.forEach((catName, index) => {
+    const catId = index + 1;
+    sqlLines.push(
+      `INSERT INTO category (id, shop_id, name) VALUES (${catId}, ${defaultShopId}, '${catName}');`
+    );
+  });
+
+  // Helper function to map product names/IDs to category IDs and starting stock
+  const getProductCategoryAndStock = (pid: number, name: string): { catId: number; stock: number } => {
+    const n = name.toLowerCase();
+    let catId = 1; // Default to 'Frame card'
+    if (n.includes('hat')) catId = 2;
+    else if (n.includes('band')) catId = 3;
+    else if (n.includes('flower') || n.includes('cherry')) catId = 4;
+
+    let stock = 0;
+    if (pid === 1) stock = 24;
+    else if (pid === 2) stock = 8;
+    else if (pid === 3) stock = 0;
+    else if (pid === 4) stock = 42;
+    else {
+      stock = (pid * 7) % 35;
+    }
+    return { catId, stock };
+  };
+
   // 1. Insert Products and Prices
   products.forEach((p, idx) => {
     const productId = idx + 1;
     const imageUrl = `${R2_PUBLIC_URL}/${p.filename}`;
+    const { catId, stock } = getProductCategoryAndStock(productId, p.name);
     sqlLines.push(
-      `INSERT INTO product (id, name, image_url, shop_id) ` +
-      `VALUES (${productId}, '${p.name.replace(/'/g, "''")}', '${imageUrl}', ${defaultShopId});`
+      `INSERT INTO product (id, name, image_url, shop_id, category_id, stock) ` +
+      `VALUES (${productId}, '${p.name.replace(/'/g, "''")}', '${imageUrl}', ${defaultShopId}, ${catId}, ${stock});`
     );
     sqlLines.push(
       `INSERT INTO product_price (product_id, currency_code, price) ` +
