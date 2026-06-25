@@ -30,7 +30,7 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
     setIsLoading(true);
 
     const tzOffset = -new Date().getTimezoneOffset() / 60;
-    fetch(`/api/transactions?currency=${selectedCurrency.code}&tzOffset=${tzOffset}`)
+    fetch(`/api/transaction?currency=${selectedCurrency.code}&tzOffset=${tzOffset}`)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch transactions');
         return res.json();
