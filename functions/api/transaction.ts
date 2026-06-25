@@ -140,7 +140,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       ).bind(item.product_id, item.quantity, item.price_per_unit)
     );
 
-    const batchResult = await context.env.DB.batch([insertTx, ...itemStatements]);
+    // Add stock deduction updates
+    const stockDeductionStatements = items.map((item) =>
+      context.env.DB.prepare(
+        `UPDATE product SET stock = MAX(0, stock - ?) WHERE id = ?`
+      ).bind(item.quantity, item.product_id)
+    );
+
+    const batchResult = await context.env.DB.batch([insertTx, ...itemStatements, ...stockDeductionStatements]);
     const transactionId = batchResult[0].meta.last_row_id;
 
     return new Response(JSON.stringify({ success: true, transactionId }), {
