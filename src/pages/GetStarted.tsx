@@ -40,8 +40,6 @@ export default function GetStarted() {
     }
   }, [shopId])
 
-  console.log("hasProduct:", hasProduct);
-
   const handleLogout = () => {
     const confirmLogout = window.confirm('Are you sure you want to logout?');
     if (confirmLogout) {
@@ -152,7 +150,7 @@ export default function GetStarted() {
 
           {/* Add Product Block */}
           <button
-            onClick={() => navigate('/add-product')}
+            onClick={() => navigate('/add-first-product')}
             disabled={!shopId|| hasProduct}
             className={`w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 transition-all duration-300 overflow-hidden relative ${shopId && !hasProduct ? 'hover:shadow-md active:scale-95 group cursor-pointer opacity-100' : 'opacity-40 pointer-events-none'}`}
           >

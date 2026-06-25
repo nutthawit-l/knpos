@@ -122,18 +122,19 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       user.is_verified = 1;
     }
 
-    // 4. Retrieve shop details if the user is a member of any shop
-    const shopMember = await context.env.DB.prepare(
-      `SELECT sm.shop_id, s.name as shop_name
-       FROM shop_member sm
-       JOIN shop s ON sm.shop_id = s.id
-       WHERE sm.user_id = ?`
+    // Retrieve user and shop info
+    const userProfile: any = await context.env.DB.prepare(
+      `SELECT u.id, u.email, sm.shop_id, s.name as shop_name, p.id as product_id
+       FROM "user" u
+       LEFT JOIN shop_member sm ON u.id = sm.user_id
+       LEFT JOIN shop s ON sm.shop_id = s.id
+       LEFT JOIN product p ON s.id = p.shop_id
+       WHERE u.id = ?`
     )
       .bind(user.id)
-      .first<ShopMemberDetails>();
+      .first();
 
-    const shopId = shopMember ? shopMember.shop_id : null;
-    const shopName = shopMember ? shopMember.shop_name : null;
+    const isShopEmpty = userProfile.product_id ? true : false;
 
     // 5. Create active session
     const sessionId = generateUUID();
@@ -161,8 +162,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           id: user.id,
           email: user.email,
           name: name || email.split("@")[0],
-          shopName: shopName,
-          shopId: shopId,
+          shopName: userProfile.shop_name || null,
+          shopId: userProfile.shop_id || null,
+          isOnboardingComplete: isShopEmpty,
         },
       }),
       {

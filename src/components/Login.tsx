@@ -24,7 +24,9 @@ export default function Login(_props: Readonly<LoginProps>) {
   } = useLoginForm();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const navigate = useNavigate();
-  const loginWithGoogleToken = useAuthStore((state) => state.loginWithGoogleToken);
+  const loginWithGoogleToken = useAuthStore(
+    (state) => state.loginWithGoogleToken
+  );
 
   useEffect(() => {
     if (isAuthenticated) navigate('/')

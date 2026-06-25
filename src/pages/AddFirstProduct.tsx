@@ -80,7 +80,7 @@ export default function AddFirstProduct() {
             },
           });
         }
-        navigate('/dashboard');
+        navigate('/');
       } else {
         const errorText = await res.text();
         alert('Failed to save product: ' + errorText);
