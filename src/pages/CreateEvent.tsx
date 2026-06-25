@@ -1,16 +1,10 @@
-import { ArrowLeft, Calendar, Store, PlaneTakeoff, Hotel, Utensils, Loader2, Sparkles, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Calendar, Store, PlaneTakeoff, Hotel, Utensils, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { useCreateEventForm } from '../hooks/useCreateEventForm';
 import FormInput from '../components/FormInput';
 import FormSelect from '../components/FormSelect';
 import MascotLogo from '../components/MascotLogo';
 
-export interface CreateEventProps {
-  readonly onNavigate?: (tab: string) => void;
-}
-
-export default function CreateEvent({ onNavigate }: CreateEventProps) {
-  const navigate = useNavigate();
+export default function CreateEvent() {
   const {
     eventName,
     setEventName,
@@ -32,40 +26,15 @@ export default function CreateEvent({ onNavigate }: CreateEventProps) {
     isSuccess,
     activeCurrencyCode,
     handleCreateEventSubmit,
-  } = useCreateEventForm({ onNavigate });
+  } = useCreateEventForm();
 
   const countries = ['Thailand', 'Singapore', 'USA', 'Japan'] as const;
 
-  const handleBack = () => {
-    if (onNavigate) {
-      onNavigate('dashboard');
-    } else {
-      navigate('/dashboard');
-    }
-  };
-
   return (
-    <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
-      <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
-        {/* TopAppBar */}
-        <header className="bg-[#fff8f8] flex items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20 shrink-0">
-          <button
-            onClick={handleBack}
-            className="mr-4 hover:opacity-80 transition-opacity duration-200 bg-transparent border-none cursor-pointer p-1 -ml-1 text-[#805062]"
-            aria-label="Go back"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">
-            Create Event
-          </h1>
-        </header>
-
-        {/* Content */}
-        <form
-          className="flex-1 overflow-y-auto px-6 pb-28 pt-6 space-y-6 no-scrollbar"
-          onSubmit={handleCreateEventSubmit}
-        >
+    <form
+      className="space-y-6 pb-6"
+      onSubmit={handleCreateEventSubmit}
+    >
           {/* Mascot Banner */}
           <section className="relative bg-brand-blue/30 rounded-[24px] p-5 flex items-center overflow-hidden border border-brand-blue/20">
             <div className="flex-1 z-10">
@@ -271,7 +240,5 @@ export default function CreateEvent({ onNavigate }: CreateEventProps) {
             </p>
           </div>
         </form>
-      </div>
-    </div>
   );
 }
