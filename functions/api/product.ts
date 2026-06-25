@@ -207,7 +207,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const filename = `${Date.now()}-${imageFile.name}`;
     await context.env.IMAGES_BUCKET.put(filename, imageFile.stream());
-    const imageUrl = `${context.env.R2_PUBLIC_URL}/${filename}`;
+    const urlObj = new URL(context.request.url);
+    const isLocal = urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1';
+    const r2PublicUrl = isLocal ? '/api/images' : context.env.R2_PUBLIC_URL;
+    const imageUrl = `${r2PublicUrl}/${filename}`;
 
     const productInsert = context.env.DB.prepare(
       `INSERT INTO product (name, image_url, shop_id) VALUES (?, ?, ?)`
@@ -353,7 +356,10 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     if (imageFile && imageFile.name) {
       const filename = `${Date.now()}-${imageFile.name}`;
       await context.env.IMAGES_BUCKET.put(filename, imageFile.stream());
-      imageUrl = `${context.env.R2_PUBLIC_URL}/${filename}`;
+      const urlObj = new URL(context.request.url);
+      const isLocal = urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1';
+      const r2PublicUrl = isLocal ? '/api/images' : context.env.R2_PUBLIC_URL;
+      imageUrl = `${r2PublicUrl}/${filename}`;
     }
 
     const updateProduct = context.env.DB.prepare(
