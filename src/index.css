@@ -33,6 +33,8 @@
   --color-pink-container: #FFF0F5;
   --color-peach-container: #FFF3E0;
   --color-surface-variant-custom: #504447;
+  --color-primary-custom: #805062;
+  --color-secondary-custom: #326578;
 }
 
 @layer base {

@@ -6,14 +6,12 @@ import {
   Minus,
   CreditCard,
   AlertCircle,
-  ArrowLeft,
 } from 'lucide-react';
 import MascotLogo from '../components/MascotLogo';
 import PaymentModal from '../components/PaymentModal';
 import CurrencySortControls from '../components/CurrencySortControls';
 import CategoryFilter from '../components/CategoryFilter';
 import { useOrderStore } from '../store/useOrderStore';
-import BottomNavigation from '../components/BottomNavigation';
 import { type Product } from '../components/SwipeableProductRow';
 
 export interface OrderProps {
@@ -96,262 +94,241 @@ export default function Order({ onNavigate }: OrderProps) {
   }, 0);
 
   return (
-    <div className='bg-[#f9fafb] h-dvh overflow-hidden flex justify-center'>
-      <div className='bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern'>
-        {isConfirmModalOpen && (
-          <PaymentModal
-            isOpen={isConfirmModalOpen}
-            items={products
-              .filter((p) => (quantities[p.id] || 0) > 0)
+    <>
+      {isConfirmModalOpen && (
+        <PaymentModal
+          isOpen={isConfirmModalOpen}
+          items={products
+            .filter((p) => (quantities[p.id] || 0) > 0)
+            .map((p) => ({
+              id: p.id,
+              name: p.name,
+              quantity: quantities[p.id],
+              pricePerUnit: getPrice(p, selectedCurrency.code),
+            }))}
+          currencySymbol={selectedCurrency.symbol}
+          isLoading={isConfirming}
+          onCancel={() => {
+            clearOrder();
+            setIsConfirmModalOpen(false);
+          }}
+          onEdit={() => setIsConfirmModalOpen(false)}
+          onConfirm={async () => {
+            setIsConfirming(true);
+            const orderItems = products
+              .filter((p) => quantities[p.id] > 0)
               .map((p) => ({
-                id: p.id,
-                name: p.name,
+                product_id: p.id,
                 quantity: quantities[p.id],
-                pricePerUnit: getPrice(p, selectedCurrency.code),
-              }))}
-            currencySymbol={selectedCurrency.symbol}
-            isLoading={isConfirming}
-            onCancel={() => {
-              clearOrder();
-              setIsConfirmModalOpen(false);
-            }}
-            onEdit={() => setIsConfirmModalOpen(false)}
-            onConfirm={async () => {
-              setIsConfirming(true);
-              const orderItems = products
-                .filter((p) => quantities[p.id] > 0)
-                .map((p) => ({
-                  product_id: p.id,
-                  quantity: quantities[p.id],
-                  price_per_unit: getPrice(p, selectedCurrency.code),
-                }));
+                price_per_unit: getPrice(p, selectedCurrency.code),
+              }));
 
-              try {
-                const response = await fetch('/api/transactions', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    currency_code: selectedCurrency.code,
-                    total_income: totalCost,
-                    total_product_sold: totalCount,
-                    event_id: activeEventId,
-                    items: orderItems,
-                  }),
-                });
+            try {
+              const response = await fetch('/api/transactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  currency_code: selectedCurrency.code,
+                  total_income: totalCost,
+                  total_product_sold: totalCount,
+                  event_id: activeEventId,
+                  items: orderItems,
+                }),
+              });
 
-                if (response.ok) {
-                  clearOrder();
-                  onNavigate?.('transactions');
-                  setIsConfirmModalOpen(false);
-                } else {
-                  let errorMsg = 'Unknown error';
-                  const contentType = response.headers.get('content-type');
-                  if (contentType && contentType.includes('application/json')) {
-                    try {
-                      const errJson = await response.json() as { error?: string };
-                      errorMsg = errJson.error || errorMsg;
-                    } catch {
-                      // Fallback if parsing fails
-                    }
-                  } else {
-                    errorMsg = await response.text();
+              if (response.ok) {
+                clearOrder();
+                onNavigate?.('transactions');
+                setIsConfirmModalOpen(false);
+              } else {
+                let errorMsg = 'Unknown error';
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                  try {
+                    const errJson = await response.json() as { error?: string };
+                    errorMsg = errJson.error || errorMsg;
+                  } catch {
+                    // Fallback if parsing fails
                   }
-                  console.error('Checkout failed:', errorMsg);
-                  alert(`Checkout failed: ${errorMsg}`);
+                } else {
+                  errorMsg = await response.text();
                 }
-              } catch (err) {
-                console.error('Checkout error:', err);
-                alert('A network error occurred. Please check your connection and try again.');
-              } finally {
-                setIsConfirming(false);
+                console.error('Checkout failed:', errorMsg);
+                alert(`Checkout failed: ${errorMsg}`);
               }
-            }}
-          />
-        )}
+            } catch (err) {
+              console.error('Checkout error:', err);
+              alert('A network error occurred. Please check your connection and try again.');
+            } finally {
+              setIsConfirming(false);
+            }
+          }}
+        />
+      )}
 
-        {/* TopAppBar */}
-        <header className="bg-[#fff8f8] flex justify-between items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20 shrink-0">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => onNavigate?.('dashboard')}
-              className="mr-1 hover:opacity-80 transition-opacity duration-200 bg-transparent border-none cursor-pointer p-1 -ml-1 text-[#805062]"
-              aria-label="Go back"
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </button>
-            <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">Order</h1>
-          </div>
-        </header>
-
-        {/* Content */}
-        <div className="flex-grow overflow-y-auto px-5 pb-44 pt-4 space-y-4 no-scrollbar">
-          {/* Search Bar */}
-          <section className="shrink-0">
-            <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline-variant-warm group-focus-within:text-[#805062] transition-colors" />
-              <input
-                type="text"
-                placeholder="Find treats, toys, and more..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-12 pl-12 pr-12 bg-[#f6ebed] rounded-full border-none focus:ring-2 focus:ring-brand-pink/50 text-[14px] font-medium text-text-brown placeholder:text-outline-variant-warm/60 outline-none"
-              />
-              <button
-                type="button"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant-warm hover:text-[#805062] transition-colors bg-transparent border-none cursor-pointer p-1"
-                aria-label="Scan barcode"
-              >
-                <Scan className="w-5 h-5" />
-              </button>
-            </div>
-          </section>
-
-          {/* Categories header with Currency switcher */}
-          <div className="flex items-center justify-between shrink-0">
-            <span className="text-[12px] font-bold uppercase tracking-wider text-text-brown opacity-60 pl-2">Categories</span>
-            <CurrencySortControls
-              selectedCurrency={selectedCurrency}
-              onSelectCurrency={setSelectedCurrency}
+      {/* Main Content Scrollable Area Wrapper (renders inside MainLayout scroll container) */}
+      <div className="space-y-4 pb-20">
+        {/* Search Bar */}
+        <section className="shrink-0">
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline-variant-warm group-focus-within:text-[#805062] transition-colors" />
+            <input
+              type="text"
+              placeholder="Find treats, toys, and more..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-12 pl-12 pr-12 bg-[#f6ebed] rounded-full border-none focus:ring-2 focus:ring-brand-pink/50 text-[14px] font-medium text-text-brown placeholder:text-outline-variant-warm/60 outline-none"
             />
+            <button
+              type="button"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant-warm hover:text-[#805062] transition-colors bg-transparent border-none cursor-pointer p-1"
+              aria-label="Scan barcode"
+            >
+              <Scan className="w-5 h-5" />
+            </button>
           </div>
+        </section>
 
-          {/* Category tabs */}
-          <CategoryFilter
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
+        {/* Categories header with Currency switcher */}
+        <div className="flex items-center justify-between shrink-0">
+          <span className="text-[12px] font-bold uppercase tracking-wider text-text-brown opacity-60 pl-2">Categories</span>
+          <CurrencySortControls
+            selectedCurrency={selectedCurrency}
+            onSelectCurrency={setSelectedCurrency}
           />
-
-          {/* Products List/Grid */}
-          <section className="pb-4">
-            {isLoading ? (
-              <div className="p-8 text-center text-[14px] text-text-brown font-medium">
-                Loading products...
-              </div>
-            ) : filteredProducts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <AlertCircle className="w-12 h-12 text-outline-variant-warm mb-3" />
-                <p className="text-[14px] text-outline-variant-warm font-bold">No products found.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                {filteredProducts.map((product) => {
-                  const qty = quantities[product.id] || 0;
-                  const isSelected = qty > 0;
-                  const price = getPrice(product, selectedCurrency.code);
-
-                  return (
-                    <div
-                      key={product.id}
-                      className={`bg-white rounded-[20px] p-3 shadow-[0_4px_12px_rgba(78,52,46,0.05)] transition-all duration-200 flex flex-col border ${isSelected
-                          ? 'border-2 border-brand-pink ring-4 ring-brand-pink/10'
-                          : 'border-outline-warm/40'
-                        }`}
-                    >
-                      {/* Product Image */}
-                      <div className="aspect-square rounded-xl bg-peach-container/40 relative overflow-hidden mb-3 flex items-center justify-center p-2 border border-outline-warm/15">
-                        <img
-                          src={product.image_url}
-                          alt={product.name}
-                          className="w-full h-full object-contain mix-blend-multiply"
-                        />
-                      </div>
-
-                      {/* Info */}
-                      <h3 className="font-bold text-[14px] text-text-brown leading-tight mb-1 truncate">
-                        {product.name}
-                      </h3>
-                      <p className="text-[11px] text-outline-variant-warm font-medium mb-3">
-                        {getProductCategory(product.name)}
-                      </p>
-
-                      {/* Action / Price */}
-                      <div className="mt-auto">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-bold text-[14px] text-[#805062]">
-                            {selectedCurrency.symbol}{price.toFixed(2)}
-                          </span>
-                        </div>
-
-                        {isSelected ? (
-                          <div className="flex items-center justify-between bg-brand-pink/20 rounded-full p-1 border border-brand-pink/30">
-                            <button
-                              type="button"
-                              onClick={() => handleDecrement(product.id)}
-                              className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#805062] hover:bg-brand-pink/10 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
-                            >
-                              <Minus className="w-3.5 h-3.5" />
-                            </button>
-                            <span className="font-bold text-text-brown text-sm">
-                              {qty}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => handleIncrement(product.id)}
-                              className="w-7 h-7 rounded-full bg-[#805062] flex items-center justify-center text-white hover:bg-[#805062]/90 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
-                            >
-                              <Plus className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex justify-end">
-                            <button
-                              type="button"
-                              onClick={() => handleIncrement(product.id)}
-                              className="w-8 h-8 rounded-full bg-[#ffd9e4] text-[#805062] hover:bg-brand-pink/30 active:scale-90 transition-transform flex items-center justify-center shadow-sm cursor-pointer border-none"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-
-          {/* Empty state mascot illustration */}
-          <div className="flex flex-col items-center justify-center py-8 opacity-60">
-            <div className="relative">
-              <MascotLogo sizeClassName="w-20 h-20" className="border-4 border-white shadow-md floating-animation mb-3" />
-              <div className="absolute -bottom-1 -right-1 bg-[#805062] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">CHARNI</div>
-            </div>
-            <p className="font-bold text-[14px] text-text-brown">Need help finding something?</p>
-          </div>
         </div>
 
-        {/* Bottom Docked Summary Bar */}
-        {!isConfirmModalOpen && (
-          <div className="absolute bottom-20 left-0 w-full px-5 z-30 pointer-events-none">
-            <div className="bg-white/90 backdrop-blur-md rounded-[20px] p-4 shadow-2xl pointer-events-auto border border-outline-warm/40 flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col">
-                  <span className="text-[12px] text-text-brown/60 font-bold">Items: {totalCount}</span>
-                  <span className="text-[20px] font-bold text-text-brown leading-none mt-1">
-                    {selectedCurrency.symbol}{totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  disabled={totalCount === 0}
-                  onClick={() => setIsConfirmModalOpen(true)}
-                  className="h-12 px-6 bg-brand-pink hover:bg-brand-pink-hover text-text-brown font-bold uppercase rounded-full shadow-md transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer border-none"
-                >
-                  <span>PROCESS PAYMENT</span>
-                  <CreditCard className="w-5 h-5 text-text-brown" />
-                </button>
+        {/* Category tabs */}
+        <CategoryFilter
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+        />
+
+        {/* Products List/Grid */}
+        <section className="pb-4">
+          {isLoading ? (
+            <div className="p-8 text-center text-[14px] text-text-brown font-medium">
+              Loading products...
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <AlertCircle className="w-12 h-12 text-outline-variant-warm mb-3" />
+              <p className="text-[14px] text-outline-variant-warm font-bold">No products found.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {filteredProducts.map((product) => {
+                const qty = quantities[product.id] || 0;
+                const isSelected = qty > 0;
+                const price = getPrice(product, selectedCurrency.code);
+
+                return (
+                  <div
+                    key={product.id}
+                    className={`bg-white rounded-[20px] p-3 shadow-[0_4px_12px_rgba(78,52,46,0.05)] transition-all duration-200 flex flex-col border ${isSelected
+                        ? 'border-2 border-brand-pink ring-4 ring-brand-pink/10'
+                        : 'border-outline-warm/40'
+                      }`}
+                  >
+                    {/* Product Image */}
+                    <div className="aspect-square rounded-xl bg-peach-container/40 relative overflow-hidden mb-3 flex items-center justify-center p-2 border border-outline-warm/15">
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-full object-contain mix-blend-multiply"
+                      />
+                    </div>
+
+                    {/* Info */}
+                    <h3 className="font-bold text-[14px] text-text-brown leading-tight mb-1 truncate">
+                      {product.name}
+                    </h3>
+                    <p className="text-[11px] text-outline-variant-warm font-medium mb-3">
+                      {getProductCategory(product.name)}
+                    </p>
+
+                    {/* Action / Price */}
+                    <div className="mt-auto">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-[14px] text-[#805062]">
+                          {selectedCurrency.symbol}{price.toFixed(2)}
+                        </span>
+                      </div>
+
+                      {isSelected ? (
+                        <div className="flex items-center justify-between bg-brand-pink/20 rounded-full p-1 border border-brand-pink/30">
+                          <button
+                            type="button"
+                            onClick={() => handleDecrement(product.id)}
+                            className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#805062] hover:bg-brand-pink/10 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
+                          >
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                          <span className="font-bold text-text-brown text-sm">
+                            {qty}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleIncrement(product.id)}
+                            className="w-7 h-7 rounded-full bg-[#805062] flex items-center justify-center text-white hover:bg-[#805062]/90 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => handleIncrement(product.id)}
+                            className="w-8 h-8 rounded-full bg-[#ffd9e4] text-[#805062] hover:bg-brand-pink/30 active:scale-90 transition-transform flex items-center justify-center shadow-sm cursor-pointer border-none"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        {/* Empty state mascot illustration */}
+        <div className="flex flex-col items-center justify-center py-8 opacity-60">
+          <div className="relative">
+            <MascotLogo sizeClassName="w-20 h-20" className="border-4 border-white shadow-md floating-animation mb-3" />
+            <div className="absolute -bottom-1 -right-1 bg-[#805062] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">CHARNI</div>
+          </div>
+          <p className="font-bold text-[14px] text-text-brown">Need help finding something?</p>
+        </div>
+      </div>
+
+      {/* Bottom Docked Summary Bar */}
+      {!isConfirmModalOpen && (
+        <div className="absolute bottom-20 left-0 w-full px-5 z-30 pointer-events-none">
+          <div className="bg-white/90 backdrop-blur-md rounded-[20px] p-4 shadow-2xl pointer-events-auto border border-outline-warm/40 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-[12px] text-text-brown/60 font-bold">Items: {totalCount}</span>
+                <span className="text-[20px] font-bold text-text-brown leading-none mt-1">
+                  {selectedCurrency.symbol}{totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
               </div>
+              <button
+                type="button"
+                disabled={totalCount === 0}
+                onClick={() => setIsConfirmModalOpen(true)}
+                className="h-12 px-6 bg-brand-pink hover:bg-brand-pink-hover text-text-brown font-bold uppercase rounded-full shadow-md transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer border-none"
+              >
+                <span>PROCESS PAYMENT</span>
+                <CreditCard className="w-5 h-5 text-text-brown" />
+              </button>
             </div>
           </div>
-        )}
-
-        {/* Bottom Navigation */}
-        {!isConfirmModalOpen && (
-          <BottomNavigation activeTab="order" onNavigate={onNavigate} />
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }

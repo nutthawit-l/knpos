@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 
 interface InventoryState {
+  shopId: number | null;
+  fetchShopId: (userId?: number) => Promise<void>;
+  setShopId: (shopId: number | null) => void;
+  firstProductId: number | null;
   stocks: Record<number, number>; // productId -> quantity
   setStock: (productId: number, stock: number) => void;
   incrementStock: (productId: number) => void;
@@ -13,6 +17,19 @@ interface InventoryState {
 export const useInventoryStore = create<InventoryState>((set) => ({
   stocks: {},
   hasFirstProduct: false,
+  shopId: null,
+  firstProductId: null,
+  fetchShopId: async (userId) => {
+    fetch(`/api/shop?user_id=${userId}&limit=1&fields=id`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.exists) {
+          set({ shopId: data.shop_id });
+        }
+      })
+      .catch((err) => console.error('Failed to query shop member:', err));
+  },
+  setShopId: (shopId) => set({ shopId }),
   checkFirstProduct: async () => {
     try {
       const res = await fetch('/api/product');

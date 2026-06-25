@@ -1,16 +1,12 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Search, Plus, Minus, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Plus, Minus, Trash2 } from 'lucide-react';
 import { type Product } from '../components/SwipeableProductRow';
 import { useInventoryStore } from '../store/useInventoryStore';
-import BottomNavigation from '../components/BottomNavigation';
 import CategoryFilter from '../components/CategoryFilter';
 
-export interface InventoryProps {
-  readonly onNavigate?: (tab: string) => void;
-  readonly onEditProduct?: (product: Product) => void;
-}
-
-export default function Inventory({ onNavigate, onEditProduct }: InventoryProps) {
+export default function Inventory() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -98,24 +94,8 @@ export default function Inventory({ onNavigate, onEditProduct }: InventoryProps)
   });
 
   return (
-    <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
-      <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
-        {/* TopAppBar */}
-        <header className="bg-[#fff8f8] flex items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20 shrink-0">
-          <button
-            onClick={() => onNavigate?.('dashboard')}
-            className="mr-4 hover:opacity-80 transition-opacity duration-200 bg-transparent border-none cursor-pointer p-1 -ml-1 text-[#805062]"
-            aria-label="Go back"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">
-            Inventory
-          </h1>
-        </header>
-
-        {/* Scrollable Container */}
-        <div className="flex-grow overflow-y-auto px-5 pb-28 pt-4 space-y-4 no-scrollbar">
+    <>
+      <div className="space-y-4 pb-20">
           {/* Search Bar */}
           <section className="shrink-0">
             <div className="relative group">
@@ -166,9 +146,8 @@ export default function Inventory({ onNavigate, onEditProduct }: InventoryProps)
                     key={product.id}
                     className="product-card p-4 bg-white rounded-[20px] shadow-[0_4px_12px_rgba(78,52,46,0.05)] border border-outline-warm/40 flex gap-4 items-center relative overflow-hidden transition-all duration-200"
                   >
-                    {/* Clickable Area for Editing */}
                     <div
-                      onClick={() => onEditProduct?.(product)}
+                      onClick={() => navigate('/add-product', { state: { productToEdit: product } })}
                       className="flex-grow flex gap-4 items-center min-w-0 cursor-pointer"
                     >
                       {/* Product Image */}
@@ -236,20 +215,16 @@ export default function Inventory({ onNavigate, onEditProduct }: InventoryProps)
               })
             )}
           </section>
-        </div>
-
-        {/* Floating Action Button (FAB) for Add Product */}
-        <button
-          onClick={() => onNavigate?.('add-product')}
-          className="absolute right-6 bottom-24 w-14 h-14 bg-[#805062] text-white rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform z-50 cursor-pointer border-none hover:bg-[#805062]/95"
-          aria-label="Add new product"
-        >
-          <Plus className="w-8 h-8" />
-        </button>
-
-        {/* Bottom Navigation */}
-        <BottomNavigation activeTab="products" onNavigate={onNavigate} />
       </div>
-    </div>
+
+      {/* Floating Action Button (FAB) for Add Product */}
+      <button
+        onClick={() => navigate('/add-product')}
+        className="absolute right-6 bottom-24 w-14 h-14 bg-[#805062] text-white rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform z-50 cursor-pointer border-none hover:bg-[#805062]/95"
+        aria-label="Add new product"
+      >
+        <Plus className="w-8 h-8" />
+      </button>
+    </>
   );
 }

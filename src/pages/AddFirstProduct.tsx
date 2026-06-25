@@ -1,50 +1,20 @@
 import { useState, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Camera, Plus, Loader2 } from 'lucide-react';
-import { type Product } from '../components/SwipeableProductRow';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Camera, Loader2 } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
 import { currencies } from '../types/currency';
-import { ADD_PRODUCT_DATA } from '../data/mockData';
-import FormInput from '../components/FormInput';
+import TextInput from '../components/TextInput';
 import MascotLogo from '../components/MascotLogo';
 
-export interface AddProductProps {
-  readonly productToEdit?: Product;
-}
-
-export default function AddProduct({
-  productToEdit: propsProductToEdit,
-}: AddProductProps) {
+export default function AddFirstProduct() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const productToEdit = propsProductToEdit || (location.state as { productToEdit?: Product } | null | undefined)?.productToEdit;
-
-  const handleBack = () => {
-    if (productToEdit) {
-      navigate('/products');
-    } else {
-      navigate('/dashboard');
-    }
-  };
 
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    productToEdit ? productToEdit.image_url : null,
-  );
+  const [imagePreview, setImagePreview] = useState<string | null>(null,);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [name, setName] = useState(productToEdit ? productToEdit.name : '');
-  const [prices, setPrices] = useState<Record<string, string>>(() => {
-    if (!productToEdit || !productToEdit.prices) return {};
-    const priceMap: Record<string, string> = {};
-    Object.entries(productToEdit.prices).forEach(([currency, value]) => {
-      priceMap[currency] = value !== null && value !== undefined ? String(value) : '';
-    });
-    return priceMap;
-  });
+  const [name, setName] = useState('');
+  const [prices, setPrices] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-
-  // Local UI categories
-  const [categories, setCategories] = useState<string[]>(['Accessories', 'Treats', 'Toys']);
-  const [selectedCategory, setSelectedCategory] = useState<string>('Accessories');
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -54,25 +24,17 @@ export default function AddProduct({
     }
   };
 
-  const handlePriceChange = (currency: string, value: string) => {
-    setPrices((prev) => ({
+  const handlePriceChange = (currency: string, value: string) => { setPrices((prev) => ({
       ...prev,
       [currency]: value,
     }));
   };
 
-  const handleAddCategory = () => {
-    const newCat = prompt('Enter new category name:');
-    if (newCat && newCat.trim()) {
-      const trimmed = newCat.trim();
-      if (!categories.includes(trimmed)) {
-        setCategories((prev) => [...prev, trimmed]);
-      }
-      setSelectedCategory(trimmed);
-    }
-  };
-
   const handleSave = async () => {
+    if (!imageFile) {
+      alert('Product image is required.');
+      return;
+    }
     if (!name.trim()) {
       alert('Product Name is required.');
       return;
@@ -81,20 +43,12 @@ export default function AddProduct({
       alert('Thai Price (THB) is required.');
       return;
     }
-    if (!imageFile && !productToEdit) {
-      alert('Product image is required.');
-      return;
-    }
 
     setIsLoading(true);
     try {
       const formData = new FormData();
       formData.append('name', name.trim());
-      if (imageFile) {
-        formData.append('image', imageFile);
-      } else if (productToEdit) {
-        formData.append('image_url', productToEdit.image_url);
-      }
+      formData.append('image', imageFile);
 
       // Build prices dictionary to send to API
       const parsedPrices: Record<string, number | null> = {};
@@ -108,10 +62,8 @@ export default function AddProduct({
       });
       formData.append('prices', JSON.stringify(parsedPrices));
 
-      const url = productToEdit
-        ? `/api/product?id=${productToEdit.id}`
-        : '/api/product';
-      const method = productToEdit ? 'PUT' : 'POST';
+      const url = '/api/product';
+      const method = 'POST';
 
       const res = await fetch(url, {
         method,
@@ -119,7 +71,16 @@ export default function AddProduct({
       });
 
       if (res.ok) {
-        handleBack();
+        const user = useAuthStore.getState().user;
+        if (user) {
+          useAuthStore.setState({
+            user: {
+              ...user,
+              isOnboardingComplete: true,
+            },
+          });
+        }
+        navigate('/');
       } else {
         const errorText = await res.text();
         alert('Failed to save product: ' + errorText);
@@ -141,13 +102,30 @@ export default function AddProduct({
   });
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="bg-surface h-dvh overflow-hidden flex justify-center">
+      <div className="bg-white flex flex-col h-dvh w-full max-w-100 relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
+        {/* Header */}
+        <header className="bg-[#fff8f8] flex items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20 shrink-0">
+          <button
+            onClick={() => navigate(-1)}
+            className="mr-4 hover:opacity-80 transition-opacity duration-200 bg-transparent border-none cursor-pointer p-1 -ml-1 text-primary-custom"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <h1 className="font-bold text-[20px] text-primary-custom tracking-tight">
+            Add New Product
+          </h1>
+        </header>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-6 pb-28 pt-6 space-y-6 no-scrollbar">
           {/* Image Upload Area */}
           <section
             className="relative group cursor-pointer"
             onClick={() => fileInputRef.current?.click()}
           >
-            <div className="w-full aspect-square rounded-[20px] bg-gradient-to-br from-[#FFE0B2] to-[#FFCC80] border-4 border-white flex flex-col items-center justify-center relative shadow-md transition-transform active:scale-[0.98] overflow-hidden">
+            <div className="w-full aspect-square rounded-[20px] bg-linear-to-br from-brand-peach to-[#FFCC80] border-4 border-white flex flex-col items-center justify-center relative shadow-md transition-transform active:scale-[0.98] overflow-hidden">
               {imagePreview ? (
                 <img
                   src={imagePreview}
@@ -160,7 +138,7 @@ export default function AddProduct({
                     <Camera className="w-10 h-10 text-text-brown" />
                   </div>
                   <p className="font-bold text-[14px] text-text-brown">
-                    {ADD_PRODUCT_DATA.tapPhotoText}
+                    Tap to add product photo
                   </p>
                 </>
               )}
@@ -173,8 +151,8 @@ export default function AddProduct({
                   sizeClassName="w-14 h-14 shrink-0"
                   className="rounded-full border border-pink-container"
                 />
-                <span className="absolute -top-2 -right-2 bg-[#805062] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">
-                  {productToEdit ? "Let's update!" : ADD_PRODUCT_DATA.mascotSpeech}
+                <span className="absolute -top-2 -right-2 bg-primary-custom text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">
+                  Let's add your first product
                 </span>
               </div>
             </div>
@@ -190,66 +168,29 @@ export default function AddProduct({
           {/* Form Fields */}
           <div className="space-y-6">
             {/* Product Name */}
-            <FormInput
+            <TextInput
               id="product_name"
-              label={ADD_PRODUCT_DATA.productNameLabel}
-              placeholder={ADD_PRODUCT_DATA.productNamePlaceholder}
+              label="Product Name"
+              placeholder="e.g., Frame card fuffy"
               value={name}
               onChange={setName}
               required
             />
 
-            {/* Category selection */}
-            <div className="space-y-2">
-              <label className="text-[14px] leading-[20px] font-bold text-text-brown pl-4">
-                Category
-              </label>
-              <div className="flex flex-wrap gap-2 items-center pl-2">
-                {categories.map((cat) => {
-                  const isSelected = selectedCategory === cat;
-                  return (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setSelectedCategory(cat)}
-                      className={`px-5 py-2 rounded-full font-bold text-[14px] transition-all duration-200 active:scale-95 cursor-pointer ${
-                        isSelected
-                          ? 'bg-[#E0F7FA] text-[#37697d] border-2 border-transparent shadow-sm'
-                          : 'bg-[#F5F5F5] text-text-brown border-2 border-outline-warm/30 hover:bg-[#eae0e1]/30'
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  );
-                })}
-                <button
-                  type="button"
-                  onClick={handleAddCategory}
-                  className="w-9 h-9 rounded-full bg-peach-container text-text-brown flex items-center justify-center hover:opacity-90 active:scale-95 transition-all cursor-pointer border-none"
-                  aria-label="Add Category"
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
             {/* Pricing Section */}
             <div className="space-y-4 pt-2">
-              <h3 className="font-bold text-[14px] text-text-brown ml-4 uppercase tracking-wider">
-                Pricing (Multi-Currency)
-              </h3>
               <div className="space-y-4">
                 {sortedCurrencies.map((currency) => (
                   <div className="space-y-2" key={currency.code}>
                     <label
-                      className="text-[14px] leading-[20px] font-bold text-text-brown pl-4"
+                      className="text-[14px] leading-5 font-bold text-text-brown pl-4"
                       htmlFor={`price_${currency.code}`}
                     >
                       Price ({currency.code} {currency.symbol}){' '}
-                      {currency.code === 'THB' && <span className="text-[#ef4444]">*</span>}
+                      {currency.code === 'THB' && <span className="text-destructive">*</span>}
                     </label>
                     <div className="relative flex items-center">
-                      <span className="absolute left-5 font-bold text-[#805062] text-[16px] pointer-events-none">
+                      <span className="absolute left-5 font-bold text-primary-custom text-[16px] pointer-events-none">
                         {currency.symbol}
                       </span>
                       <input
@@ -260,7 +201,7 @@ export default function AddProduct({
                         required={currency.code === 'THB'}
                         value={prices[currency.code] || ''}
                         onChange={(e) => handlePriceChange(currency.code, e.target.value)}
-                        className="w-full h-14 pl-12 pr-6 py-4 rounded-full border-2 border-outline-warm bg-white focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 text-[16px] leading-[24px] placeholder:text-outline-variant-warm font-medium text-text-brown shadow-sm"
+                        className="w-full h-14 pl-12 pr-6 py-4 rounded-full border-2 border-outline-warm bg-white focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 text-[16px] leading-6 placeholder:text-outline-variant-warm font-medium text-text-brown shadow-sm"
                       />
                     </div>
                   </div>
@@ -283,14 +224,14 @@ export default function AddProduct({
                   </>
                 ) : (
                   <span>
-                    {productToEdit
-                      ? ADD_PRODUCT_DATA.saveChangesButtonText
-                      : ADD_PRODUCT_DATA.saveButtonText}
+                    SAVE PRODUCT
                   </span>
                 )}
               </button>
             </div>
           </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -194,7 +194,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Retrieve all events for this shop with the user's specific event role (if any)
+    // Extract today from URL parameters
+    const url = new URL(context.request.url);
+    const today = url.searchParams.get("today") || new Date().toISOString().split("T")[0];
+
+    // Retrieve all events for this shop with calculated status, total sales, and net profit
     const { results } = await context.env.DB.prepare(
       `SELECT 
         e.id, 
@@ -207,13 +211,20 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         e.travel, 
         e.accommodation, 
         e.food_allowance AS foodAllowance, 
-        em.role
+        em.role,
+        CASE 
+            WHEN ?3 < e.start_date THEN 'upcoming'
+            WHEN ?3 BETWEEN e.start_date AND e.end_date THEN 'inprogress'
+            ELSE 'ended'
+        END AS status,
+        COALESCE((SELECT SUM(o.total_income) FROM "order" o WHERE o.event_id = e.id), 0) AS totalSales,
+        (COALESCE((SELECT SUM(o.total_income) FROM "order" o WHERE o.event_id = e.id), 0) - (COALESCE(e.booth_rental, 0) + COALESCE(e.travel, 0) + COALESCE(e.accommodation, 0) + COALESCE(e.food_allowance, 0))) AS netProfit
        FROM event e
-       LEFT JOIN event_member em ON e.id = em.event_id AND em.user_id = ?
-       WHERE e.shop_id = ?
+       LEFT JOIN event_member em ON e.id = em.event_id AND em.user_id = ?1
+       WHERE e.shop_id = ?2
        ORDER BY e.start_date DESC`
     )
-      .bind(session.user_id, shopMember.shop_id)
+      .bind(session.user_id, shopMember.shop_id, today)
       .all();
 
     return new Response(JSON.stringify(results), {

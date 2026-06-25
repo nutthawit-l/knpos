@@ -46,10 +46,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     // Retrieve user and shop info
     const userProfile: any = await context.env.DB.prepare(
-      `SELECT u.id, u.email, sm.shop_id, s.name as shop_name 
-       FROM "user" u 
-       LEFT JOIN shop_member sm ON u.id = sm.user_id 
-       LEFT JOIN shop s ON sm.shop_id = s.id 
+      `SELECT u.id, u.email, sm.shop_id, s.name as shop_name, p.id as product_id
+       FROM "user" u
+       LEFT JOIN shop_member sm ON u.id = sm.user_id
+       LEFT JOIN shop s ON sm.shop_id = s.id
+       LEFT JOIN product p ON s.id = p.shop_id
        WHERE u.id = ?`
     )
       .bind(session.user_id)
@@ -62,6 +63,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       });
     }
 
+    console.log("userProfile:", userProfile)
+    const isShopEmpty = userProfile.product_id ? true : false;
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -70,6 +74,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           email: userProfile.email,
           shopName: userProfile.shop_name || null,
           shopId: userProfile.shop_id || null,
+          isOnboardingComplete: isShopEmpty,
         },
       }),
       {

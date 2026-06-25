@@ -1,223 +1,277 @@
 import { useState, useEffect } from 'react';
-import {
-  Bell,
-  Store,
-  ArrowRight,
-  PlusCircle,
-  Package,
-  LogOut,
-} from 'lucide-react';
-import MascotLogo from '../components/MascotLogo';
-import BottomNavigation from '../components/BottomNavigation';
-import Header from '../components/Header';
-import { useAuthStore } from '../store/useAuthStore';
-import { useOrderStore } from '../store/useOrderStore';
+import { Store, Calendar, TrendingUp, PlusCircle, Loader2 } from 'lucide-react';
+import { DASHBOARD2_DATA } from '../data/mockData';
+import { useNavigate } from 'react-router-dom';
 
-export interface DashboardProps {
+export interface DashboardProp {
   readonly onNavigate?: (tab: string) => void;
 }
 
-export default function Dashboard({ onNavigate }: DashboardProps) {
-  const { user, logout } = useAuthStore();
-  const { hasEvent } = useOrderStore();
-  const hasShop = !!user?.shopId;
-  const [hasProducts, setHasProducts] = useState(false);
-  const [hasFirstProduct, setHasFirstProduct] = useState(false);
+interface EventData {
+  id: number;
+  shop_id: number;
+  name: string;
+  country: string;
+  startDate: string;
+  endDate: string;
+  boothRental: number;
+  travel: number;
+  accommodation: number;
+  foodAllowance: number;
+  role: string | null;
+  status: 'upcoming' | 'inprogress' | 'ended';
+  totalSales: number;
+  netProfit: number;
+}
 
-  // Read hasFirstProduct and setHasFirstProduct to prevent TS compiler unused variable error
-  if (hasFirstProduct) {
-    // future toggle logic placeholder
-    setHasFirstProduct(false);
-  }
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  'Thailand': '฿',
+  'Singapore': 'S$',
+  'USA': '$',
+  'Japan': '¥',
+};
+
+const FALLBACK_IMAGES = [
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuA26HQI-qdJAvzLtbtiSB1a6t9L-M7mMng7ieiMdxU_iprolC16B8jxM4KCINz78XguSTlBa48kJ5M8bjmNj0oed6UkgLVSwUfxK7FYUCaujX1qK7erq6voKLWO9kLHTDK7oxMNr9D7IEqD5kNPhFhd3xEcROPYINGMBKaSribquSk4XXqCrDTDw7K8bbphMukuUDpALB9vC5cTMhvO_hBWPumziFEoHQd08ZXOlnXKAwNH2POhcH-Ssbt884610PJAcCcHv31qAz0',
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuAzzCCWPKVC8c4C6G8DNKs-aBMj-bte3RJF3klOsKETSlbpGqGjO_qmZOsvWFefamanxVHGdzXfhb6d1ENwxKmf-jd5L-dYcXxxd9UYiQuHjnBbn2N76OZ3h2WMa8wNBO4AplTsD28XLokhxmADvJLSKpbl_rrFnyL4EYHvAHr17fv0yxUVt4FnSM7dLn-yM6nlCf7xMzETZ3sO4CnQjz17lYnW6s2ynTnm6VggDerW8ji3ELBvle34wKnPYwQEjEJusag4oXx9Cgk',
+];
+
+export default function Dashboard() {
+  const [events, setEvents] = useState<EventData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate()
 
   useEffect(() => {
-    if (hasShop) {
-      fetch('/api/product')
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data) && data.length > 0) {
-            setHasProducts(true);
-          }
-        })
-        .catch((err) => console.error('Failed to fetch products:', err));
-    }
-  }, [hasShop]);
+    const d = new Date();
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-  const handleLogout = () => {
-    const confirmLogout = window.confirm('Are you sure you want to logout?');
-    if (confirmLogout) {
-      logout();
-    }
-  };
+    let active = true;
+    setIsLoading(true);
+
+    fetch(`/api/event?today=${todayStr}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch events');
+        return res.json();
+      })
+      .then((data) => {
+        if (active) {
+          setEvents(data);
+          setIsLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (active) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px] gap-2">
+        <Loader2 className="w-8 h-8 animate-spin text-[#805062]" />
+        <p className="text-[14px] text-text-brown/70 font-medium">Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  const hasEndedEvent = events.some((e) => e.status === 'ended');
+  const displayedEvents = hasEndedEvent
+    ? events
+    : events.filter((e) => e.status === 'inprogress' || e.status === 'upcoming');
+
+  // Title label for the events list
+  const eventsHeaderLabel = hasEndedEvent ? DASHBOARD2_DATA.pastEventsLabel : 'Current & Upcoming Events';
 
   return (
-    <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
-      <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
-        {/* Header */}
-        <Header
-          rightElement={
-            hasEvent ? (
-              <button className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer">
-                <Bell className="w-5 h-5" />
-              </button>
-            ) : (
-              <button
-                onClick={handleLogout}
-                className="w-10 h-10 flex items-center justify-center rounded-full text-[#805062] hover:bg-[#fcf1f2] transition-colors active:scale-95 duration-150 cursor-pointer"
-                title="Sign Out"
-              >
-                <LogOut className="w-5 h-5 text-destructive" />
-              </button>
-            )
-          }
-        />
+    <>
+      {/* Shop Summary Section (State 2 only: shown if at least one ended event exists) */}
+      {hasEndedEvent && (
+        <section className="space-y-3">
+          <h2 className="font-bold text-[12px] tracking-widest text-[#4E342E] opacity-60 uppercase">
+            {DASHBOARD2_DATA.headerTitle}
+          </h2>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto px-5 pb-24 space-y-6 no-scrollbar">
-          {/* Greeting Section */}
-          <section className="flex items-end gap-4 pt-4">
-            <MascotLogo sizeClassName="w-20 h-20" className="floating-animation" />
-            <div className="bg-white rounded-2xl rounded-bl-none p-4 shadow-sm border border-outline-warm relative mb-2 flex-1">
-              <p className="font-bold text-text-brown text-[14px] leading-[20px]">
-                "Hi there! I'm Charni. I'm so excited to help you start your business journey today!"
-              </p>
-              <div className="absolute -left-2 bottom-0 w-4 h-4 bg-white border-l border-b border-outline-warm rotate-45 transform origin-top-left"></div>
+          {/* Bento Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Total Sales Card */}
+            <div className="col-span-2 bg-[#f8bbd0] p-5 rounded-[20px] shadow-[0_4px_20px_-2px_rgba(78,52,46,0.08)] flex flex-col justify-between min-h-[120px]">
+              <div>
+                <p className="text-[12px] font-medium text-[#76485a] opacity-80">
+                  {DASHBOARD2_DATA.totalSalesLabel}
+                </p>
+                <h3 className="text-[28px] font-bold text-[#76485a] leading-none mt-1">
+                  {DASHBOARD2_DATA.totalSalesValue}
+                </h3>
+              </div>
+              <div className="mt-4 flex items-center text-[#76485a] font-bold text-[12px]">
+                <TrendingUp className="w-4 h-4 mr-1 shrink-0" />
+                <span>{DASHBOARD2_DATA.totalSalesTrend}</span>
+              </div>
             </div>
-          </section>
 
-          {/* Quick Guide */}
-          <section className="bg-[#b5e7fe] rounded-[20px] p-5">
-            <h3 className="font-bold text-[12px] tracking-widest text-[#37697d] uppercase mb-4">
-              Quick Guide
-            </h3>
-            <ul className="space-y-4">
-              <li className={`flex gap-3 items-start ${hasShop ? 'line-through opacity-100' : ''}`}>
-                <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0">
-                  1
-                </span>
-                <p className="font-medium text-[16px] text-text-brown">
-                  Create your shop
+            {/* Active Shops Card */}
+            <div className="bg-[#b5e7fe] p-5 rounded-[20px] shadow-[0_4px_20px_-2px_rgba(78,52,46,0.08)] flex flex-col justify-between">
+              <div>
+                <Store className="w-5 h-5 text-[#37697d] mb-2" />
+                <p className="text-[12px] font-medium text-[#37697d] opacity-80">
+                  {DASHBOARD2_DATA.activeShopsLabel}
                 </p>
-              </li>
-              <li className={`flex gap-3 items-start ${hasShop && hasProducts ? 'line-through opacity-100' : (hasShop ? '' : 'opacity-60')}`}>
-                <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0">
-                  2
-                </span>
-                <p className="font-medium text-[16px] text-text-brown">
-                  Add your products to inventory
-                </p>
-              </li>
-              <li className={`flex gap-3 items-start ${hasShop && hasProducts ? '' : 'opacity-60'}`}>
-                <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[#326578] text-xs font-bold shrink-0">
-                  3
-                </span>
-                <p className="font-medium text-[16px] text-text-brown">
-                  Create your event
-                </p>
-              </li>
-            </ul>
-            <div className="mt-6 pt-6 border-t border-[#326578]/10">
-              <p className="font-medium text-[12px] italic text-[#154d5f]">
-                Tip: You can change these later in Settings.
-              </p>
-            </div>
-          </section>
-
-          {/* Action Blocks */}
-          <div className="space-y-4">
-            {/* Primary CTA: Create Your Shop */}
-            <button
-              onClick={() => onNavigate?.('create-shop')}
-              disabled={hasShop}
-              className={`w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 transition-all duration-300 overflow-hidden relative ${hasShop ? 'opacity-40 pointer-events-none' : 'hover:shadow-md active:scale-95 group cursor-pointer'}`}
-            >
-              <div className="flex flex-col h-full justify-between relative z-10">
-                <div>
-                  <div className="w-14 h-14 bg-[#f8bbd0] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Store className="w-7 h-7 text-[#805062]" />
-                  </div>
-                  <h3 className="text-[28px] leading-[36px] font-bold text-text-brown mb-2">
-                    Create Your Shop
-                  </h3>
-                  <p className="text-[16px] leading-[24px] text-[#504447]">
-                    Set your shop name, logo, and currency to begin.
-                  </p>
-                </div>
-                <div className="mt-8 flex items-center gap-2 text-[#805062] font-bold text-[14px]">
-                  <span>Get Started</span>
-                  <ArrowRight className={`w-4 h-4 ${hasShop ? '' : 'animate-pulse'}`} />
-                </div>
               </div>
-              <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#f8bbd0] opacity-20 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-            </button>
-
-            {/* Add Product Block */}
-            <button
-              onClick={() => onNavigate?.('add-product')}
-              disabled={!hasShop || hasProducts}
-              className={`w-full text-left bg-white border-2 border-[#f8bbd0] rounded-[20px] p-5 transition-all duration-300 overflow-hidden relative ${hasShop && !hasProducts ? 'hover:shadow-md active:scale-95 group cursor-pointer opacity-100' : 'opacity-40 pointer-events-none'}`}
-            >
-              <div className="flex flex-col h-full justify-between relative z-10">
-                <div>
-                  <div className="w-14 h-14 bg-[#b5e7fe] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Package className="w-7 h-7 text-[#326578]" />
-                  </div>
-                  <h3 className="text-[28px] leading-[36px] font-bold text-text-brown mb-2">
-                    Add Product
-                  </h3>
-                  <p className="text-[16px] leading-[24px] text-[#504447]">
-                    Fill your inventory with your amazing items.
-                  </p>
-                </div>
-                <div className="mt-8 flex items-center gap-2 text-[#326578] font-bold text-[14px]">
-                  <span>Add Product</span>
-                  <ArrowRight className={`w-4 h-4 ${hasShop && !hasProducts ? 'animate-pulse' : ''}`} />
-                </div>
-              </div>
-              <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#b5e7fe] opacity-10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-            </button>
-
-            {/* Create New Event Block */}
-            <button
-              onClick={() => onNavigate?.('create-event')}
-              disabled={!hasShop || !hasProducts}
-              className={`w-full bg-[#fcf1f2] border-2 border-dashed border-[#805062]/30 py-8 px-6 rounded-[20px] transition-all duration-300 flex flex-col items-center justify-center gap-2 ${hasShop && hasProducts ? 'opacity-100 cursor-pointer hover:bg-[#ffd9e4]/10 group' : 'opacity-40 pointer-events-none'}`}
-            >
-              <div className="w-14 h-14 rounded-full bg-[#f8bbd0] flex items-center justify-center text-[#805062] group-hover:scale-110 transition-transform duration-300">
-                <PlusCircle className="w-7 h-7" />
-              </div>
-              <h3 className="font-bold text-[#805062] text-[20px]">
-                Create New Event
+              <h3 className="text-[24px] font-bold text-[#37697d] leading-none mt-2">
+                {DASHBOARD2_DATA.activeShopsValue}
               </h3>
-              <p className="text-[#504447] text-[14px] leading-[20px] text-center max-w-xs">
-                Start logging sales and managing products for your next event.
-              </p>
-            </button>
+            </div>
+
+            {/* Events this Year Card */}
+            <div className="bg-[#fddeb0] p-5 rounded-[20px] shadow-[0_4px_20px_-2px_rgba(78,52,46,0.08)] flex flex-col justify-between">
+              <div>
+                <Calendar className="w-5 h-5 text-[#68522f] mb-2" />
+                <p className="text-[12px] font-medium text-[#68522f] opacity-80">
+                  {DASHBOARD2_DATA.eventsYearLabel}
+                </p>
+              </div>
+              <h3 className="text-[24px] font-bold text-[#68522f] leading-none mt-2">
+                {DASHBOARD2_DATA.eventsYearValue}
+              </h3>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Dynamic Events Section (reused) */}
+      {displayedEvents.length > 0 && (
+        <section className="space-y-3">
+          <div className="flex justify-between items-end">
+            <h2 className="font-bold text-[12px] tracking-widest text-[#4E342E] opacity-60 uppercase">
+              {eventsHeaderLabel}
+            </h2>
+            {hasEndedEvent && (
+              <button
+                onClick={() => alert('Viewing all events will be supported in the next update! 🐾')}
+                className="text-[#805062] font-bold text-[12px] hover:underline cursor-pointer bg-transparent border-none p-0"
+              >
+                {DASHBOARD2_DATA.viewAllLabel}
+              </button>
+            )}
           </div>
 
-          {/* Footer Illustration Content */}
-          <section className="py-6 flex flex-col items-center text-center space-y-6">
-            <div className="w-full max-w-[280px] aspect-square bg-white rounded-[40px] shadow-sm border border-outline-warm flex items-center justify-center p-6 mx-auto">
-              <img
-                alt="Empty Shop"
-                className="w-full h-full object-contain"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWZ2jOhkWHoWtTZcH730W_qh0nGmJ6toLGpHWcwBSrbRkADHwAFGsDMoU1H3Erdfu2GZl13Lz-Hab2zRQw0fKIa5Vd0q6wc4dfst53kOjIG28w9NkZ5tSQkuWqSYMQa3pdh7nRyg__3y4OWT--X07l0On639t05qz_zn1BjkcX20ae8uZEJIbuoEQk59N9GWX_H419fSIPq79C1oc2zgm79lC60Ed-E99XIT3ALnpFhFv5k9FieGwYy8XNPpPmXMBgHa6ZArCZfGE"
-              />
-            </div>
-            <div className="space-y-2 pb-6">
-              <h4 className="font-bold text-[20px] text-text-brown">
-                Every big dream starts small.
-              </h4>
-              <p className="font-medium text-[16px] text-[#504447] px-8">
-                Ready to transform this empty space into your dream boutique?
-              </p>
-            </div>
-          </section>
-        </div>
+          <div className="grid grid-cols-1 gap-4">
+            {displayedEvents.map((event, idx) => {
+              const currencySym = CURRENCY_SYMBOLS[event.country] || '฿';
+              const formattedSales = `${currencySym}${event.totalSales.toLocaleString()}`;
 
-        {/* Bottom Navigation */}
-        {hasShop && hasEvent && <BottomNavigation activeTab="dashboard" onNavigate={onNavigate} />}
-      </div>
-    </div>
+              // Determine Badge styling & text
+              let badgeText = '';
+              let badgeClass = '';
+              const isLoss = event.netProfit < 0;
+
+              if (event.status === 'inprogress') {
+                badgeText = 'In Progress';
+                badgeClass = 'bg-[#d1fae5] text-[#065f46]';
+              } else if (event.status === 'upcoming') {
+                badgeText = 'Upcoming';
+                badgeClass = 'bg-[#fef3c7] text-[#92400e]';
+              } else {
+                badgeText = isLoss ? 'Accumulated Loss' : 'Profit';
+                badgeClass = isLoss ? 'bg-[#b5e7fe]/90 text-[#37697d]' : 'bg-[#f8bbd0]/90 text-[#76485a]';
+              }
+
+              // Format Dates (e.g. "25 Jun 2026")
+              const formatDate = (dateStr: string) => {
+                try {
+                  const parsed = new Date(dateStr);
+                  return parsed.toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                  });
+                } catch {
+                  return dateStr;
+                }
+              };
+
+              const dateRange = `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`;
+
+              // Format Net Profit
+              const formattedProfit = isLoss
+                ? `-${currencySym}${Math.abs(event.netProfit).toLocaleString()}`
+                : `+${currencySym}${event.netProfit.toLocaleString()}`;
+
+              return (
+                <div
+                  key={event.id}
+                  className="bg-white rounded-[20px] overflow-hidden shadow-[0_4px_20px_-2px_rgba(78,52,46,0.08)] border border-[#E0D0CC]/30 group hover:-translate-y-1 transition-transform duration-300"
+                >
+                  <div className="h-32 w-full relative overflow-hidden bg-[#fff8f8]">
+                    <img
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      alt={event.name}
+                      src={FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length]}
+                    />
+                    <div className={`absolute top-4 right-4 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${badgeClass}`}>
+                      {badgeText}
+                    </div>
+                  </div>
+
+                  <div className="p-5 space-y-3">
+                    <div>
+                      <h4 className="text-[18px] font-bold text-text-brown leading-tight">
+                        {event.name}
+                      </h4>
+                      <p className="text-[12px] text-text-brown/70 mt-0.5">
+                        {dateRange}
+                      </p>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-2.5 border-t border-[#E0D0CC]/20">
+                      <div>
+                        <p className="text-[10px] font-semibold text-text-brown/65 uppercase tracking-wide">
+                          {DASHBOARD2_DATA.totalSalesLabel}
+                        </p>
+                        <p className="font-bold text-text-brown text-[16px]">
+                          {formattedSales}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] font-semibold text-text-brown/65 uppercase tracking-wide">
+                          Net Profit
+                        </p>
+                        <p className={`font-bold text-[16px] ${isLoss ? 'text-[#326578]' : 'text-[#805062]'}`}>
+                          {formattedProfit}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Create New Event Button */}
+      <section className="pt-2">
+        <button
+          onClick={() => navigate('/create-event')}
+          className="w-full bg-[#fcf1f2] border-2 border-dashed border-[#805062]/30 py-8 px-6 rounded-[20px] group hover:bg-[#ffd9e4]/20 transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+        >
+          <div className="w-14 h-14 rounded-full bg-[#f8bbd0] flex items-center justify-center text-[#805062] group-hover:scale-110 transition-transform duration-300 shadow-sm">
+            <PlusCircle className="w-7 h-7" />
+          </div>
+          <h3 className="font-bold text-[#805062] text-[20px]">
+            {DASHBOARD2_DATA.createEventTitle}
+          </h3>
+          <p className="text-text-brown/80 text-[13px] text-center max-w-[280px]">
+            {DASHBOARD2_DATA.createEventSubtitle}
+          </p>
+        </button>
+      </section>
+    </>
   );
 }

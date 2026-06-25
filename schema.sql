@@ -1,11 +1,10 @@
 -- schema.sql
 -- WARNING: This is a destructive initialization script. Running it will drop existing tables and reset all data.
-PRAGMA foreign_keys = ON;
+PRAGMA foreign_keys = OFF;
 
 -- Drop old tables if they exist
 DROP TABLE IF EXISTS Transaction_Item;
 DROP TABLE IF EXISTS "Transaction";
-DROP TABLE IF EXISTS Product;
 
 -- Drop new tables in correct dependency order (children first)
 DROP TABLE IF EXISTS session;
@@ -74,10 +73,14 @@ CREATE TABLE event_member (
 
 CREATE TABLE product (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    shop_id INTEGER NOT NULL,
     name TEXT NOT NULL,
     image_url TEXT NOT NULL,
-    created_at TEXT DEFAULT (datetime('now', 'localtime'))
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (shop_id) REFERENCES shop(id) ON DELETE CASCADE
 );
+
+CREATE INDEX IF NOT EXISTS idx_product_shop ON product(shop_id);
 
 CREATE TABLE product_price (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

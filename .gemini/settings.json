@@ -1,11 +1,8 @@
 {
   "skills": {
     "disabled": [
-      "brainstorming",
       "using-superpowers",
-      "writing-plans",
       "writing-skills",
-      "executing-plans",
       "verification-before-completion",
       "systematic-debugging",
       "test-driven-development"

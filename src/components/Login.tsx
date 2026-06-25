@@ -1,13 +1,18 @@
 import { Mail, Lock, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { useLoginForm } from '../hooks/useLoginForm';
+import { useAuthStore } from '../store/useAuthStore';
 import { LOGIN_DATA } from '../data/mockData';
-import AuthLayout from '../components/AuthLayout';
-import FormInput from '../components/FormInput';
-import AuthButton from '../components/AuthButton';
-import MascotLogo from '../components/MascotLogo';
+import AuthLayout from './AuthLayout';
+import FormInput from './FormInput';
+import AuthButton from './AuthButton';
+import MascotLogo from './MascotLogo';
+import { useEffect } from 'react';
 
-export default function Login() {
+export interface LoginProps {}
+
+export default function Login(_props: Readonly<LoginProps>) {
   const {
     email,
     setEmail,
@@ -17,6 +22,15 @@ export default function Login() {
     error,
     handleLoginSubmit,
   } = useLoginForm();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const navigate = useNavigate();
+  const loginWithGoogleToken = useAuthStore(
+    (state) => state.loginWithGoogleToken
+  );
+
+  useEffect(() => {
+    if (isAuthenticated) navigate('/')
+  }, [isAuthenticated, navigate])
 
   return (
     <AuthLayout>
@@ -41,7 +55,7 @@ export default function Login() {
           onChange={setEmail}
         />
 
-        <div className="space-y-1">
+        <div className="space-y-2">
           <FormInput
             icon={Lock}
             id="password"
@@ -54,7 +68,7 @@ export default function Login() {
           />
           <div className="flex justify-end pr-2">
             <button
-              className="text-[12px] leading-[16px] font-bold text-secondary-custom hover:underline focus:outline-none"
+              className="text-[12px] leading-[16px] font-bold text-secondary-custom hover:underline focus:outline-none cursor-pointer"
               type="button"
             >
               {LOGIN_DATA.forgotPasswordText}
@@ -89,14 +103,29 @@ export default function Login() {
         </div>
       </form>
 
-      {/* Aesthetic Footer */}
-      <footer className="mt-12 flex items-center gap-4 text-outline-variant-warm justify-center">
-        <div className="h-[1px] w-12 bg-outline-warm" />
-        <span className="text-[12px] leading-[16px] uppercase tracking-widest font-bold">
-          {LOGIN_DATA.footerText}
-        </span>
-        <div className="h-[1px] w-12 bg-outline-warm" />
-      </footer>
+      {/* Aesthetic Google Divider & Button */}
+      <div className="w-full flex flex-col items-center gap-4 mt-8">
+        <div className="flex items-center gap-4 w-full text-text-brown">
+          <div className="h-[1px] flex-1 bg-outline-warm" />
+          <span className="text-[12px] leading-[16px] uppercase tracking-widest font-bold">OR</span>
+          <div className="h-[1px] flex-1 bg-outline-warm" />
+        </div>
+        <div className="w-full flex justify-center">
+          <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+              if (credentialResponse.credential) {
+                await loginWithGoogleToken(credentialResponse.credential);
+              }
+            }}
+            onError={() => {
+              console.error('Google Sign-In failed');
+            }}
+            theme="outline"
+            shape="pill"
+            size="large"
+          />
+        </div>
+      </div>
     </AuthLayout>
   );
 }

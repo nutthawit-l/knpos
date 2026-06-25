@@ -3,10 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useOrderStore } from '../store/useOrderStore';
 import { currencies } from '../types/currency';
 
-interface UseCreateEventFormProps {
-  readonly onNavigate?: (tab: string) => void;
-}
-
 const COUNTRY_CURRENCY_MAP: Record<string, string> = {
   'Thailand': 'THB',
   'Singapore': 'SGD',
@@ -14,7 +10,7 @@ const COUNTRY_CURRENCY_MAP: Record<string, string> = {
   'Japan': 'JPY',
 };
 
-export function useCreateEventForm({ onNavigate }: UseCreateEventFormProps = {}) {
+export function useCreateEventForm() {
   const [eventName, setEventName] = useState('');
   const [country, setCountry] = useState('Thailand');
   const [startDate, setStartDate] = useState('');
@@ -70,11 +66,7 @@ export function useCreateEventForm({ onNavigate }: UseCreateEventFormProps = {})
 
         // Navigate to order page after success feedback animation
         setTimeout(() => {
-          if (onNavigate) {
-            onNavigate('order');
-          } else {
-            navigate('/dashboard', { state: { activeTab: 'order' } });
-          }
+          navigate('/order');
         }, 1000);
       } else {
         let errorMsg = 'Failed to create event';
