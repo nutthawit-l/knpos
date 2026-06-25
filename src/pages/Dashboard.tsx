@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Store, Calendar, TrendingUp, PlusCircle, Loader2 } from 'lucide-react';
 import { DASHBOARD2_DATA } from '../data/mockData';
+import { useNavigate } from 'react-router-dom';
 
 export interface DashboardProp {
   readonly onNavigate?: (tab: string) => void;
@@ -35,14 +36,15 @@ const FALLBACK_IMAGES = [
   'https://lh3.googleusercontent.com/aida-public/AB6AXuAzzCCWPKVC8c4C6G8DNKs-aBMj-bte3RJF3klOsKETSlbpGqGjO_qmZOsvWFefamanxVHGdzXfhb6d1ENwxKmf-jd5L-dYcXxxd9UYiQuHjnBbn2N76OZ3h2WMa8wNBO4AplTsD28XLokhxmADvJLSKpbl_rrFnyL4EYHvAHr17fv0yxUVt4FnSM7dLn-yM6nlCf7xMzETZ3sO4CnQjz17lYnW6s2ynTnm6VggDerW8ji3ELBvle34wKnPYwQEjEJusag4oXx9Cgk',
 ];
 
-export default function Dashboard({ onNavigate }: DashboardProp) {
+export default function Dashboard() {
   const [events, setEvents] = useState<EventData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate()
 
   useEffect(() => {
     const d = new Date();
     const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    
+
     let active = true;
     setIsLoading(true);
 
@@ -79,8 +81,8 @@ export default function Dashboard({ onNavigate }: DashboardProp) {
   }
 
   const hasEndedEvent = events.some((e) => e.status === 'ended');
-  const displayedEvents = hasEndedEvent 
-    ? events 
+  const displayedEvents = hasEndedEvent
+    ? events
     : events.filter((e) => e.status === 'inprogress' || e.status === 'upcoming');
 
   // Title label for the events list
@@ -163,7 +165,7 @@ export default function Dashboard({ onNavigate }: DashboardProp) {
             {displayedEvents.map((event, idx) => {
               const currencySym = CURRENCY_SYMBOLS[event.country] || '฿';
               const formattedSales = `${currencySym}${event.totalSales.toLocaleString()}`;
-              
+
               // Determine Badge styling & text
               let badgeText = '';
               let badgeClass = '';
@@ -197,7 +199,7 @@ export default function Dashboard({ onNavigate }: DashboardProp) {
               const dateRange = `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`;
 
               // Format Net Profit
-              const formattedProfit = isLoss 
+              const formattedProfit = isLoss
                 ? `-${currencySym}${Math.abs(event.netProfit).toLocaleString()}`
                 : `+${currencySym}${event.netProfit.toLocaleString()}`;
 
@@ -256,7 +258,7 @@ export default function Dashboard({ onNavigate }: DashboardProp) {
       {/* Create New Event Button */}
       <section className="pt-2">
         <button
-          onClick={() => onNavigate?.('create-event')}
+          onClick={() => navigate('/create-event')}
           className="w-full bg-[#fcf1f2] border-2 border-dashed border-[#805062]/30 py-8 px-6 rounded-[20px] group hover:bg-[#ffd9e4]/20 transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
         >
           <div className="w-14 h-14 rounded-full bg-[#f8bbd0] flex items-center justify-center text-[#805062] group-hover:scale-110 transition-transform duration-300 shadow-sm">
