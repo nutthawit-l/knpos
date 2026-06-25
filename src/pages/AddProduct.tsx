@@ -1,50 +1,28 @@
 import { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Camera, Plus, Loader2 } from 'lucide-react';
+import { Camera, Plus, Loader2 } from 'lucide-react';
 import { type Product } from '../components/SwipeableProductRow';
 import { currencies } from '../types/currency';
 import { ADD_PRODUCT_DATA } from '../data/mockData';
 import FormInput from '../components/FormInput';
 import MascotLogo from '../components/MascotLogo';
-import BottomNavigation from '../components/BottomNavigation';
-import { useOrderStore } from '../store/useOrderStore';
 
 export interface AddProductProps {
-  readonly onNavigate?: (tab: string) => void;
-  readonly onMenuClick?: () => void;
   readonly productToEdit?: Product;
 }
 
 export default function AddProduct({
-  onNavigate,
   productToEdit: propsProductToEdit,
 }: AddProductProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const productToEdit = propsProductToEdit || (location.state as any)?.productToEdit;
-  const { hasEvent } = useOrderStore();
+  const productToEdit = propsProductToEdit || (location.state as { productToEdit?: Product } | null | undefined)?.productToEdit;
 
   const handleBack = () => {
     if (productToEdit) {
-      if (onNavigate) {
-        onNavigate('products');
-      } else {
-        navigate('/dashboard', { state: { activeTab: 'products' } });
-      }
+      navigate('/products');
     } else {
-      if (onNavigate) {
-        onNavigate('dashboard');
-      } else {
-        navigate('/dashboard', { state: { activeTab: 'dashboard' } });
-      }
-    }
-  };
-
-  const handleBottomNavigate = (tab: string) => {
-    if (onNavigate) {
-      onNavigate(tab);
-    } else {
-      navigate('/dashboard', { state: { activeTab: tab } });
+      navigate('/dashboard');
     }
   };
 
@@ -163,24 +141,7 @@ export default function AddProduct({
   });
 
   return (
-    <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
-      <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
-        {/* TopAppBar */}
-        <header className="bg-[#fff8f8] flex items-center px-5 h-16 w-full sticky top-0 z-50 border-b border-outline-warm/20 shrink-0">
-          <button
-            onClick={handleBack}
-            className="mr-4 hover:opacity-80 transition-opacity duration-200 bg-transparent border-none cursor-pointer p-1 -ml-1 text-[#805062]"
-            aria-label="Go back"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <h1 className="font-bold text-[20px] text-[#805062] tracking-tight">
-            {productToEdit ? ADD_PRODUCT_DATA.editTitle : ADD_PRODUCT_DATA.title}
-          </h1>
-        </header>
-
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-6 pb-28 pt-6 space-y-6 no-scrollbar">
+    <div className="space-y-6 pb-6">
           {/* Image Upload Area */}
           <section
             className="relative group cursor-pointer"
@@ -330,11 +291,6 @@ export default function AddProduct({
               </button>
             </div>
           </div>
-        </div>
-
-        {/* Bottom Navigation */}
-        {hasEvent && <BottomNavigation activeTab="products" onNavigate={handleBottomNavigate} />}
-      </div>
     </div>
   );
 }
