@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Camera, Plus, Loader2 } from 'lucide-react';
+import { Camera, Plus, Loader2, X } from 'lucide-react';
 import { type Product } from '../components/SwipeableProductRow';
 import { currencies } from '../types/currency';
 import { ADD_PRODUCT_DATA } from '../data/mockData';
@@ -48,6 +48,8 @@ export default function AddProduct({
   const [stock, setStock] = useState<string>(
     productToEdit && 'stock' in productToEdit ? String((productToEdit as any).stock) : '0'
   );
+  const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   useEffect(() => {
     fetch('/api/category')
@@ -82,13 +84,20 @@ export default function AddProduct({
   };
 
   const handleAddCategory = () => {
-    const newCat = prompt('Enter new category name:');
-    if (newCat && newCat.trim()) {
-      const trimmed = newCat.trim();
+    setNewCategoryName('');
+    setIsAddCategoryModalOpen(true);
+  };
+
+  const handleConfirmAddCategory = () => {
+    if (newCategoryName && newCategoryName.trim()) {
+      const trimmed = newCategoryName.trim();
       if (!categories.includes(trimmed)) {
         setCategories((prev) => [...prev, trimmed]);
       }
       setSelectedCategory(trimmed);
+      setIsAddCategoryModalOpen(false);
+    } else {
+      alert('Category name cannot be empty.');
     }
   };
 
@@ -333,6 +342,53 @@ export default function AddProduct({
               </button>
             </div>
           </div>
-    </div>
-  );
-}
+
+          {/* Add Category Modal */}
+          {isAddCategoryModalOpen && (
+            <div className="fixed inset-0 bg-black/45 z-50 flex items-center justify-center p-5 animate-fade-in">
+              <div className="bg-white w-full max-w-[335px] rounded-[24px] border-2 border-outline-warm flex flex-col overflow-hidden relative shadow-2xl p-6 gap-5 font-quicksand">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-[18px] font-bold text-text-brown">Add New Category</h2>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddCategoryModalOpen(false)}
+                    className="p-1 text-[#805062] hover:opacity-80 border-none bg-transparent cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="space-y-2 text-left">
+                  <label htmlFor="new_cat_input" className="text-[13px] font-bold text-text-brown pl-2">
+                    Category Name
+                  </label>
+                  <input
+                    id="new_cat_input"
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="e.g. Frame card"
+                    className="w-full h-12 px-5 rounded-full border-2 border-outline-warm focus:border-brand-pink focus:outline-none text-[14px] font-medium text-text-brown shadow-sm"
+                  />
+                </div>
+                <div className="flex gap-3 justify-end pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddCategoryModalOpen(false)}
+                    className="px-5 py-2.5 rounded-full border-2 border-outline-warm text-[13px] font-bold text-text-brown bg-transparent cursor-pointer hover:bg-outline-warm/10 active:scale-95 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmAddCategory}
+                    className="px-5 py-2.5 rounded-full bg-brand-pink text-text-brown text-[13px] font-bold border-none cursor-pointer hover:bg-brand-pink-hover active:scale-95 transition-all shadow-sm"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
