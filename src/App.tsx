@@ -15,6 +15,7 @@ import Order from "./pages/Order";
 import Transactions from "./pages/Transactions";
 import Inventory from "./pages/Inventory";
 import Setting from "./pages/Setting";
+import CreateEvent from "./pages/CreateEvent";
 
 function RootRedirect() {
   const user = useAuthStore((state) => state.user);
@@ -39,6 +40,7 @@ const router = createBrowserRouter([
           { path: "/products", element: <Inventory /> },
           { path: "/settings", element: <Setting /> },
           { path: "/add-product", element: <AddProduct /> },
+          { path: "/create-event", element: <CreateEvent /> },
         ]
       },
       {

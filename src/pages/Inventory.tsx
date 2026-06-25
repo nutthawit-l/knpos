@@ -1,15 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Minus, Trash2 } from 'lucide-react';
 import { type Product } from '../components/SwipeableProductRow';
 import { useInventoryStore } from '../store/useInventoryStore';
 import CategoryFilter from '../components/CategoryFilter';
 
-export interface InventoryProps {
-  readonly onNavigate?: (tab: string) => void;
-  readonly onEditProduct?: (product: Product) => void;
-}
-
-export default function Inventory({ onNavigate, onEditProduct }: InventoryProps) {
+export default function Inventory() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -149,9 +146,8 @@ export default function Inventory({ onNavigate, onEditProduct }: InventoryProps)
                     key={product.id}
                     className="product-card p-4 bg-white rounded-[20px] shadow-[0_4px_12px_rgba(78,52,46,0.05)] border border-outline-warm/40 flex gap-4 items-center relative overflow-hidden transition-all duration-200"
                   >
-                    {/* Clickable Area for Editing */}
                     <div
-                      onClick={() => onEditProduct?.(product)}
+                      onClick={() => navigate('/add-product', { state: { productToEdit: product } })}
                       className="flex-grow flex gap-4 items-center min-w-0 cursor-pointer"
                     >
                       {/* Product Image */}
@@ -223,8 +219,8 @@ export default function Inventory({ onNavigate, onEditProduct }: InventoryProps)
 
       {/* Floating Action Button (FAB) for Add Product */}
       <button
-        onClick={() => onNavigate?.('add-product')}
-        className="absolute right-6 bottom-24 w-14 h-14 bg-[#805062] text-white rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform z-50 cursor-pointer border-none hover:bg-[#805062]/95"
+        onClick={() => navigate('/add-product')}
+        className="absolute right-6 bottom-24 w-14 h-14 bg-[#805062] text-white rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform z-50 cursor-pointer border-none hover:bg-[#805062]/95"
         aria-label="Add new product"
       >
         <Plus className="w-8 h-8" />
