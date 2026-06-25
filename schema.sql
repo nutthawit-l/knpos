@@ -15,6 +15,7 @@ DROP TABLE IF EXISTS event_member;
 DROP TABLE IF EXISTS shop_member;
 DROP TABLE IF EXISTS "order";
 DROP TABLE IF EXISTS product;
+DROP TABLE IF EXISTS category;
 DROP TABLE IF EXISTS event;
 DROP TABLE IF EXISTS "user";
 DROP TABLE IF EXISTS shop;
@@ -71,13 +72,25 @@ CREATE TABLE event_member (
     UNIQUE(event_id, user_id)
 );
 
-CREATE TABLE product (
+CREATE TABLE category (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     shop_id INTEGER NOT NULL,
     name TEXT NOT NULL,
-    image_url TEXT NOT NULL,
     created_at TEXT DEFAULT (datetime('now', 'localtime')),
-    FOREIGN KEY (shop_id) REFERENCES shop(id) ON DELETE CASCADE
+    FOREIGN KEY (shop_id) REFERENCES shop(id) ON DELETE CASCADE,
+    UNIQUE(shop_id, name)
+);
+
+CREATE TABLE product (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    shop_id INTEGER NOT NULL,
+    category_id INTEGER,
+    name TEXT NOT NULL,
+    image_url TEXT NOT NULL,
+    stock INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (shop_id) REFERENCES shop(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_product_shop ON product(shop_id);

@@ -89,9 +89,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         p.image_url,
         p.created_at,
         p.shop_id,
+        p.stock,
+        c.id AS category_id,
+        c.name AS category_name,
         pp.currency_code,
         pp.price
       FROM product p
+      LEFT JOIN category c ON p.category_id = c.id
       LEFT JOIN product_price pp ON p.id = pp.product_id
       WHERE p.shop_id = ?
       ORDER BY p.created_at DESC
@@ -108,6 +112,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           image_url: row.image_url,
           created_at: row.created_at,
           shop_id: row.shop_id,
+          stock: row.stock,
+          category_id: row.category_id,
+          category_name: row.category_name,
           prices: {}
         });
       }
@@ -186,9 +193,33 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const name = formData.get('name') as string;
     const pricesStr = formData.get('prices') as string;
     const imageFile = formData.get('image') as unknown as File;
+    const categoryName = formData.get('category_name') as string;
+    const stockVal = formData.get('stock') as string;
+    const stock = stockVal ? parseInt(stockVal, 10) : 0;
 
     if (!name || !imageFile || !imageFile.name) {
       return new Response('Missing required fields', { status: 400 });
+    }
+
+    let categoryId: number | null = null;
+    if (categoryName && categoryName.trim()) {
+      const trimmedCat = categoryName.trim();
+      const existingCat = await context.env.DB.prepare(
+        "SELECT id FROM category WHERE name = ? AND shop_id = ?"
+      )
+        .bind(trimmedCat, shopMember.shop_id)
+        .first<{ id: number }>();
+
+      if (existingCat) {
+        categoryId = existingCat.id;
+      } else {
+        const createCatRes = await context.env.DB.prepare(
+          "INSERT INTO category (name, shop_id) VALUES (?, ?)"
+        )
+          .bind(trimmedCat, shopMember.shop_id)
+          .run();
+        categoryId = createCatRes.meta.last_row_id;
+      }
     }
 
     let prices: Record<string, number> = {};
@@ -213,8 +244,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const imageUrl = `${r2PublicUrl}/${filename}`;
 
     const productInsert = context.env.DB.prepare(
-      `INSERT INTO product (name, image_url, shop_id) VALUES (?, ?, ?)`
-    ).bind(name, imageUrl, shopMember.shop_id);
+      `INSERT INTO product (name, image_url, shop_id, category_id, stock) VALUES (?, ?, ?, ?, ?)`
+    ).bind(name, imageUrl, shopMember.shop_id, categoryId, stock);
 
     const priceStatements = Object.entries(prices)
       .filter(([_, price]) => price !== null && price !== undefined && !isNaN(price))
@@ -296,6 +327,30 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     // Enable Foreign Key support
     await context.env.DB.prepare("PRAGMA foreign_keys = ON;").run();
 
+    const contentType = context.request.headers.get("Content-Type") || "";
+
+    // If it's a bulk stock update (JSON)
+    if (contentType.includes("application/json")) {
+      const body = await context.request.json() as { stocks: Record<number, number> };
+      if (!body || !body.stocks) {
+        return new Response('Missing stocks data', { status: 400 });
+      }
+
+      const updates = Object.entries(body.stocks).map(([idStr, stockAmt]) => {
+        const prodId = parseInt(idStr, 10);
+        return context.env.DB.prepare(
+          "UPDATE product SET stock = ? WHERE id = ? AND shop_id = ?"
+        ).bind(stockAmt, prodId, shopMember.shop_id);
+      });
+
+      const batchRes = await context.env.DB.batch(updates);
+      const ok = batchRes.every((r) => r.success);
+      return new Response(JSON.stringify({ success: ok }), {
+        status: ok ? 200 : 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const url = new URL(context.request.url);
     const id = url.searchParams.get('id');
 
@@ -332,9 +387,33 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     const formData = await context.request.formData();
     const name = formData.get('name') as string;
     const pricesStr = formData.get('prices') as string;
+    const categoryName = formData.get('category_name') as string;
+    const stockVal = formData.get('stock') as string;
+    const stock = stockVal ? parseInt(stockVal, 10) : 0;
 
     if (!name) {
       return new Response('Missing required fields', { status: 400 });
+    }
+
+    let categoryId: number | null = null;
+    if (categoryName && categoryName.trim()) {
+      const trimmedCat = categoryName.trim();
+      const existingCat = await context.env.DB.prepare(
+        "SELECT id FROM category WHERE name = ? AND shop_id = ?"
+      )
+        .bind(trimmedCat, shopMember.shop_id)
+        .first<{ id: number }>();
+
+      if (existingCat) {
+        categoryId = existingCat.id;
+      } else {
+        const createCatRes = await context.env.DB.prepare(
+          "INSERT INTO category (name, shop_id) VALUES (?, ?)"
+        )
+          .bind(trimmedCat, shopMember.shop_id)
+          .run();
+        categoryId = createCatRes.meta.last_row_id;
+      }
     }
 
     let prices: Record<string, number> = {};
@@ -363,8 +442,8 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     }
 
     const updateProduct = context.env.DB.prepare(
-      `UPDATE product SET name = ?, image_url = ? WHERE id = ? AND shop_id = ?`
-    ).bind(name, imageUrl, productId, shopMember.shop_id);
+      `UPDATE product SET name = ?, image_url = ?, category_id = ?, stock = ? WHERE id = ? AND shop_id = ?`
+    ).bind(name, imageUrl, categoryId, stock, productId, shopMember.shop_id);
 
     const deletePrices = context.env.DB.prepare(
       `DELETE FROM product_price WHERE product_id = ?`

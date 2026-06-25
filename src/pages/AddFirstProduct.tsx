@@ -10,11 +10,13 @@ export default function AddFirstProduct() {
   const navigate = useNavigate();
 
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null,);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState('');
   const [prices, setPrices] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [categoryName, setCategoryName] = useState('');
+  const [stock, setStock] = useState('0');
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -24,7 +26,8 @@ export default function AddFirstProduct() {
     }
   };
 
-  const handlePriceChange = (currency: string, value: string) => { setPrices((prev) => ({
+  const handlePriceChange = (currency: string, value: string) => {
+    setPrices((prev) => ({
       ...prev,
       [currency]: value,
     }));
@@ -39,6 +42,14 @@ export default function AddFirstProduct() {
       alert('Product Name is required.');
       return;
     }
+    if (!categoryName.trim()) {
+      alert('Category is required.');
+      return;
+    }
+    if (stock.trim() === '' || isNaN(parseInt(stock, 10)) || parseInt(stock, 10) < 0) {
+      alert('Stock Quantity must be a valid non-negative number.');
+      return;
+    }
     if (!prices['THB'] || isNaN(parseFloat(prices['THB']))) {
       alert('Thai Price (THB) is required.');
       return;
@@ -48,6 +59,8 @@ export default function AddFirstProduct() {
     try {
       const formData = new FormData();
       formData.append('name', name.trim());
+      formData.append('category_name', categoryName.trim());
+      formData.append('stock', parseInt(stock, 10).toString());
       formData.append('image', imageFile);
 
       // Build prices dictionary to send to API
@@ -174,6 +187,27 @@ export default function AddFirstProduct() {
               placeholder="e.g., Frame card fuffy"
               value={name}
               onChange={setName}
+              required
+            />
+
+            {/* Category selection */}
+            <TextInput
+              id="product_category"
+              label="Category"
+              placeholder="e.g., Frame card"
+              value={categoryName}
+              onChange={setCategoryName}
+              required
+            />
+
+            {/* Stock Quantity */}
+            <TextInput
+              id="stock_quantity"
+              label="Stock Quantity"
+              placeholder="0"
+              value={stock}
+              onChange={setStock}
+              type="number"
               required
             />
 

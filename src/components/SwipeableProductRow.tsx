@@ -9,6 +9,9 @@ export interface Product {
   image_url: string;
   prices: Record<string, number | null>;
   created_at?: string;
+  category_id?: number;
+  category_name?: string;
+  stock?: number;
 }
 
 interface SwipeableProductRowProps {

@@ -124,7 +124,7 @@ export default function Order({ onNavigate }: OrderProps) {
               }));
 
             try {
-              const response = await fetch('/api/transactions', {
+              const response = await fetch('/api/transaction', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

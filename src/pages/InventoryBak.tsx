@@ -10,30 +10,17 @@ export default function Inventory() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [categories, setCategories] = useState<string[]>(['All']);
-  const [isSavingStock, setIsSavingStock] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด');
 
-  const { stocks, incrementStock, decrementStock, initializeStocks, hasStockChanges, saveStockChanges } = useInventoryStore();
+  const { stocks, incrementStock, decrementStock, initializeStocks } = useInventoryStore();
 
   useEffect(() => {
-    // Load categories
-    fetch('/api/category')
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setCategories(['All', ...data.map((c) => c.name)]);
-        }
-      })
-      .catch((err) => console.error('Failed to fetch categories:', err));
-
-    // Load products
     fetch('/api/product')
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
           setProducts(data);
-          initializeStocks(data);
+          initializeStocks(data.map((p) => p.id));
         }
         setIsLoading(false);
       })
@@ -62,39 +49,49 @@ export default function Inventory() {
     }
   };
 
+  // Helper mappings for categories and SKUs
+  const getProductCategory = (name: string): string => {
+    const n = name.toLowerCase();
+    if (n.includes('treat') || n.includes('bite') || n.includes('beef') || n.includes('snack') || n.includes('food')) {
+      return 'ขนมสุนัข';
+    }
+    if (n.includes('toy') || n.includes('rope') || n.includes('doll') || n.includes('hat') || n.includes('badge') || n.includes('stand') || n.includes('keyring') || n.includes('resin')) {
+      return 'ของเล่น';
+    }
+    if (n.includes('bow') || n.includes('collar') || n.includes('ribbon') || n.includes('band') || n.includes('tie') || n.includes('clip')) {
+      return 'ปลอกคอ';
+    }
+    if (n.includes('balm') || n.includes('paw') || n.includes('organic') || n.includes('groom') || n.includes('cherry') || n.includes('flower')) {
+      return 'กรูมมิ่ง';
+    }
+    return 'ปลอกคอ'; // default fallback category
+  };
+
   const getProductSku = (id: number, category: string): string => {
     let prefix = 'GEN';
-    if (category === 'Frame card') prefix = 'FRM';
-    else if (category === 'Hat') prefix = 'HAT';
-    else if (category === 'Head band') prefix = 'BD';
-    else if (category === 'Flower') prefix = 'FLW';
+    if (category === 'ปลอกคอ') prefix = 'ACC';
+    else if (category === 'ขนมสุนัข') prefix = 'FOD';
+    else if (category === 'ของเล่น') prefix = 'TOY';
+    else if (category === 'กรูมมิ่ง') prefix = 'GRO';
     return `${prefix}-${String(id).padStart(3, '0')}`;
   };
 
+  // Unique categories for filtering
+  const categories = ['ทั้งหมด', 'ขนมสุนัข', 'ของเล่น', 'ปลอกคอ', 'กรูมมิ่ง'];
+
   // Filtered products list
   const filteredProducts = products.filter((product) => {
-    const category = product.category_name || 'General';
+    const category = getProductCategory(product.name);
     const sku = getProductSku(product.id, category);
     
     const matchesSearch =
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       sku.toLowerCase().includes(searchQuery.toLowerCase());
       
-    const matchesCategory = selectedCategory === 'All' || category === selectedCategory;
+    const matchesCategory = selectedCategory === 'ทั้งหมด' || category === selectedCategory;
 
     return matchesSearch && matchesCategory;
   });
-
-  const handleSaveStock = async () => {
-    setIsSavingStock(true);
-    const success = await saveStockChanges();
-    setIsSavingStock(false);
-    if (success) {
-      alert('Stock changes saved successfully.');
-    } else {
-      alert('Failed to save stock changes.');
-    }
-  };
 
   return (
     <>
@@ -105,7 +102,7 @@ export default function Inventory() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline-variant-warm group-focus-within:text-[#805062] transition-colors" />
               <input
                 type="text"
-                placeholder="Search products or SKU..."
+                placeholder="ค้นหาสินค้าหรือ SKU..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full h-12 pl-12 pr-4 bg-[#f6ebed] rounded-full border-none focus:ring-2 focus:ring-brand-pink/50 text-[14px] font-medium text-text-brown placeholder:text-outline-variant-warm/60 outline-none"
@@ -132,7 +129,7 @@ export default function Inventory() {
               </div>
             ) : (
               filteredProducts.map((product) => {
-                const category = product.category_name || 'General';
+                const category = getProductCategory(product.name);
                 const sku = getProductSku(product.id, category);
                 const stock = stocks[product.id] !== undefined ? stocks[product.id] : 0;
 
@@ -173,7 +170,7 @@ export default function Inventory() {
                         <div className="flex items-center gap-1.5">
                           <span className={`w-2.5 h-2.5 rounded-full ${dotColorClass}`}></span>
                           <span className="text-[12px] text-[#504447] font-medium">
-                            Stock:{' '}
+                            คลังสินค้า:{' '}
                             <span
                               className={`font-bold ${
                                 stock === 0 ? 'text-[#FF8A80]' : 'text-[#805062]'
@@ -219,22 +216,6 @@ export default function Inventory() {
             )}
           </section>
       </div>
-
-      {/* Floating Save Stock Changes bar */}
-      {hasStockChanges() && (
-        <div className="absolute bottom-20 left-0 right-0 px-6 z-50 animate-bounce">
-          <div className="bg-white/90 backdrop-blur-md border border-outline-warm/30 px-5 py-4 rounded-3xl shadow-xl flex items-center justify-between">
-            <span className="text-[13px] font-bold text-text-brown">Unsaved stock changes</span>
-            <button
-              onClick={handleSaveStock}
-              disabled={isSavingStock}
-              className="bg-brand-pink text-text-brown font-bold text-[12px] px-5 py-2.5 rounded-full hover:bg-brand-pink-hover active:scale-95 transition-all shadow-sm border-none cursor-pointer disabled:opacity-50"
-            >
-              {isSavingStock ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Floating Action Button (FAB) for Add Product */}
       <button

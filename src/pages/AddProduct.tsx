@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Camera, Plus, Loader2 } from 'lucide-react';
+import { Camera, Plus, Loader2, X } from 'lucide-react';
 import { type Product } from '../components/SwipeableProductRow';
 import { currencies } from '../types/currency';
 import { ADD_PRODUCT_DATA } from '../data/mockData';
@@ -42,9 +42,31 @@ export default function AddProduct({
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  // Local UI categories
-  const [categories, setCategories] = useState<string[]>(['Accessories', 'Treats', 'Toys']);
-  const [selectedCategory, setSelectedCategory] = useState<string>('Accessories');
+  // Local UI categories loaded from API
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [stock, setStock] = useState<string>(
+    productToEdit && 'stock' in productToEdit ? String((productToEdit as any).stock) : '0'
+  );
+  const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
+  useEffect(() => {
+    fetch('/api/category')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const names = data.map((c) => c.name);
+          setCategories(names);
+          if (productToEdit && 'category_name' in productToEdit && (productToEdit as any).category_name) {
+            setSelectedCategory((productToEdit as any).category_name);
+          } else if (names.length > 0) {
+            setSelectedCategory(names[0]);
+          }
+        }
+      })
+      .catch((err) => console.error('Failed to load categories:', err));
+  }, [productToEdit]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -62,19 +84,34 @@ export default function AddProduct({
   };
 
   const handleAddCategory = () => {
-    const newCat = prompt('Enter new category name:');
-    if (newCat && newCat.trim()) {
-      const trimmed = newCat.trim();
+    setNewCategoryName('');
+    setIsAddCategoryModalOpen(true);
+  };
+
+  const handleConfirmAddCategory = () => {
+    if (newCategoryName && newCategoryName.trim()) {
+      const trimmed = newCategoryName.trim();
       if (!categories.includes(trimmed)) {
         setCategories((prev) => [...prev, trimmed]);
       }
       setSelectedCategory(trimmed);
+      setIsAddCategoryModalOpen(false);
+    } else {
+      alert('Category name cannot be empty.');
     }
   };
 
   const handleSave = async () => {
     if (!name.trim()) {
       alert('Product Name is required.');
+      return;
+    }
+    if (!selectedCategory) {
+      alert('Category is required.');
+      return;
+    }
+    if (stock.trim() === '' || isNaN(parseInt(stock, 10)) || parseInt(stock, 10) < 0) {
+      alert('Stock Quantity must be a valid non-negative number.');
       return;
     }
     if (!prices['THB'] || isNaN(parseFloat(prices['THB']))) {
@@ -90,6 +127,9 @@ export default function AddProduct({
     try {
       const formData = new FormData();
       formData.append('name', name.trim());
+      formData.append('category_name', selectedCategory.trim());
+      formData.append('stock', parseInt(stock, 10).toString());
+      
       if (imageFile) {
         formData.append('image', imageFile);
       } else if (productToEdit) {
@@ -222,16 +262,81 @@ export default function AddProduct({
                     </button>
                   );
                 })}
-                <button
-                  type="button"
-                  onClick={handleAddCategory}
-                  className="w-9 h-9 rounded-full bg-peach-container text-text-brown flex items-center justify-center hover:opacity-90 active:scale-95 transition-all cursor-pointer border-none"
-                  aria-label="Add Category"
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={handleAddCategory}
+                    className="w-9 h-9 rounded-full bg-peach-container text-text-brown flex items-center justify-center hover:opacity-90 active:scale-95 transition-all cursor-pointer border-none"
+                    aria-label="Add Category"
+                  >
+                    <Plus className="w-5 h-5" />
+                  </button>
+
+                  {isAddCategoryModalOpen && (
+                    <>
+                      {/* Backdrop */}
+                      <div 
+                        className="fixed inset-0 z-40 cursor-default"
+                        onClick={() => setIsAddCategoryModalOpen(false)}
+                      />
+                      {/* Popup container */}
+                      <div 
+                        className="absolute right-0 bottom-full mb-2 bg-white rounded-[16px] w-[240px] overflow-hidden flex flex-col shadow-[0_4px_20px_rgba(0,0,0,0.15)] z-50 border border-outline-warm/20 p-4 gap-4"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-center justify-between">
+                          <h2 className="font-bold text-text-brown text-[14px]">Add Category</h2>
+                          <button
+                            type="button"
+                            onClick={() => setIsAddCategoryModalOpen(false)}
+                            className="p-1 text-[#805062] hover:opacity-80 border-none bg-transparent cursor-pointer"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <div className="space-y-1 text-left">
+                          <input
+                            type="text"
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            placeholder="Category Name"
+                            className="w-full h-10 px-4 rounded-full border-2 border-outline-warm focus:border-brand-pink focus:outline-none text-[13px] font-medium text-text-brown shadow-sm"
+                            autoFocus
+                          />
+                        </div>
+                        <div className="flex gap-2 justify-end">
+                          <button
+                            type="button"
+                            onClick={() => setIsAddCategoryModalOpen(false)}
+                            className="px-4 py-1.5 rounded-full border-2 border-outline-warm text-[11px] font-bold text-text-brown bg-transparent cursor-pointer hover:bg-outline-warm/10 transition-all active:scale-95"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleConfirmAddCategory}
+                            className="px-4 py-1.5 rounded-full bg-brand-pink text-text-brown text-[11px] font-bold border-none cursor-pointer hover:bg-brand-pink-hover transition-all active:scale-95 shadow-sm"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
+
+            {/* Stock Quantity */}
+            <FormInput
+              id="stock_quantity"
+              label="Stock Quantity"
+              placeholder="0"
+              value={stock}
+              onChange={setStock}
+              type="number"
+              required
+            />
 
             {/* Pricing Section */}
             <div className="space-y-4 pt-2">
@@ -291,6 +396,6 @@ export default function AddProduct({
               </button>
             </div>
           </div>
-    </div>
-  );
-}
+        </div>
+      );
+    }
