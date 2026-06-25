@@ -37,10 +37,12 @@ interface DBUser {
   password_salt?: string;
 }
 
-// Define the shape of the shop member query result
-interface ShopMemberDetails {
-  shop_id: number;
-  shop_name: string;
+interface UserProfileRow {
+  id: number;
+  email: string;
+  shop_id: number | null;
+  shop_name: string | null;
+  product_id: number | null;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -123,7 +125,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     // Retrieve user and shop info
-    const userProfile: any = await context.env.DB.prepare(
+    const userProfile = await context.env.DB.prepare(
       `SELECT u.id, u.email, sm.shop_id, s.name as shop_name, p.id as product_id
        FROM "user" u
        LEFT JOIN shop_member sm ON u.id = sm.user_id
@@ -132,9 +134,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
        WHERE u.id = ?`
     )
       .bind(user.id)
-      .first();
+      .first<UserProfileRow>();
 
-    const isShopEmpty = userProfile.product_id ? true : false;
+    const isShopEmpty = userProfile?.product_id ? true : false;
 
     // 5. Create active session
     const sessionId = generateUUID();
@@ -162,8 +164,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           id: user.id,
           email: user.email,
           name: name || email.split("@")[0],
-          shopName: userProfile.shop_name || null,
-          shopId: userProfile.shop_id || null,
+          shopName: userProfile?.shop_name || null,
+          shopId: userProfile?.shop_id || null,
           isOnboardingComplete: isShopEmpty,
         },
       }),
