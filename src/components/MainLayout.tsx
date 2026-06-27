@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Header from './Header';
 import BottomNavigation from './BottomNavigation';
 import { Bell } from 'lucide-react';
+import { useOrderStore } from '../store/useOrderStore';
 
 interface LocationState {
   productToEdit?: unknown;
@@ -41,6 +43,8 @@ const ROUTE_CONFIGS: Record<string, RouteConfig> = {
 export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { hasEvent, setHasEvent, setActiveEvent } = useOrderStore();
+  const [isLoadingEvent, setIsLoadingEvent] = useState(true);
 
   // Find config based on current pathname
   const config = ROUTE_CONFIGS[location.pathname] || { title: 'Boutique POS', tab: '' };
@@ -50,6 +54,49 @@ export default function MainLayout() {
   const resolvedTitle = typeof config.title === 'function' 
     ? config.title(state) 
     : config.title;
+
+  // Check event status on mount & navigation
+  useEffect(() => {
+    let active = true;
+    const d = new Date();
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+    fetch(`/api/event?today=${todayStr}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch events');
+        return res.json();
+      })
+      .then((data) => {
+        if (!active) return;
+        const events = data as Array<{ id: number; name: string; status: string }>;
+        const activeEvent = events.find((e) => e.status === 'inprogress');
+        if (activeEvent) {
+          setHasEvent(true);
+          setActiveEvent(activeEvent.id, activeEvent.name);
+        } else {
+          setHasEvent(false);
+          setActiveEvent(null, null);
+        }
+        setIsLoadingEvent(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (active) {
+          setIsLoadingEvent(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [setHasEvent, setActiveEvent, location.pathname]);
+
+  // Route guard: Redirect to /dashboard if on /order or /transactions and no active event exists
+  useEffect(() => {
+    if (!isLoadingEvent && !hasEvent && (location.pathname === '/order' || location.pathname === '/transactions')) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isLoadingEvent, hasEvent, location.pathname, navigate]);
 
   const handleNavigate = (tab: string) => {
     navigate(`/${tab}`);
@@ -63,6 +110,17 @@ export default function MainLayout() {
       navigate(destination);
     }
   };
+
+  if (isLoadingEvent && (location.pathname === '/order' || location.pathname === '/transactions')) {
+    return (
+      <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center items-center">
+        <div className="text-[#805062] font-medium text-sm flex flex-col items-center gap-2">
+          <span className="animate-spin border-4 border-[#805062] border-t-transparent w-8 h-8 rounded-full"></span>
+          <span>Checking active event...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
