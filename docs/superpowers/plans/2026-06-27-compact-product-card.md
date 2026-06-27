@@ -2,13 +2,13 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Compact the size of product cards in the Products List/Grid of the Order page by changing the quantity controls to a vertical layout that stacks upwards from the bottom-right, reusing the space above the plus button and avoiding card height expansion.
+**Goal:** Convert product card layout in the Order page back to horizontal quantity controls, but replace the displayed product category with the product price to keep the overall height compact.
 
 **Architecture:** Modify `src/pages/Order.tsx` to:
-1. Make the product card container `relative`.
-2. Add `pr-8` to the product title and category to avoid overlapping with controls.
-3. Absolutely position the quantity controls at the bottom-right (`absolute bottom-3 right-3`).
-4. In the selected state, render a vertical pill with the minus button `[-]` at the top, quantity text in the middle, and plus button `[+]` at the bottom. This ensures the `[+]` button remains in the same position and the controls grow upwards.
+1. Revert product card wrapper class to original (no `relative` class needed).
+2. Remove displayed category text completely.
+3. Place the product price below the title, styled as bold with size `14px` and color `#805062`.
+4. Restore horizontal quantity controls at the bottom (`mt-auto`). If selected, show `[-] qty [+]` in a horizontal pill. If not selected, show a single `[+]` button aligned to the right.
 
 **Tech Stack:** React, TypeScript, Tailwind CSS, Lucide React
 
@@ -20,92 +20,89 @@
 
 ---
 
-### Task 1: Update Product Card Layout in Order.tsx
+### Task 1: Revert to Horizontal Controls & Replace Category with Price in Order.tsx
 
 **Files:**
 - Modify: [Order.tsx](file:///home/tie/Projects/knpos/src/pages/Order.tsx)
 
 **Interfaces:**
 - Consumes: `quantities` and `selectedCurrency` from `useOrderStore`
-- Produces: Compact card layout with absolutely positioned vertical controls
+- Produces: Horizontal controls layout with price below title in Order page
 
 - [ ] **Step 1: Modify layout of the product card**
 
-Update [Order.tsx](file:///home/tie/Projects/knpos/src/pages/Order.tsx) as follows:
-1. Add `relative` to the product card wrapper container (line 218).
-2. Add `pr-8` to the product title `h3` (line 233).
-3. Add `pr-8` to the category `p` (line 236).
-4. Replace the `{/* Action / Price */}` section and quantity control markup (lines 240-281) to place the price at the bottom-left and the controls in an `absolute bottom-3 right-3` container.
-
-Specifically, replace the code starting from `{/* Info */}` to the end of the card return block with:
+Update [Order.tsx](file:///home/tie/Projects/knpos/src/pages/Order.tsx) by replacing lines 218 to 281 with the following implementation:
 
 ```tsx
-                    {/* Info */}
-                    <h3 className="font-bold text-[14px] text-text-brown leading-tight mb-1 truncate pr-8">
-                      {product.name}
-                    </h3>
-                    <p className="text-[11px] text-outline-variant-warm font-medium mb-3 pr-8">
-                      {product.category_name || 'General'}
-                    </p>
+                    <div
+                      key={product.id}
+                      className={`bg-white rounded-[20px] p-3 shadow-[0_4px_12px_rgba(78,52,46,0.05)] transition-all duration-200 flex flex-col border ${isSelected
+                          ? 'border-2 border-brand-pink ring-4 ring-brand-pink/10'
+                          : 'border-outline-warm/40'
+                        }`}
+                    >
+                      {/* Product Image */}
+                      <div className="aspect-square rounded-xl bg-peach-container/40 relative overflow-hidden mb-3 flex items-center justify-center p-2 border border-outline-warm/15">
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="w-full h-full object-contain mix-blend-multiply"
+                        />
+                      </div>
 
-                    {/* Action / Price */}
-                    <div className="mt-auto pt-1">
-                      <span className="font-bold text-[14px] text-[#805062]">
+                      {/* Info */}
+                      <h3 className="font-bold text-[14px] text-text-brown leading-tight mb-1 truncate">
+                        {product.name}
+                      </h3>
+                      <p className="font-bold text-[14px] text-[#805062] mb-3">
                         {selectedCurrency.symbol}{price.toFixed(2)}
-                      </span>
-                    </div>
+                      </p>
 
-                    {/* Quantity Controls (Absolutely Positioned) */}
-                    <div className="absolute bottom-3 right-3 z-10">
-                      {isSelected ? (
-                        <div className="flex flex-col items-center bg-brand-pink/20 rounded-[16px] p-0.5 border border-brand-pink/30 gap-1 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => handleDecrement(product.id)}
-                            className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-[#805062] hover:bg-brand-pink/10 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
-                          >
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="font-bold text-text-brown text-[11px] min-w-[18px] text-center leading-none">
-                            {qty}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleIncrement(product.id)}
-                            className="w-6 h-6 rounded-full bg-[#805062] flex items-center justify-center text-white hover:bg-[#805062]/90 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => handleIncrement(product.id)}
-                          className="w-8 h-8 rounded-full bg-[#ffd9e4] text-[#805062] hover:bg-brand-pink/30 active:scale-90 transition-transform flex items-center justify-center shadow-sm cursor-pointer border-none"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      )}
+                      {/* Action / Controls */}
+                      <div className="mt-auto">
+                        {isSelected ? (
+                          <div className="flex items-center justify-between bg-brand-pink/20 rounded-full p-1 border border-brand-pink/30">
+                            <button
+                              type="button"
+                              onClick={() => handleDecrement(product.id)}
+                              className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#805062] hover:bg-brand-pink/10 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
+                            >
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="font-bold text-text-brown text-sm">
+                              {qty}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleIncrement(product.id)}
+                              className="w-7 h-7 rounded-full bg-[#805062] flex items-center justify-center text-white hover:bg-[#805062]/90 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => handleIncrement(product.id)}
+                              className="w-8 h-8 rounded-full bg-[#ffd9e4] text-[#805062] hover:bg-brand-pink/30 active:scale-90 transition-transform flex items-center justify-center shadow-sm cursor-pointer border-none"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
 ```
 
 - [ ] **Step 2: Run build to verify TypeScript compilation**
 
 Run: `pnpm build`
-Expected: Compilation completes successfully with no errors in `src/pages/Order.tsx`.
+Expected: Compilation completes successfully with no errors.
 
-- [ ] **Step 3: Run dev server to verify visually**
-
-Run: `pnpm dev`
-Expected: Server starts successfully. Verify on the UI that:
-1. When not selected, the price is at the bottom left and the pink `[+]` button is at the bottom right.
-2. When clicked, the `[+]` button transitions to the vertical controls with the `[+]` button at the bottom and `[-]` at the top.
-3. The card height does not expand when a product is selected.
-4. Tap targets work correctly and update the order state.
-
-- [ ] **Step 4: Commit changes**
+- [ ] **Step 3: Commit changes**
 
 ```bash
 git add src/pages/Order.tsx
-git commit -m "feat(order): absolute position vertical quantity controls to prevent card height expansion"
+git commit -m "feat(order): restore horizontal controls and display price instead of category"
 ```

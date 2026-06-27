@@ -16,6 +16,7 @@ interface RouteConfig {
   hideBottomNav?: boolean;
   showBackButton?: boolean;
   backTo?: string | ((state: LocationState | null | undefined) => string);
+  disableLayoutScroll?: boolean;
 }
 
 // Static mapping of pathnames to layout configuration
@@ -24,6 +25,7 @@ const ROUTE_CONFIGS: Record<string, RouteConfig> = {
   '/order': {
     title: (_, activeEventName) => activeEventName ? `Order of ${activeEventName}` : 'New Order',
     tab: 'order',
+    disableLayoutScroll: true,
   },
   '/transactions': { title: 'History', tab: 'transactions' },
   '/products': { title: 'Inventory', tab: 'products' },
@@ -150,7 +152,11 @@ export default function MainLayout() {
         />
 
         {/* Sub-page Outlet */}
-        <div className={`flex-1 overflow-y-auto px-5 space-y-6 no-scrollbar pt-4 ${
+        <div className={`flex-1 px-5 pt-4 ${
+          config.disableLayoutScroll
+            ? 'flex flex-col min-h-0 overflow-hidden'
+            : 'overflow-y-auto space-y-6 no-scrollbar'
+        } ${
           config.hideBottomNav ? 'pb-8' : 'pb-24'
         }`}>
           <Outlet />

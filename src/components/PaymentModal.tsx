@@ -34,8 +34,14 @@ export default function PaymentModal({
   const totalAmount = subtotal + tax;
 
   return (
-    <div className="absolute inset-0 bg-text-brown/40 backdrop-blur-xs flex items-end justify-center z-50 rounded-[24px]">
-      <div className="relative w-full rounded-t-[24px] shadow-2xl overflow-visible max-h-[85%] flex flex-col border-t border-outline-warm/30 font-quicksand bg-pattern">
+    <div
+      onClick={isLoading ? undefined : onEdit}
+      className="absolute inset-0 bg-text-brown/40 backdrop-blur-xs flex items-end justify-center z-50 rounded-[24px] cursor-pointer"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full rounded-t-[24px] shadow-2xl overflow-visible max-h-[85%] flex flex-col border-t border-outline-warm/30 font-quicksand bg-pattern cursor-default"
+      >
         
         {/* Mascot Clerk Speech & Logo */}
         <div className="absolute -top-16 left-5 z-50 pointer-events-none">
