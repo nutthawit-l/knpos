@@ -215,7 +215,7 @@ export default function Order({ onNavigate }: OrderProps) {
                 return (
                   <div
                     key={product.id}
-                    className={`bg-white rounded-[20px] p-3 shadow-[0_4px_12px_rgba(78,52,46,0.05)] transition-all duration-200 flex flex-col border ${isSelected
+                    className={`relative bg-white rounded-[20px] p-3 shadow-[0_4px_12px_rgba(78,52,46,0.05)] transition-all duration-200 flex flex-col border ${isSelected
                         ? 'border-2 border-brand-pink ring-4 ring-brand-pink/10'
                         : 'border-outline-warm/40'
                       }`}
@@ -230,51 +230,50 @@ export default function Order({ onNavigate }: OrderProps) {
                     </div>
 
                     {/* Info */}
-                    <h3 className="font-bold text-[14px] text-text-brown leading-tight mb-1 truncate">
+                    <h3 className="font-bold text-[14px] text-text-brown leading-tight mb-1 truncate pr-10">
                       {product.name}
                     </h3>
-                    <p className="text-[11px] text-outline-variant-warm font-medium mb-3">
+                    <p className="text-[11px] text-outline-variant-warm font-medium mb-3 pr-10">
                       {product.category_name || 'General'}
                     </p>
 
                     {/* Action / Price */}
-                    <div className="mt-auto">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-[14px] text-[#805062]">
-                          {selectedCurrency.symbol}{price.toFixed(2)}
-                        </span>
-                      </div>
+                    <div className="mt-auto pt-1">
+                      <span className="font-bold text-[14px] text-[#805062]">
+                        {selectedCurrency.symbol}{price.toFixed(2)}
+                      </span>
+                    </div>
 
+                    {/* Quantity Controls (Absolutely Positioned) */}
+                    <div className="absolute bottom-3 right-3 z-10">
                       {isSelected ? (
-                        <div className="flex items-center justify-between bg-brand-pink/20 rounded-full p-1 border border-brand-pink/30">
+                        <div className="flex flex-col items-center bg-brand-pink/20 rounded-[20px] p-1 border border-brand-pink/30 gap-1.5 shrink-0">
                           <button
                             type="button"
                             onClick={() => handleDecrement(product.id)}
-                            className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#805062] hover:bg-brand-pink/10 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
+                            className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#805062] hover:bg-brand-pink/10 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
                           >
-                            <Minus className="w-3.5 h-3.5" />
+                            <Minus className="w-4 h-4" />
                           </button>
-                          <span className="font-bold text-text-brown text-sm">
+                          <span className="font-bold text-text-brown text-sm min-w-[20px] text-center leading-none">
                             {qty}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleIncrement(product.id)}
-                            className="w-7 h-7 rounded-full bg-[#805062] flex items-center justify-center text-white hover:bg-[#805062]/90 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex justify-end">
-                          <button
-                            type="button"
-                            onClick={() => handleIncrement(product.id)}
-                            className="w-8 h-8 rounded-full bg-[#ffd9e4] text-[#805062] hover:bg-brand-pink/30 active:scale-90 transition-transform flex items-center justify-center shadow-sm cursor-pointer border-none"
+                            className="w-8 h-8 rounded-full bg-[#805062] flex items-center justify-center text-white hover:bg-[#805062]/90 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
                           >
                             <Plus className="w-4 h-4" />
                           </button>
                         </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleIncrement(product.id)}
+                          className="w-8 h-8 rounded-full bg-[#ffd9e4] text-[#805062] hover:bg-brand-pink/30 active:scale-90 transition-transform flex items-center justify-center shadow-sm cursor-pointer border-none"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
                       )}
                     </div>
                   </div>
