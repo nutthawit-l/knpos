@@ -159,7 +159,7 @@ export default function Order({ onNavigate }: OrderProps) {
       )}
 
       {/* Main Content Scrollable Area Wrapper (renders inside MainLayout scroll container) */}
-      <div className="space-y-4 pb-20">
+      <div className="flex flex-col min-h-0 h-full space-y-4">
         {/* Search Bar */}
         <section className="shrink-0">
           <div className="relative group">
@@ -194,102 +194,100 @@ export default function Order({ onNavigate }: OrderProps) {
           onSelectCategory={setSelectedCategory}
         />
 
-        {/* Products List/Grid */}
-        <section className="pb-4">
-          {isLoading ? (
-            <div className="p-8 text-center text-[14px] text-text-brown font-medium">
-              Loading products...
-            </div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <AlertCircle className="w-12 h-12 text-outline-variant-warm mb-3" />
-              <p className="text-[14px] text-outline-variant-warm font-bold">No products found.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4">
-              {filteredProducts.map((product) => {
-                const qty = quantities[product.id] || 0;
-                const isSelected = qty > 0;
-                const price = getPrice(product, selectedCurrency.code);
+        {/* Products List/Grid Scroll Container */}
+        <div className="flex-1 overflow-y-auto no-scrollbar min-h-0 space-y-4 pb-32">
+          {/* Products List/Grid */}
+          <section className="pb-4">
+            {isLoading ? (
+              <div className="p-8 text-center text-[14px] text-text-brown font-medium">
+                Loading products...
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <AlertCircle className="w-12 h-12 text-outline-variant-warm mb-3" />
+                <p className="text-[14px] text-outline-variant-warm font-bold">No products found.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                {filteredProducts.map((product) => {
+                  const qty = quantities[product.id] || 0;
+                  const isSelected = qty > 0;
+                  const price = getPrice(product, selectedCurrency.code);
 
-                return (
-                  <div
-                    key={product.id}
-                    className={`relative bg-white rounded-[20px] p-3 shadow-[0_4px_12px_rgba(78,52,46,0.05)] transition-all duration-200 flex flex-col border ${isSelected
-                        ? 'border-2 border-brand-pink ring-4 ring-brand-pink/10'
-                        : 'border-outline-warm/40'
-                      }`}
-                  >
-                    {/* Product Image */}
-                    <div className="aspect-square rounded-xl bg-peach-container/40 relative overflow-hidden mb-3 flex items-center justify-center p-2 border border-outline-warm/15">
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-full h-full object-contain mix-blend-multiply"
-                      />
-                    </div>
+                  return (
+                    <div
+                      key={product.id}
+                      className={`bg-white rounded-[20px] p-3 shadow-[0_4px_12px_rgba(78,52,46,0.05)] transition-all duration-200 flex flex-col border ${isSelected
+                          ? 'border-2 border-brand-pink ring-4 ring-brand-pink/10'
+                          : 'border-outline-warm/40'
+                        }`}
+                    >
+                      {/* Product Image */}
+                      <div className="aspect-square rounded-xl bg-peach-container/40 relative overflow-hidden mb-3 flex items-center justify-center p-2 border border-outline-warm/15">
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="w-full h-full object-contain mix-blend-multiply"
+                        />
+                      </div>
 
-                    {/* Info */}
-                    <h3 className="font-bold text-[14px] text-text-brown leading-tight mb-1 truncate pr-10">
-                      {product.name}
-                    </h3>
-                    <p className="text-[11px] text-outline-variant-warm font-medium mb-3 pr-10">
-                      {product.category_name || 'General'}
-                    </p>
-
-                    {/* Action / Price */}
-                    <div className="mt-auto pt-1">
-                      <span className="font-bold text-[14px] text-[#805062]">
+                      {/* Info */}
+                      <h3 className="font-bold text-[14px] text-text-brown leading-tight mb-1 truncate">
+                        {product.name}
+                      </h3>
+                      <p className="font-bold text-[14px] text-[#805062] mb-3">
                         {selectedCurrency.symbol}{price.toFixed(2)}
-                      </span>
-                    </div>
+                      </p>
 
-                    {/* Quantity Controls (Absolutely Positioned) */}
-                    <div className="absolute bottom-3 right-3 z-10">
-                      {isSelected ? (
-                        <div className="flex flex-col items-center bg-brand-pink/20 rounded-[20px] p-1 border border-brand-pink/30 gap-1.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => handleDecrement(product.id)}
-                            className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#805062] hover:bg-brand-pink/10 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
-                          >
-                            <Minus className="w-4 h-4" />
-                          </button>
-                          <span className="font-bold text-text-brown text-sm min-w-[20px] text-center leading-none">
-                            {qty}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleIncrement(product.id)}
-                            className="w-8 h-8 rounded-full bg-[#805062] flex items-center justify-center text-white hover:bg-[#805062]/90 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => handleIncrement(product.id)}
-                          className="w-8 h-8 rounded-full bg-[#ffd9e4] text-[#805062] hover:bg-brand-pink/30 active:scale-90 transition-transform flex items-center justify-center shadow-sm cursor-pointer border-none"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      )}
+                      {/* Action / Controls */}
+                      <div className="mt-auto">
+                        {isSelected ? (
+                          <div className="flex items-center justify-between bg-brand-pink/20 rounded-full p-1 border border-brand-pink/30">
+                            <button
+                              type="button"
+                              onClick={() => handleDecrement(product.id)}
+                              className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#805062] hover:bg-brand-pink/10 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
+                            >
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="font-bold text-text-brown text-sm">
+                              {qty}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleIncrement(product.id)}
+                              className="w-7 h-7 rounded-full bg-[#805062] flex items-center justify-center text-white hover:bg-[#805062]/90 active:scale-90 transition-transform cursor-pointer border-none shadow-sm"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => handleIncrement(product.id)}
+                              className="w-8 h-8 rounded-full bg-[#ffd9e4] text-[#805062] hover:bg-brand-pink/30 active:scale-90 transition-transform flex items-center justify-center shadow-sm cursor-pointer border-none"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* Empty state mascot illustration */}
+          <div className="flex flex-col items-center justify-center py-8 opacity-60">
+            <div className="relative">
+              <MascotLogo sizeClassName="w-20 h-20" className="border-4 border-white shadow-md floating-animation mb-3" />
+              <div className="absolute -bottom-1 -right-1 bg-[#805062] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">CHARNI</div>
             </div>
-          )}
-        </section>
-
-        {/* Empty state mascot illustration */}
-        <div className="flex flex-col items-center justify-center py-8 opacity-60">
-          <div className="relative">
-            <MascotLogo sizeClassName="w-20 h-20" className="border-4 border-white shadow-md floating-animation mb-3" />
-            <div className="absolute -bottom-1 -right-1 bg-[#805062] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">CHARNI</div>
+            <p className="font-bold text-[14px] text-text-brown">Need help finding something?</p>
           </div>
-          <p className="font-bold text-[14px] text-text-brown">Need help finding something?</p>
         </div>
       </div>
 
