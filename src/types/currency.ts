@@ -16,3 +16,11 @@ export const currencies: Currency[] = [
   { code: 'TWD', name: 'Taiwan Dollar', symbol: 'NT$', flag: '🇹🇼' },
   { code: 'THB', name: 'Thai Baht', symbol: '฿', flag: '🇹🇭' },
 ];
+
+export const COUNTRY_CURRENCY_MAP: Record<string, string> = {
+  'Thailand': 'THB',
+  'Singapore': 'SGD',
+  'USA': 'USD',
+  'Japan': 'JPY',
+};
+
