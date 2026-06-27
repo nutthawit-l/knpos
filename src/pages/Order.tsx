@@ -166,18 +166,10 @@ export default function Order({ onNavigate }: OrderProps) {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline-variant-warm group-focus-within:text-[#805062] transition-colors" />
             <input
               type="text"
-              placeholder="Find treats, toys, and more..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-12 pl-12 pr-12 bg-[#f6ebed] rounded-full border-none focus:ring-2 focus:ring-brand-pink/50 text-[14px] font-medium text-text-brown placeholder:text-outline-variant-warm/60 outline-none"
             />
-            <button
-              type="button"
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant-warm hover:text-[#805062] transition-colors bg-transparent border-none cursor-pointer p-1"
-              aria-label="Scan barcode"
-            >
-              <Scan className="w-5 h-5" />
-            </button>
           </div>
         </section>
 
