@@ -10,7 +10,7 @@ interface LocationState {
 }
 
 interface RouteConfig {
-  title: string | ((state: LocationState | null | undefined) => string);
+  title: string | ((state: LocationState | null | undefined, activeEventName?: string | null) => string);
   tab: string;
   hideBottomNav?: boolean;
   showBackButton?: boolean;
@@ -20,7 +20,10 @@ interface RouteConfig {
 // Static mapping of pathnames to layout configuration
 const ROUTE_CONFIGS: Record<string, RouteConfig> = {
   '/dashboard': { title: 'Dashboard', tab: 'dashboard' },
-  '/order': { title: 'New Order', tab: 'order' },
+  '/order': {
+    title: (_, activeEventName) => activeEventName ? `Order of ${activeEventName}` : 'New Order',
+    tab: 'order',
+  },
   '/transactions': { title: 'History', tab: 'transactions' },
   '/products': { title: 'Inventory', tab: 'products' },
   '/settings': { title: 'Settings', tab: 'settings' },
@@ -43,7 +46,7 @@ const ROUTE_CONFIGS: Record<string, RouteConfig> = {
 export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { hasEvent, setHasEvent, setActiveEvent } = useOrderStore();
+  const { hasEvent, setHasEvent, setActiveEvent, activeEventName } = useOrderStore();
   const [isLoadingEvent, setIsLoadingEvent] = useState(true);
 
   // Find config based on current pathname
@@ -52,7 +55,7 @@ export default function MainLayout() {
   const state = location.state as LocationState | null | undefined;
 
   const resolvedTitle = typeof config.title === 'function' 
-    ? config.title(state) 
+    ? config.title(state, activeEventName) 
     : config.title;
 
   // Check event status on mount & navigation
