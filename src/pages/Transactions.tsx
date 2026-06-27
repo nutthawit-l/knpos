@@ -6,7 +6,7 @@ import {
   ReceiptText,
 } from 'lucide-react';
 import MascotLogo from '../components/MascotLogo';
-import CurrencySortControls from '../components/CurrencySortControls';
+import EventCurrencyIndicator from '../components/EventCurrencyIndicator';
 import DatePickerModal from '../components/DatePickerModal';
 import { useOrderStore } from '../store/useOrderStore';
 
@@ -16,7 +16,7 @@ export interface TransactionsProps {
 }
 
 export default function Transactions({ onNavigate }: TransactionsProps) {
-  const { selectedCurrency, setCurrency } = useOrderStore();
+  const { selectedCurrency } = useOrderStore();
   const [summary, setSummary] = useState({ daily_total_income: 0, daily_total_product_sold: 0 });
   const [itemsSold, setItemsSold] = useState<Array<{ product_id: number; product_name: string; image_url: string; total_sold_today: number }>>([]);
   const [orders, setOrders] = useState<Array<{ id: number; total_income: number; total_product_sold: number; created_at: string }>>([]);
@@ -65,10 +65,7 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
             <span className="text-[12px] font-bold uppercase tracking-wider text-text-brown opacity-60">
               Overview
             </span>
-            <CurrencySortControls
-              selectedCurrency={selectedCurrency}
-              onSelectCurrency={setCurrency}
-            />
+            <EventCurrencyIndicator />
           </div>
 
           {/* Hero Section: Total Performance */}
