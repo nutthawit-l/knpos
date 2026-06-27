@@ -4,6 +4,7 @@ import Header from './Header';
 import BottomNavigation from './BottomNavigation';
 import { Bell } from 'lucide-react';
 import { useOrderStore } from '../store/useOrderStore';
+import { currencies, COUNTRY_CURRENCY_MAP } from '../types/currency';
 
 interface LocationState {
   productToEdit?: unknown;
@@ -71,11 +72,18 @@ export default function MainLayout() {
       })
       .then((data) => {
         if (!active) return;
-        const events = data as Array<{ id: number; name: string; status: string }>;
+        const events = data as Array<{ id: number; name: string; country: string; status: string }>;
         const activeEvent = events.find((e) => e.status === 'inprogress');
         if (activeEvent) {
           setHasEvent(true);
           setActiveEvent(activeEvent.id, activeEvent.name);
+
+          // Sync currency with active event's country
+          const currencyCode = COUNTRY_CURRENCY_MAP[activeEvent.country] || 'THB';
+          const matchedCurrency = currencies.find((c) => c.code === currencyCode);
+          if (matchedCurrency) {
+            useOrderStore.getState().setCurrency(matchedCurrency);
+          }
         } else {
           setHasEvent(false);
           setActiveEvent(null, null);
