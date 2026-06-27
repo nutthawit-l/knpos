@@ -217,13 +217,13 @@ export default function Order({ onNavigate }: OrderProps) {
                   return (
                     <div
                       key={product.id}
-                      className={`bg-white rounded-[20px] p-3 shadow-[0_4px_12px_rgba(78,52,46,0.05)] transition-all duration-200 flex flex-col border ${isSelected
+                      className={`bg-white rounded-[20px] pt-3 px-3 pb-1 shadow-[0_4px_12px_rgba(78,52,46,0.05)] transition-all duration-200 flex flex-col border ${isSelected
                           ? 'border-2 border-brand-pink ring-4 ring-brand-pink/10'
                           : 'border-outline-warm/40'
                         }`}
                     >
                       {/* Product Image */}
-                      <div className="aspect-square rounded-xl bg-peach-container/40 relative overflow-hidden mb-3 flex items-center justify-center p-2 border border-outline-warm/15">
+                      <div className="aspect-square rounded-xl bg-peach-container/40 relative overflow-hidden mb-2 flex items-center justify-center p-2 border border-outline-warm/15">
                         <img
                           src={product.image_url}
                           alt={product.name}
@@ -235,12 +235,12 @@ export default function Order({ onNavigate }: OrderProps) {
                       <h3 className="font-bold text-[14px] text-text-brown leading-tight mb-1 truncate">
                         {product.name}
                       </h3>
-                      <p className="font-bold text-[14px] text-[#805062] mb-3">
+                      <p className="font-bold text-[14px] text-[#805062] mb-1">
                         {selectedCurrency.symbol}{price.toFixed(2)}
                       </p>
 
                       {/* Action / Controls */}
-                      <div className="mt-auto">
+                      <div className="">
                         {isSelected ? (
                           <div className="flex items-center justify-between bg-brand-pink/20 rounded-full p-1 border border-brand-pink/30">
                             <button
