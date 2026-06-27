@@ -36,8 +36,20 @@ export default function Order({ onNavigate }: OrderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [categories, setCategories] = useState<string[]>(['All']);
 
   useEffect(() => {
+    // Load categories
+    fetch('/api/category')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCategories(['All', ...data.map((c) => c.name)]);
+        }
+      })
+      .catch((err) => console.error('Failed to fetch categories:', err));
+
+    // Load products
     fetch('/api/product')
       .then((res) => res.json())
       .then((data) => {
@@ -57,27 +69,8 @@ export default function Order({ onNavigate }: OrderProps) {
     return typeof val === 'number' ? val : (typeof val === 'string' ? parseFloat(val) : 0);
   };
 
-  const getProductCategory = (name: string): string => {
-    const n = name.toLowerCase();
-    if (n.includes('treat') || n.includes('bite') || n.includes('beef') || n.includes('snack') || n.includes('food')) {
-      return 'Treats';
-    }
-    if (n.includes('toy') || n.includes('rope') || n.includes('doll') || n.includes('hat') || n.includes('badge') || n.includes('stand') || n.includes('keyring') || n.includes('resin')) {
-      return 'Toys';
-    }
-    if (n.includes('bow') || n.includes('collar') || n.includes('ribbon') || n.includes('band') || n.includes('tie') || n.includes('clip')) {
-      return 'Accessories';
-    }
-    if (n.includes('balm') || n.includes('paw') || n.includes('organic') || n.includes('groom') || n.includes('cherry') || n.includes('flower')) {
-      return 'Grooming';
-    }
-    return 'Accessories'; // fallback category
-  };
-
-  const categories = ['All', 'Accessories', 'Treats', 'Toys', 'Grooming'] as const;
-
   const filteredProducts = products.filter((product) => {
-    const category = getProductCategory(product.name);
+    const category = product.category_name || 'General';
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || category === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -245,7 +238,7 @@ export default function Order({ onNavigate }: OrderProps) {
                       {product.name}
                     </h3>
                     <p className="text-[11px] text-outline-variant-warm font-medium mb-3">
-                      {getProductCategory(product.name)}
+                      {product.category_name || 'General'}
                     </p>
 
                     {/* Action / Price */}
