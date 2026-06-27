@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import MascotLogo from '../components/MascotLogo';
 import PaymentModal from '../components/PaymentModal';
-import CurrencySortControls from '../components/CurrencySortControls';
+import EventCurrencyIndicator from '../components/EventCurrencyIndicator';
 import CategoryFilter from '../components/CategoryFilter';
 import { useOrderStore } from '../store/useOrderStore';
 import { type Product } from '../components/SwipeableProductRow';
@@ -25,7 +25,6 @@ export default function Order({ onNavigate }: OrderProps) {
   const {
     quantities,
     selectedCurrency,
-    setCurrency: setSelectedCurrency,
     incrementItem: handleIncrement,
     decrementItem: handleDecrement,
     clearOrder,
@@ -185,10 +184,7 @@ export default function Order({ onNavigate }: OrderProps) {
         {/* Categories header with Currency switcher */}
         <div className="flex items-center justify-between shrink-0">
           <span className="text-[12px] font-bold uppercase tracking-wider text-text-brown opacity-60 pl-2">Categories</span>
-          <CurrencySortControls
-            selectedCurrency={selectedCurrency}
-            onSelectCurrency={setSelectedCurrency}
-          />
+          <EventCurrencyIndicator />
         </div>
 
         {/* Category tabs */}
