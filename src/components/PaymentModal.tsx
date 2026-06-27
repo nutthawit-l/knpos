@@ -30,8 +30,7 @@ export default function PaymentModal({
   if (!isOpen) return null;
 
   const subtotal = items.reduce((sum, item) => sum + item.pricePerUnit * item.quantity, 0);
-  const tax = subtotal * 0.07;
-  const totalAmount = subtotal + tax;
+  const totalAmount = subtotal;
 
   return (
     <div
@@ -42,7 +41,7 @@ export default function PaymentModal({
         onClick={(e) => e.stopPropagation()}
         className="relative w-full rounded-t-[24px] shadow-2xl overflow-visible max-h-[85%] flex flex-col border-t border-outline-warm/30 font-quicksand bg-pattern cursor-default"
       >
-        
+
         {/* Mascot Clerk Speech & Logo */}
         <div className="absolute -top-16 left-5 z-50 pointer-events-none">
           <div className="relative floating-animation flex items-end gap-3">
@@ -95,20 +94,7 @@ export default function PaymentModal({
         {/* Totals & Actions Section */}
         <div className="bg-pink-container/30 px-6 py-6 rounded-t-[24px] border-t border-outline-warm/40 shrink-0">
           <div className="space-y-2 mb-6">
-            <div className="flex justify-between text-surface-variant-custom/80 text-[14px] font-medium">
-              <span>Subtotal</span>
-              <span className="font-bold text-text-brown">
-                {currencySymbol}{subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div className="flex justify-between text-surface-variant-custom/80 text-[14px] font-medium">
-              <span>Tax (7%)</span>
-              <span className="font-bold text-text-brown">
-                {currencySymbol}{tax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            </div>
-            
-            <div className="flex justify-between items-center pt-3 mt-3 border-t border-outline-warm/50">
+            <div className="flex justify-between items-center border-outline-warm/50">
               <span className="text-text-brown font-bold text-[16px]">Total Amount</span>
               <div className="text-right">
                 <span className="text-primary font-bold text-[22px]">
