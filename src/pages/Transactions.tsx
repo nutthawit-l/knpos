@@ -247,19 +247,6 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
                 )
               )}
             </div>
-
-            {/* View All Products button */}
-            {!isLoading && itemsSold.length > 0 && activeTab !== 'orders' && (
-              <div className="pt-2 flex justify-center">
-                <button
-                  onClick={() => onNavigate?.('products')}
-                  className="px-5 py-2 rounded-full border border-brand-pink text-[#805062] font-bold text-xs flex items-center gap-2 hover:bg-pink-container transition-colors active:scale-95 cursor-pointer bg-white"
-                >
-                  <span>View All Products</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
           </section>
 
           {/* Aesthetic Footer Mascot sticker */}
