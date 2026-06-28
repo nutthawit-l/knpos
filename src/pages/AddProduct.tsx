@@ -254,68 +254,14 @@ export default function AddProduct({
                     </button>
                   );
                 })}
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={handleAddCategory}
-                    className="w-9 h-9 rounded-full bg-peach-container text-text-brown flex items-center justify-center hover:opacity-90 active:scale-95 transition-all cursor-pointer border-none"
-                    aria-label="Add Category"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-
-                  {isAddCategoryModalOpen && (
-                    <>
-                      {/* Backdrop */}
-                      <div 
-                        className="fixed inset-0 z-40 cursor-default"
-                        onClick={() => setIsAddCategoryModalOpen(false)}
-                      />
-                      {/* Popup container */}
-                      <div 
-                        className="absolute right-0 bottom-full mb-2 bg-white rounded-[16px] w-[240px] overflow-hidden flex flex-col shadow-[0_4px_20px_rgba(0,0,0,0.15)] z-50 border border-outline-warm/20 p-4 gap-4"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className="flex items-center justify-between">
-                          <h2 className="font-bold text-text-brown text-[14px]">Add Category</h2>
-                          <button
-                            type="button"
-                            onClick={() => setIsAddCategoryModalOpen(false)}
-                            className="p-1 text-[#805062] hover:opacity-80 border-none bg-transparent cursor-pointer"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                        <div className="space-y-1 text-left">
-                          <input
-                            type="text"
-                            value={newCategoryName}
-                            onChange={(e) => setNewCategoryName(e.target.value)}
-                            placeholder="Category Name"
-                            className="w-full h-10 px-4 rounded-full border-2 border-outline-warm focus:border-brand-pink focus:outline-none text-[13px] font-medium text-text-brown shadow-sm"
-                            autoFocus
-                          />
-                        </div>
-                        <div className="flex gap-2 justify-end">
-                          <button
-                            type="button"
-                            onClick={() => setIsAddCategoryModalOpen(false)}
-                            className="px-4 py-1.5 rounded-full border-2 border-outline-warm text-[11px] font-bold text-text-brown bg-transparent cursor-pointer hover:bg-outline-warm/10 transition-all active:scale-95"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleConfirmAddCategory}
-                            className="px-4 py-1.5 rounded-full bg-brand-pink text-text-brown text-[11px] font-bold border-none cursor-pointer hover:bg-brand-pink-hover transition-all active:scale-95 shadow-sm"
-                          >
-                            Add
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
+                <button
+                  type="button"
+                  onClick={handleAddCategory}
+                  className="w-9 h-9 rounded-full bg-peach-container text-text-brown flex items-center justify-center hover:opacity-90 active:scale-95 transition-all cursor-pointer border-none"
+                  aria-label="Add Category"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
               </div>
             </div>
 
@@ -389,6 +335,60 @@ export default function AddProduct({
               </button>
             </div>
           </div>
+
+          {/* Center Modal for Adding Category */}
+          {isAddCategoryModalOpen && (
+            <div className="absolute inset-0 z-[100] flex items-center justify-center p-6 bg-text-brown/40 backdrop-blur-xs">
+              {/* Backdrop click listener */}
+              <div 
+                className="absolute inset-0 cursor-default"
+                onClick={() => setIsAddCategoryModalOpen(false)}
+              />
+              
+              {/* Modal card */}
+              <div 
+                className="relative bg-white rounded-[24px] w-full max-w-[320px] shadow-[0_8px_30px_rgba(0,0,0,0.2)] z-10 border border-outline-warm/20 p-6 flex flex-col gap-4 bg-pattern"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between">
+                  <h2 className="font-bold text-text-brown text-[16px]">Add Category</h2>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddCategoryModalOpen(false)}
+                    className="p-1 text-[#805062] hover:opacity-80 border-none bg-transparent cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="space-y-1 text-left">
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="Category Name"
+                    className="w-full h-12 px-5 rounded-full border-2 border-outline-warm focus:border-brand-pink focus:outline-none text-[14px] font-medium text-text-brown shadow-sm"
+                    autoFocus
+                  />
+                </div>
+                <div className="flex gap-3 justify-end pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddCategoryModalOpen(false)}
+                    className="px-5 py-2.5 rounded-full border-2 border-outline-warm text-[13px] font-bold text-text-brown bg-transparent cursor-pointer hover:bg-outline-warm/10 transition-all active:scale-95"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmAddCategory}
+                    className="px-5 py-2.5 rounded-full bg-brand-pink text-text-brown text-[13px] font-bold border-none cursor-pointer hover:bg-brand-pink-hover transition-all active:scale-95 shadow-md"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
