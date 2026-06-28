@@ -57,7 +57,7 @@ export default function BottomNavigation({
               : 'text-[#504447]'
           }`}
         />
-        <span className="text-[12px] font-bold">History</span>
+        <span className="text-[12px] font-bold">Transaction</span>
       </button>
 
       <button
