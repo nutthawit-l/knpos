@@ -1,4 +1,5 @@
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Store, PlaneTakeoff, Hotel, Utensils, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { useOrderStore } from '../store/useOrderStore';
