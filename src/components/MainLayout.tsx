@@ -30,6 +30,7 @@ const ROUTE_CONFIGS: Record<string, RouteConfig> = {
   '/transactions': {
     title: (_, activeEventName) => activeEventName ? `Transaction of ${activeEventName}` : 'Transaction',
     tab: 'transactions',
+    disableLayoutScroll: true,
   },
   '/products': { title: 'Inventory', tab: 'products' },
   '/settings': { title: 'Settings', tab: 'settings' },
