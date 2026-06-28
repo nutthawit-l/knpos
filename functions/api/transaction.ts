@@ -174,6 +174,73 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const url = new URL(context.request.url);
+    
+    const eventIdParam = url.searchParams.get('event_id');
+    if (eventIdParam) {
+      const eventId = parseInt(eventIdParam, 10);
+      const eventRecord = await context.env.DB.prepare(
+        "SELECT country FROM event WHERE id = ?"
+      ).bind(eventId).first<{ country: string }>();
+
+      if (!eventRecord) {
+        return new Response('Event not found', { status: 404 });
+      }
+
+      const countryCurrencies: Record<string, string> = {
+        Thailand: 'THB',
+        Singapore: 'SGD',
+        Japan: 'JPY',
+        USA: 'USD',
+      };
+      const eventCurrency = countryCurrencies[eventRecord.country] || 'THB';
+
+      // Query 1: Event-wide aggregates (all-time for this event)
+      const summaryResult = await context.env.DB.prepare(
+        `SELECT 
+            COALESCE(SUM(total_income), 0) AS daily_total_income,
+            COALESCE(SUM(total_product_sold), 0) AS daily_total_product_sold
+         FROM "order"
+         WHERE event_id = ?`
+      ).bind(eventId).first<{ daily_total_income: number; daily_total_product_sold: number }>();
+
+      // Query 2: Product volumes for this event
+      const { results: productsResult } = await context.env.DB.prepare(
+        `SELECT 
+            p.id AS product_id,
+            p.name AS product_name,
+            p.image_url,
+            SUM(ti.quantity) AS total_sold_today
+         FROM order_item ti
+         JOIN "order" t ON ti.order_id = t.id
+         JOIN product p ON ti.product_id = p.id
+         WHERE t.event_id = ?
+         GROUP BY p.id, p.name, p.image_url
+         ORDER BY total_sold_today DESC`
+      ).bind(eventId).all<{ product_id: number; product_name: string; image_url: string; total_sold_today: number }>();
+
+      // Query 3: Individual orders for this event
+      const { results: ordersResult } = await context.env.DB.prepare(
+        `SELECT 
+            id,
+            total_income,
+            total_product_sold,
+            created_at
+         FROM "order"
+         WHERE event_id = ?
+         ORDER BY created_at DESC`
+      ).bind(eventId).all<{ id: number; total_income: number; total_product_sold: number; created_at: string }>();
+
+      return new Response(
+        JSON.stringify({
+          summary: summaryResult || { daily_total_income: 0, daily_total_product_sold: 0 },
+          products: productsResult || [],
+          orders: ordersResult || [],
+          eventCurrency,
+        }),
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const currency = (url.searchParams.get('currency') || 'THB').toUpperCase();
 
     // Determine the timezone offset. Eagerly check for a client-supplied tzOffset (in hours).
