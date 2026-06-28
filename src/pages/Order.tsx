@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
   Search,
-  Scan,
   Plus,
   Minus,
   CreditCard,
