@@ -60,20 +60,15 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
   return (
     <>
       <div className="space-y-5">
-          {/* Currency Switcher Row */}
-          <div className="flex items-center justify-between px-1">
-            <span className="text-[12px] font-bold uppercase tracking-wider text-text-brown opacity-60">
-              Overview
-            </span>
-            <EventCurrencyIndicator />
-          </div>
-
           {/* Hero Section: Total Performance */}
           <section className="relative overflow-hidden bg-pink-container rounded-[24px] p-6 shadow-[0_10px_25px_-5px_rgba(78,52,46,0.08)] border border-white/40">
             {/* Decorative circle */}
             <div className="absolute -top-12 -right-12 w-40 h-40 bg-brand-blue/30 rounded-full blur-2xl"></div>
             <div className="relative z-10">
-              <p className="font-bold text-[14px] text-[#805062] mb-1">Total Sales Today</p>
+              <div className="flex items-center justify-between mb-1">
+                <p className="font-bold text-[14px] text-[#805062]">Total Sales Today</p>
+                <EventCurrencyIndicator />
+              </div>
               <div className="flex items-baseline gap-2 mb-6">
                 <span className="text-4xl font-bold text-text-brown tracking-tight">
                   {selectedCurrency.symbol}
@@ -103,9 +98,9 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
           {/* Main Content List / Tabs */}
           <section className="space-y-4">
             <div className="flex justify-between items-center px-1 gap-2">
-              <h2 className="font-bold text-text-brown text-[18px]">
+              {/*<h2 className="font-bold text-text-brown text-[18px]">
                 {activeTab === 'orders' ? 'Transaction History' : 'Best Selling Items'}
-              </h2>
+              </h2>*/}
               <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar shrink-0">
                 <button
                   onClick={() => setActiveTab('top5')}
@@ -223,10 +218,10 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
                         <div className="text-right shrink-0">
                           <p className="font-bold text-[#805062] text-sm">
                             {selectedCurrency.symbol}
-                            {/* Wait, we calculate total product sold * unit price if API had it, but since API lists total_sold_today, let's display sold count, or check if we have total income for this product. 
-                            Wait! In schema, order_item stores price_per_unit. The API doesn't return total product revenue directly, but wait! 
+                            {/* Wait, we calculate total product sold * unit price if API had it, but since API lists total_sold_today, let's display sold count, or check if we have total income for this product.
+                            Wait! In schema, order_item stores price_per_unit. The API doesn't return total product revenue directly, but wait!
                             In the HTML, Organic Biscuits says 15 ชิ้น and ฿2,775.00.
-                            Since the API doesn't compute total income per product right now, we can calculate a estimated income or just show the volume! 
+                            Since the API doesn't compute total income per product right now, we can calculate a estimated income or just show the volume!
                             Wait, is there product price we can query or calculate?
                             Actually, let's check how the original Transactions.tsx showed this.
                             Oh! The original page showed:
