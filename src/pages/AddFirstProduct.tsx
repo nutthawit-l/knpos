@@ -235,6 +235,7 @@ export default function AddFirstProduct() {
                         required={currency.code === 'THB'}
                         value={prices[currency.code] || ''}
                         onChange={(e) => handlePriceChange(currency.code, e.target.value)}
+                        onWheel={(e) => e.currentTarget.blur()}
                         className="w-full h-14 pl-12 pr-6 py-4 rounded-full border-2 border-outline-warm bg-white focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 text-[16px] leading-6 placeholder:text-outline-variant-warm font-medium text-text-brown shadow-sm"
                       />
                     </div>
