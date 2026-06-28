@@ -74,6 +74,8 @@ We will design and implement the ability to bind transactions strictly to events
   * Update the Hero label from **"Total Sales Today"** to **"Event Total Sales"**.
   * Hide date-relative indicators (e.g., "+12% vs yesterday").
   * Update items list label / ranking header if applicable.
+  * In the **Order by Order** view, display sequential order numbers relative to the event (e.g. `Order #1`, `Order #2`, ... `Order #N`) starting from the oldest transaction. Since the API returns orders sorted by `created_at DESC` (newest first), the displayed order number for index `idx` will be `orders.length - idx`.
+
 
 ---
 
