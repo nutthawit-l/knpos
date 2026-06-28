@@ -41,6 +41,13 @@ const ROUTE_CONFIGS: Record<string, RouteConfig> = {
     showBackButton: true,
     backTo: '/dashboard',
   },
+  '/edit-event': {
+    title: 'Edit Event',
+    tab: '',
+    hideBottomNav: true,
+    showBackButton: true,
+    backTo: '/dashboard',
+  },
   '/add-product': {
     title: (state) => state?.productToEdit ? 'Edit Product' : 'Add Product',
     tab: '',
