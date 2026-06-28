@@ -70,7 +70,15 @@ export default function Dashboard() {
       active = false;
     };
   }, []);
-
+  const handleEventClick = (event: EventData) => {
+    if (event.status === 'upcoming') {
+      navigate(`/edit-event?event_id=${event.id}`);
+    } else if (event.status === 'inprogress') {
+      navigate(`/transactions?event_id=${event.id}&event_name=${encodeURIComponent(event.name)}`);
+    } else if (event.status === 'ended') {
+      navigate(`/transactions?event_id=${event.id}&event_name=${encodeURIComponent(event.name)}&disable_order=true`);
+    }
+  };
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] gap-2">
@@ -206,7 +214,8 @@ export default function Dashboard() {
               return (
                 <div
                   key={event.id}
-                  className="bg-white rounded-[20px] overflow-hidden shadow-[0_4px_20px_-2px_rgba(78,52,46,0.08)] border border-[#E0D0CC]/30 group hover:-translate-y-1 transition-transform duration-300"
+                  onClick={() => handleEventClick(event)}
+                  className="bg-white rounded-[20px] overflow-hidden shadow-[0_4px_20px_-2px_rgba(78,52,46,0.08)] border border-[#E0D0CC]/30 group hover:-translate-y-1 hover:shadow-md cursor-pointer transition-all active:scale-[0.99] duration-300"
                 >
                   <div className="h-32 w-full relative overflow-hidden bg-[#fff8f8]">
                     <img
