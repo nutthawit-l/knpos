@@ -72,6 +72,15 @@ export default function MainLayout() {
     ? config.title(state, activeEventName) 
     : config.title;
 
+  let displayTitle = resolvedTitle;
+  if (location.pathname === '/transactions') {
+    const params = new URLSearchParams(location.search);
+    const eventNameParam = params.get('event_name');
+    if (eventNameParam) {
+      displayTitle = `Transaction of ${eventNameParam}`;
+    }
+  }
+
   // Check event status on mount & navigation
   useEffect(() => {
     let active = true;
@@ -117,10 +126,12 @@ export default function MainLayout() {
 
   // Route guard: Redirect to /dashboard if on /order or /transactions and no active event exists
   useEffect(() => {
-    if (!isLoadingEvent && !hasEvent && (location.pathname === '/order' || location.pathname === '/transactions')) {
+    const params = new URLSearchParams(location.search);
+    const hasEventParam = params.has('event_id');
+    if (!isLoadingEvent && !hasEvent && !hasEventParam && (location.pathname === '/order' || location.pathname === '/transactions')) {
       navigate('/dashboard', { replace: true });
     }
-  }, [isLoadingEvent, hasEvent, location.pathname, navigate]);
+  }, [isLoadingEvent, hasEvent, location.pathname, location.search, navigate]);
 
   const handleNavigate = (tab: string) => {
     navigate(`/${tab}`);
@@ -151,7 +162,7 @@ export default function MainLayout() {
       <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
         {/* Centralized Header with Dynamic Title, Back Arrow, and Bell Button */}
         <Header
-          title={resolvedTitle}
+          title={displayTitle}
           onBackClick={config.showBackButton ? handleBack : undefined}
           rightElement={
             !config.showBackButton && (

@@ -11,14 +11,16 @@ export default function BottomNavigation({
   onNavigate,
 }: BottomNavigationProps) {
   const hasEvent = useOrderStore((state) => state.hasEvent);
+  const params = new URLSearchParams(window.location.search);
+  const isOrderDisabled = params.get('disable_order') === 'true';
 
   return (
     <nav className="absolute bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-[#fcf1f2] border-t border-outline-warm/30 shadow-[0_-2px_10px_rgba(78,52,46,0.05)] rounded-t-2xl">
       <button
-        disabled={!hasEvent}
-        onClick={() => hasEvent && onNavigate?.('order')}
+        disabled={!hasEvent || isOrderDisabled}
+        onClick={() => hasEvent && !isOrderDisabled && onNavigate?.('order')}
         className={`flex flex-col items-center justify-center transition-all border-none ${
-          !hasEvent
+          (!hasEvent || isOrderDisabled)
             ? 'opacity-40 cursor-not-allowed px-5 py-1 text-[#504447]'
             : activeTab === 'order'
             ? 'bg-[#f8bbd0] text-[#76485a] rounded-full px-5 py-1 cursor-pointer'
@@ -27,7 +29,7 @@ export default function BottomNavigation({
       >
         <ShoppingCart
           className={`w-5 h-5 mb-0.5 ${
-            !hasEvent
+            (!hasEvent || isOrderDisabled)
               ? 'text-[#504447]'
               : activeTab === 'order'
               ? 'text-[#76485a]'
