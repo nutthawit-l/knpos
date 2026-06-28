@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
   ShoppingBasket,
-  ArrowRight,
   TrendingUp,
   ReceiptText,
 } from 'lucide-react';
@@ -15,7 +14,7 @@ export interface TransactionsProps {
   readonly onMenuClick?: () => void;
 }
 
-export default function Transactions({ onNavigate }: TransactionsProps) {
+export default function Transactions({ onNavigate: _onNavigate }: TransactionsProps) {
   const { selectedCurrency } = useOrderStore();
   const [summary, setSummary] = useState({ daily_total_income: 0, daily_total_product_sold: 0 });
   const [itemsSold, setItemsSold] = useState<Array<{ product_id: number; product_name: string; image_url: string; total_sold_today: number }>>([]);
@@ -59,9 +58,9 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
 
   return (
     <>
-      <div className="space-y-5">
+      <div className="flex flex-col min-h-0 h-full space-y-5">
           {/* Hero Section: Total Performance */}
-          <section className="relative overflow-hidden bg-pink-container rounded-[24px] p-6 shadow-[0_10px_25px_-5px_rgba(78,52,46,0.08)] border border-white/40">
+          <section className="relative overflow-hidden bg-pink-container rounded-[24px] p-6 shadow-[0_10px_25px_-5px_rgba(78,52,46,0.08)] border border-white/40 shrink-0">
             {/* Decorative circle */}
             <div className="absolute -top-12 -right-12 w-40 h-40 bg-brand-blue/30 rounded-full blur-2xl"></div>
             <div className="relative z-10">
@@ -96,11 +95,8 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
           </section>
 
           {/* Main Content List / Tabs */}
-          <section className="space-y-4">
-            <div className="flex justify-between items-center px-1 gap-2">
-              {/*<h2 className="font-bold text-text-brown text-[18px]">
-                {activeTab === 'orders' ? 'Transaction History' : 'Best Selling Items'}
-              </h2>*/}
+          <section className="flex-1 flex flex-col min-h-0 space-y-4">
+            <div className="flex justify-between items-center px-1 gap-2 shrink-0">
               <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar shrink-0">
                 <button
                   onClick={() => setActiveTab('top5')}
@@ -133,7 +129,7 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
             </div>
 
             {/* List */}
-            <div className="space-y-3">
+            <div className="flex-1 overflow-y-auto no-scrollbar min-h-0 space-y-3 pb-6">
               {isLoading ? (
                 <div className="p-8 text-center text-[14px] text-text-brown font-medium bg-white rounded-[24px] border border-outline-warm/20">
                   Loading sales data...
@@ -217,21 +213,6 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
                         </div>
                         <div className="text-right shrink-0">
                           <p className="font-bold text-[#805062] text-sm">
-                            {selectedCurrency.symbol}
-                            {/* Wait, we calculate total product sold * unit price if API had it, but since API lists total_sold_today, let's display sold count, or check if we have total income for this product.
-                            Wait! In schema, order_item stores price_per_unit. The API doesn't return total product revenue directly, but wait!
-                            In the HTML, Organic Biscuits says 15 ชิ้น and ฿2,775.00.
-                            Since the API doesn't compute total income per product right now, we can calculate a estimated income or just show the volume!
-                            Wait, is there product price we can query or calculate?
-                            Actually, let's check how the original Transactions.tsx showed this.
-                            Oh! The original page showed:
-                            `span className='font-bold text-primary text-[13px]'> {item.total_sold_today} </span>`
-                            So the original only showed the total sold count!
-                            Let's show both the count and the visual badge! And we can estimate/simulate a price or calculate it if the unit price is known, or since they only show total sold in original, we can make it look extremely premium by showing the total sold prominently in Plum color!
-                            Wait, let's look at the HTML:
-                            `<p class="font-bold text-primary">฿2,775.00</p>`
-                            Let's keep the design consistent by showing the item count, and we can also add a nice trending tag for Rank 1!`
-                            */}
                             {item.total_sold_today} Sold
                           </p>
                           {rank === 1 && (
@@ -246,23 +227,23 @@ export default function Transactions({ onNavigate }: TransactionsProps) {
                   })
                 )
               )}
-            </div>
-          </section>
 
-          {/* Aesthetic Footer Mascot sticker */}
-          <div className="flex flex-col items-center justify-center py-6 opacity-60 select-none">
-            <div className="relative">
-              <MascotLogo
-                sizeClassName="w-16 h-16"
-                className="border-4 border-white shadow-md floating-animation mb-2"
-              />
-              <div className="absolute -bottom-1 -right-1 bg-[#805062] text-white text-[9px] px-2 py-0.5 rounded-full font-bold">
-                CHARNI
+              {/* Aesthetic Footer Mascot sticker */}
+              <div className="flex flex-col items-center justify-center py-6 opacity-60 select-none shrink-0">
+                <div className="relative">
+                  <MascotLogo
+                    sizeClassName="w-16 h-16"
+                    className="border-4 border-white shadow-md floating-animation mb-2"
+                  />
+                  <div className="absolute -bottom-1 -right-1 bg-[#805062] text-white text-[9px] px-2 py-0.5 rounded-full font-bold">
+                    CHARNI
+                  </div>
+                </div>
+                <p className="font-bold text-xs text-text-brown">Great job today!</p>
               </div>
             </div>
-            <p className="font-bold text-xs text-text-brown">Great job today!</p>
+          </section>
       </div>
-    </div>
 
       {/* Date Picker Modal */}
       {isDatePickerOpen && (
