@@ -48,6 +48,7 @@ export default function FormInput({
           type={inputType}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onWheel={(e) => type === 'number' && e.currentTarget.blur()}
         />
         {isPassword && (
           <button
