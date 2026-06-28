@@ -18,14 +18,6 @@ export default function AddProduct({
   const location = useLocation();
   const productToEdit = propsProductToEdit || (location.state as { productToEdit?: Product } | null | undefined)?.productToEdit;
 
-  const handleBack = () => {
-    if (productToEdit) {
-      navigate('/products');
-    } else {
-      navigate('/dashboard');
-    }
-  };
-
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
     productToEdit ? productToEdit.image_url : null,
@@ -159,7 +151,7 @@ export default function AddProduct({
       });
 
       if (res.ok) {
-        handleBack();
+        navigate('/products');
       } else {
         const errorText = await res.text();
         alert('Failed to save product: ' + errorText);
