@@ -31,10 +31,6 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   'Japan': '¥',
 };
 
-const FALLBACK_IMAGES = [
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuA26HQI-qdJAvzLtbtiSB1a6t9L-M7mMng7ieiMdxU_iprolC16B8jxM4KCINz78XguSTlBa48kJ5M8bjmNj0oed6UkgLVSwUfxK7FYUCaujX1qK7erq6voKLWO9kLHTDK7oxMNr9D7IEqD5kNPhFhd3xEcROPYINGMBKaSribquSk4XXqCrDTDw7K8bbphMukuUDpALB9vC5cTMhvO_hBWPumziFEoHQd08ZXOlnXKAwNH2POhcH-Ssbt884610PJAcCcHv31qAz0',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuAzzCCWPKVC8c4C6G8DNKs-aBMj-bte3RJF3klOsKETSlbpGqGjO_qmZOsvWFefamanxVHGdzXfhb6d1ENwxKmf-jd5L-dYcXxxd9UYiQuHjnBbn2N76OZ3h2WMa8wNBO4AplTsD28XLokhxmADvJLSKpbl_rrFnyL4EYHvAHr17fv0yxUVt4FnSM7dLn-yM6nlCf7xMzETZ3sO4CnQjz17lYnW6s2ynTnm6VggDerW8ji3ELBvle34wKnPYwQEjEJusag4oXx9Cgk',
-];
 
 export default function Dashboard() {
   const [events, setEvents] = useState<EventData[]>([]);
@@ -170,25 +166,27 @@ export default function Dashboard() {
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            {displayedEvents.map((event, idx) => {
+            {displayedEvents.map((event) => {
               const currencySym = CURRENCY_SYMBOLS[event.country] || '฿';
               const formattedSales = `${currencySym}${event.totalSales.toLocaleString()}`;
 
               // Determine Badge styling & text
-              let badgeText = '';
-              let badgeClass = '';
               const isLoss = event.netProfit < 0;
+              const badgeText = event.status === 'inprogress'
+                ? 'In Progress'
+                : event.status === 'upcoming'
+                  ? 'Upcoming'
+                  : isLoss
+                    ? 'Accumulated Loss'
+                    : 'Profit';
 
-              if (event.status === 'inprogress') {
-                badgeText = 'In Progress';
-                badgeClass = 'bg-[#d1fae5] text-[#065f46]';
-              } else if (event.status === 'upcoming') {
-                badgeText = 'Upcoming';
-                badgeClass = 'bg-[#fef3c7] text-[#92400e]';
-              } else {
-                badgeText = isLoss ? 'Accumulated Loss' : 'Profit';
-                badgeClass = isLoss ? 'bg-[#b5e7fe]/90 text-[#37697d]' : 'bg-[#f8bbd0]/90 text-[#76485a]';
-              }
+              const badgeClass = event.status === 'inprogress'
+                ? 'bg-[#d1fae5] text-[#065f46]'
+                : event.status === 'upcoming'
+                  ? 'bg-[#fef3c7] text-[#92400e]'
+                  : isLoss
+                    ? 'bg-[#b5e7fe]/90 text-[#37697d]'
+                    : 'bg-[#f8bbd0]/90 text-[#76485a]';
 
               // Format Dates (e.g. "25 Jun 2026")
               const formatDate = (dateStr: string) => {
@@ -204,7 +202,7 @@ export default function Dashboard() {
                 }
               };
 
-              const dateRange = `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`;
+              const dateRange = `${formatDate(event.startDate)} - ${formatDate(event.endDate)} at ${event.country}`;
 
               // Format Net Profit
               const formattedProfit = isLoss
@@ -217,25 +215,19 @@ export default function Dashboard() {
                   onClick={() => handleEventClick(event)}
                   className="bg-white rounded-[20px] overflow-hidden shadow-[0_4px_20px_-2px_rgba(78,52,46,0.08)] border border-[#E0D0CC]/30 group hover:-translate-y-1 hover:shadow-md cursor-pointer transition-all active:scale-[0.99] duration-300"
                 >
-                  <div className="h-32 w-full relative overflow-hidden bg-[#fff8f8]">
-                    <img
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      alt={event.name}
-                      src={FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length]}
-                    />
-                    <div className={`absolute top-4 right-4 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${badgeClass}`}>
-                      {badgeText}
-                    </div>
-                  </div>
-
                   <div className="p-5 space-y-3">
-                    <div>
-                      <h4 className="text-[18px] font-bold text-text-brown leading-tight">
-                        {event.name}
-                      </h4>
-                      <p className="text-[12px] text-text-brown/70 mt-0.5">
-                        {dateRange}
-                      </p>
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <h4 className="text-[18px] font-bold text-text-brown leading-tight">
+                          {event.name}
+                        </h4>
+                        <p className="text-[12px] text-text-brown/70 mt-0.5">
+                          {dateRange}
+                        </p>
+                      </div>
+                      <div className={`shrink-0 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${badgeClass}`}>
+                        {badgeText}
+                      </div>
                     </div>
 
                     <div className="flex justify-between items-center pt-2.5 border-t border-[#E0D0CC]/20">
