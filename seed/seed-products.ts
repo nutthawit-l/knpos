@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 import sharp from 'sharp';
-import crypto from 'crypto';
 
 // Disable TLS reject unauthorized for local developer testing image downloads
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -25,7 +24,7 @@ const BUCKET_NAME = bucketNameMatch ? bucketNameMatch[1] : 'charnipos-images';
 const tempDir = path.resolve(process.cwd(), 'seed/images');
 const csvPath = path.resolve(process.cwd(), 'seed/flyaway-seed.csv');
 
-function parseWranglerJson(output: string): any {
+function parseWranglerJson(output: string): unknown {
   const startIndex = output.indexOf('[');
   const startObject = output.indexOf('{');
   
@@ -145,8 +144,8 @@ async function run() {
       if (fs.existsSync(tempCheckPath)) {
         fs.unlinkSync(tempCheckPath);
       }
-    } catch (err) {
-      existsInR2 = false;
+    } catch {
+      // Ignored
     }
 
     if (existsInR2) {
@@ -161,7 +160,7 @@ async function run() {
   console.log(`Querying categories in ${envLabel} D1 database...`);
   const queryCategoriesCommand = `npx wrangler d1 execute charnipos-db ${wranglerFlag} --command="SELECT id, name FROM category WHERE shop_id = 1" --json`;
   const categoriesResult = execSync(queryCategoriesCommand, { encoding: 'utf-8' });
-  const categoriesJson = parseWranglerJson(categoriesResult);
+  const categoriesJson = parseWranglerJson(categoriesResult) as { results?: { id: number; name: string }[] } | { results?: { id: number; name: string }[] }[];
   const existingCategories: Array<{ id: number; name: string }> = 
     Array.isArray(categoriesJson) ? (categoriesJson[0]?.results || []) : (categoriesJson?.results || []);
 
@@ -190,7 +189,7 @@ async function run() {
 
     // Re-query categories to get correct IDs
     const updatedCategoriesResult = execSync(queryCategoriesCommand, { encoding: 'utf-8' });
-    const updatedCategoriesJson = parseWranglerJson(updatedCategoriesResult);
+    const updatedCategoriesJson = parseWranglerJson(updatedCategoriesResult) as { results?: { id: number; name: string }[] } | { results?: { id: number; name: string }[] }[];
     const updatedCategories: Array<{ id: number; name: string }> = 
       Array.isArray(updatedCategoriesJson) ? (updatedCategoriesJson[0]?.results || []) : (updatedCategoriesJson?.results || []);
     
@@ -201,7 +200,7 @@ async function run() {
   console.log(`Querying existing products in ${envLabel} D1 database...`);
   const queryProductsCommand = `npx wrangler d1 execute charnipos-db ${wranglerFlag} --command="SELECT id, name FROM product WHERE shop_id = 1" --json`;
   const productsResult = execSync(queryProductsCommand, { encoding: 'utf-8' });
-  const productsJson = parseWranglerJson(productsResult);
+  const productsJson = parseWranglerJson(productsResult) as { results?: { id: number; name: string }[] } | { results?: { id: number; name: string }[] }[];
   const existingProductsList: Array<{ id: number; name: string }> = 
     Array.isArray(productsJson) ? (productsJson[0]?.results || []) : (productsJson?.results || []);
 
