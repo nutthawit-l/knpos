@@ -15,7 +15,20 @@ help:
 	@echo "  make deploy            Build and deploy app to Cloudflare Pages"
 	@echo "  make deploy-with-seed  Seed remote databases, build, and deploy app to Cloudflare Pages"
 
-seed-local:
+# Use when DB schema has changes.
+migrate:
+	pnpm install && npx wrangler d1 execute charnipos-db --local --file=./schema.sql
+
+remote-migrate:
+	pnpm install && npx wrangler d1 execute charnipos-db --remote --file=./schema.sql
+
+seed-products:
+	npx tsx seed/seed-products.ts
+
+remote-seed-products:
+	npx tsx seed/seed-products.ts --remote
+
+seed:
 	npx tsx scripts/seed.ts
 
 seed-remote:
