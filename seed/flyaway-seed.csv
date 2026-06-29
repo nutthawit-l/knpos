@@ -1,21 +1,21 @@
-image_url,name,thb,sgd
-https://duf.ntwtech.int/flyaway-images/frame-card-resin.jpg,Frame card resin,220,15
-https://duf.ntwtech.int/flyaway-images/frame-card-stand.jpg,Frame card stand,250,20
-https://duf.ntwtech.int/flyaway-images/frame-card-cherry.jpg,Frame card cherry,250,20
-https://duf.ntwtech.int/flyaway-images/frame-card-ribbon.jpg,Frame card ribbon,250,20
-https://duf.ntwtech.int/flyaway-images/frame-card-ribbom-m.jpg,Frame card ribbon M,320,22
-https://duf.ntwtech.int/flyaway-images/frame-card-fuffy.jpg,Frame card fuffy,320,22
-https://duf.ntwtech.int/flyaway-images/frame-card-morudoll-m.jpg,Frame card morudoll M,350,25
-https://duf.ntwtech.int/flyaway-images/frame-card-cat.jpg,Frame card cat ,320,25
-https://duf.ntwtech.int/flyaway-images/cherry-s.jpg,Cherry S,90,5
-https://duf.ntwtech.int/flyaway-images/cat-head-band-m.jpg,Cat head band M,120,10
-https://duf.ntwtech.int/flyaway-images/cat-head-band-s.jpg,Cat head band S,90,5
-https://duf.ntwtech.int/flyaway-images/flower-head-band.jpg,Flower head band,90,12
-https://duf.ntwtech.int/flyaway-images/doll-hat-s.jpg,Doll hat S,160,10
-https://duf.ntwtech.int/flyaway-images/doll-hat-m.jpg,Doll hat M,200,12
-https://duf.ntwtech.int/flyaway-images/keyring.jpg,Keyring,150,
-https://duf.ntwtech.int/flyaway-images/dog-keyring.jpg,Dog keyring,180,
-https://duf.ntwtech.int/flyaway-images/cherry-hair-clip.jpg,Cherry hair clip,150,
-https://duf.ntwtech.int/flyaway-images/flower-m.jpg,Flower S,120,
-https://duf.ntwtech.int/flyaway-images/flower-m.jpg,Flower M,180,
-https://duf.ntwtech.int/flyaway-images/resin-badge.jpg,Resin badge ,180,
+image_url,name,category,thb,sgd
+https://duf.ntwtech.int/flyaway-images/frame-card-resin.jpg,Frame card resin,Frame card,220,15
+https://duf.ntwtech.int/flyaway-images/frame-card-stand.jpg,Frame card stand,Frame card,250,20
+https://duf.ntwtech.int/flyaway-images/frame-card-cherry.jpg,Frame card cherry,Frame card,250,20
+https://duf.ntwtech.int/flyaway-images/frame-card-ribbon.jpg,Frame card ribbon,Frame card,250,20
+https://duf.ntwtech.int/flyaway-images/frame-card-ribbom-m.jpg,Frame card ribbon M,Frame card,320,22
+https://duf.ntwtech.int/flyaway-images/frame-card-fuffy.jpg,Frame card fuffy,Frame card,320,22
+https://duf.ntwtech.int/flyaway-images/frame-card-morudoll-m.jpg,Frame card morudoll M,Frame card,350,25
+https://duf.ntwtech.int/flyaway-images/frame-card-cat.jpg,Frame card cat,Frame card,320,25
+https://duf.ntwtech.int/flyaway-images/cherry-s.jpg,Cherry S,Head band,90,5
+https://duf.ntwtech.int/flyaway-images/cat-head-band-m.jpg,Cat head band M,Head band,120,10
+https://duf.ntwtech.int/flyaway-images/cat-head-band-s.jpg,Cat head band S,Head band,90,5
+https://duf.ntwtech.int/flyaway-images/flower-head-band.jpg,Flower head band,Flower,90,12
+https://duf.ntwtech.int/flyaway-images/doll-hat-s.jpg,Doll hat S,Head band,160,10
+https://duf.ntwtech.int/flyaway-images/doll-hat-m.jpg,Doll hat M,Head band,200,12
+https://duf.ntwtech.int/flyaway-images/keyring.jpg,Keyring,Keyring,150,
+https://duf.ntwtech.int/flyaway-images/dog-keyring.jpg,Dog keyring,Keyring,180,
+https://duf.ntwtech.int/flyaway-images/cherry-hair-clip.jpg,Cherry hair clip,Head band,150,
+https://duf.ntwtech.int/flyaway-images/flower-m.jpg,Flower S,Flower,120,
+https://duf.ntwtech.int/flyaway-images/flower-m.jpg,Flower M,Flower,180,
+https://duf.ntwtech.int/flyaway-images/resin-badge.jpg,Resin badge,Frame card,180,
