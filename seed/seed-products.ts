@@ -27,7 +27,7 @@ const csvPath = path.resolve(process.cwd(), 'seed/flyaway-seed.csv');
 function parseWranglerJson(output: string): unknown {
   const startIndex = output.indexOf('[');
   const startObject = output.indexOf('{');
-  
+
   let index = -1;
   if (startIndex !== -1 && startObject !== -1) {
     index = Math.min(startIndex, startObject);
@@ -79,7 +79,7 @@ async function run() {
   console.log(`Reading seed CSV: ${csvPath}`);
   const csvContent = fs.readFileSync(csvPath, 'utf-8');
   const lines = csvContent.split('\n').map(l => l.trim()).filter(l => l !== '');
-  
+
   // Parse CSV (Header: image_url,name,category,thb,sgd)
   const products: Array<{
     originalUrl: string;
@@ -118,7 +118,7 @@ async function run() {
   for (let i = 0; i < products.length; i++) {
     const p = products[i];
     const filePath = path.join(tempDir, p.filename);
-    
+
     // Ensure image is present locally
     if (fs.existsSync(filePath)) {
       console.log(`  -> Image already exists locally at seed/images/${p.filename}`);
@@ -161,7 +161,7 @@ async function run() {
   const queryCategoriesCommand = `npx wrangler d1 execute charnipos-db ${wranglerFlag} --command="SELECT id, name FROM category WHERE shop_id = 1" --json`;
   const categoriesResult = execSync(queryCategoriesCommand, { encoding: 'utf-8' });
   const categoriesJson = parseWranglerJson(categoriesResult) as { results?: { id: number; name: string }[] } | { results?: { id: number; name: string }[] }[];
-  const existingCategories: Array<{ id: number; name: string }> = 
+  const existingCategories: Array<{ id: number; name: string }> =
     Array.isArray(categoriesJson) ? (categoriesJson[0]?.results || []) : (categoriesJson?.results || []);
 
   const categoryMap = new Map<string, number>();
@@ -173,8 +173,8 @@ async function run() {
   const csvCategories = Array.from(new Set(products.map(p => p.category)));
   const missingCategories = csvCategories.filter(cat => !categoryMap.has(cat));
 
-  if (missingCategories.length > 0 && existingCategories.length === 0) {
-    console.log(`Category table is empty. Inserting missing categories: ${missingCategories.join(', ')}`);
+  if (missingCategories.length > 0) {
+    console.log(`Inserting missing categories: ${missingCategories.join(', ')}`);
     missingCategories.forEach(catName => {
       sqlLines.push(`INSERT INTO category (shop_id, name) VALUES (1, '${catName.replace(/'/g, "''")}');`);
     });
@@ -190,9 +190,9 @@ async function run() {
     // Re-query categories to get correct IDs
     const updatedCategoriesResult = execSync(queryCategoriesCommand, { encoding: 'utf-8' });
     const updatedCategoriesJson = parseWranglerJson(updatedCategoriesResult) as { results?: { id: number; name: string }[] } | { results?: { id: number; name: string }[] }[];
-    const updatedCategories: Array<{ id: number; name: string }> = 
+    const updatedCategories: Array<{ id: number; name: string }> =
       Array.isArray(updatedCategoriesJson) ? (updatedCategoriesJson[0]?.results || []) : (updatedCategoriesJson?.results || []);
-    
+
     updatedCategories.forEach(cat => categoryMap.set(cat.name, cat.id));
   }
 
@@ -201,7 +201,7 @@ async function run() {
   const queryProductsCommand = `npx wrangler d1 execute charnipos-db ${wranglerFlag} --command="SELECT id, name FROM product WHERE shop_id = 1" --json`;
   const productsResult = execSync(queryProductsCommand, { encoding: 'utf-8' });
   const productsJson = parseWranglerJson(productsResult) as { results?: { id: number; name: string }[] } | { results?: { id: number; name: string }[] }[];
-  const existingProductsList: Array<{ id: number; name: string }> = 
+  const existingProductsList: Array<{ id: number; name: string }> =
     Array.isArray(productsJson) ? (productsJson[0]?.results || []) : (productsJson?.results || []);
 
   const existingProductsSet = new Set(existingProductsList.map(p => p.name));
