@@ -28,6 +28,12 @@ seed-products:
 remote-seed-products:
 	npx tsx seed/seed-products.ts --remote
 
+seed-events:
+	npx tsx seed/seed-events.ts
+
+remote-seed-events:
+	npx tsx seed/seed-events.ts --remote
+
 dev:
 	@if [ -n "$$TMUX" ]; then \
 		PANE_ID=$$(tmux split-window -h -P -F '#{pane_id}' 'pnpm dev:wrangler'); \
