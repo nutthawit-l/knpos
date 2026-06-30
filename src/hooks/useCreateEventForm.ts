@@ -1,14 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrderStore } from '../store/useOrderStore';
-import { currencies } from '../types/currency';
+import { currencies, COUNTRY_CURRENCY_MAP } from '../types/currency';
 
-const COUNTRY_CURRENCY_MAP: Record<string, string> = {
-  'Thailand': 'THB',
-  'Singapore': 'SGD',
-  'USA': 'USD',
-  'Japan': 'JPY',
-};
 
 export function useCreateEventForm() {
   const [eventName, setEventName] = useState('');

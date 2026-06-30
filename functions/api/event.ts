@@ -194,8 +194,25 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Extract today from URL parameters
     const url = new URL(context.request.url);
+    const eventIdParam = url.searchParams.get("id");
+    if (eventIdParam) {
+      const eventId = parseInt(eventIdParam, 10);
+      const eventRecord = await context.env.DB.prepare(
+        `SELECT id, name, country, start_date AS startDate, end_date AS endDate, 
+                booth_rental AS boothRental, travel, accommodation, food_allowance AS foodAllowance 
+         FROM event WHERE id = ? AND shop_id = ?`
+      ).bind(eventId, shopMember.shop_id).first();
+      
+      if (!eventRecord) {
+        return new Response(JSON.stringify({ error: "Event not found" }), { status: 404 });
+      }
+      return new Response(JSON.stringify(eventRecord), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Extract today from URL parameters
     const today = url.searchParams.get("today") || new Date().toISOString().split("T")[0];
 
     // Retrieve all events for this shop with calculated status, total sales, and net profit
@@ -230,6 +247,144 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return new Response(JSON.stringify(results), {
       headers: { "Content-Type": "application/json" },
     });
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+};
+
+export const onRequestPut: PagesFunction<Env> = async (context) => {
+  try {
+    const cookieHeader = context.request.headers.get("Cookie");
+    const token = getCookie(cookieHeader, "session_token");
+
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Not authenticated" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Lookup session
+    const session = await context.env.DB.prepare(
+      "SELECT user_id, expires_at FROM session WHERE id = ?"
+    )
+      .bind(token)
+      .first<{ user_id: number; expires_at: string }>();
+
+    if (!session) {
+      return new Response(JSON.stringify({ error: "Session invalid" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const expiresAt = new Date(session.expires_at).getTime();
+    if (expiresAt < Date.now()) {
+      return new Response(JSON.stringify({ error: "Session expired" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Get user's shop membership
+    const shopMember = await context.env.DB.prepare(
+      "SELECT shop_id FROM shop_member WHERE user_id = ?"
+    )
+      .bind(session.user_id)
+      .first<{ shop_id: number }>();
+
+    if (!shopMember) {
+      return new Response(JSON.stringify({ error: "User does not belong to any shop" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    interface PutBody {
+      id: number;
+      eventName: string;
+      country: string;
+      startDate: string;
+      endDate: string;
+      boothRental: string;
+      travel: string;
+      accommodation: string;
+      foodAllowance: string;
+    }
+    const body = await context.request.json() as PutBody;
+    const {
+      id,
+      eventName,
+      country,
+      startDate,
+      endDate,
+      boothRental,
+      travel,
+      accommodation,
+      foodAllowance,
+    } = body;
+
+    if (!id || !eventName || !eventName.trim() || !country || !startDate || !endDate) {
+      return new Response(JSON.stringify({ error: "Missing required fields" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Verify the event exists and belongs to the user's shop
+    const existingEvent = await context.env.DB.prepare(
+      "SELECT id FROM event WHERE id = ? AND shop_id = ?"
+    )
+      .bind(id, shopMember.shop_id)
+      .first();
+
+    if (!existingEvent) {
+      return new Response(JSON.stringify({ error: "Event not found or unauthorized" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Update the event
+    await context.env.DB.prepare(
+      `UPDATE event 
+       SET name = ?, country = ?, start_date = ?, end_date = ?, 
+           booth_rental = ?, travel = ?, accommodation = ?, food_allowance = ?
+       WHERE id = ? AND shop_id = ?`
+    )
+      .bind(
+        eventName.trim(),
+        country.trim(),
+        startDate,
+        endDate,
+        parseFloat(boothRental) || 0,
+        parseFloat(travel) || 0,
+        parseFloat(accommodation) || 0,
+        parseFloat(foodAllowance) || 0,
+        id,
+        shopMember.shop_id
+      )
+      .run();
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        event: {
+          id,
+          name: eventName,
+          country,
+          startDate,
+          endDate,
+        },
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : String(err);
     return new Response(JSON.stringify({ error: errorMessage }), {

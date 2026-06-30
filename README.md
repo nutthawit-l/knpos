@@ -1,73 +1,83 @@
-# React + TypeScript + Vite
+# Charni POS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Charni POS is a mobile-first Point of Sale (POS) application built using Progressive Web App (PWA) technology. It is designed specifically to render on mobile screens (smartphones) and provide a seamless, native-like user experience.
 
-Currently, two official plugins are available:
+The application leverages a modern frontend stack with Cloudflare bindings for database and image storage.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Technical Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend Framework:** React + Vite (Fast HMR)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS (Shadcn UI patterns)
+- **State Management:** Zustand
+- **Backend/Platform:** Cloudflare Pages (Functions)
+- **Database:** Cloudflare D1 (SQLite database)
+- **Storage:** Cloudflare R2 (Object storage for product images)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Prerequisites
+Make sure you have [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/) installed.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1. Install Dependencies
+```bash
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Database Migrations
+Before running the application or seeding data, initialize your database schema.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **Local Database Migration:**
+  ```bash
+  make migrate
+  ```
+- **Remote Database Migration:**
+  ```bash
+  make remote-migrate
+  ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 3. Running in Development
+To run the local development server and Wrangler pages dev in parallel:
+```bash
+make dev
 ```
+*(If tmux is installed, this command will run them in split panes. Otherwise, it will manage a tmux session named `knpos-dev`.)*
+
+Alternatively, run the default Vite development server:
+```bash
+pnpm dev
+```
+
+---
+
+## Database Seeding
+
+Seeding is used to populate your database with test data (products and events/transactions). The seeding script automatically handles downloading or generating product images and uploading them to Cloudflare R2.
+
+### Prerequisites for Seeding
+The seeding process expects **User ID 1** and **Shop ID 1** to already exist in the D1 database. 
+
+1. Ensure the schema is migrated (see [Database Migrations](#2-database-migrations)).
+2. Make sure a user with `id = 1` and a shop with `id = 1` are created in the database.
+3. The seeding script will check for these records and fail if they are missing.
+
+### Running the Seed
+
+- **Seed Local Environment:**
+  ```bash
+  make seed
+  ```
+
+- **Seed Remote Environment:**
+  ```bash
+  make remote-seed
+  ```
+
+### Seeding Scripts Details
+If you want to run specific seed scripts directly:
+- **Seed Products Only:** `make seed-products` (add `make remote-seed-products` for remote database)
+- **Seed Events Only:** `make seed-events` (add `make remote-seed-events` for remote database)

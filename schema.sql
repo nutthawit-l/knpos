@@ -112,9 +112,9 @@ CREATE TABLE IF NOT EXISTS "order" (
     currency_code TEXT NOT NULL,         -- เก็บว่าใช้ราคาของประเทศไหน เช่น 'THB', 'SGD'
     total_income REAL NOT NULL,          -- รวมยอดเงินของออร์เดอร์นี้
     total_product_sold INTEGER NOT NULL, -- รวมจำนวนชิ้นที่ขายได้ในออร์เดอร์นี้
-    event_id INTEGER,
+    event_id INTEGER NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (event_id) REFERENCES event(id) ON DELETE SET NULL
+    FOREIGN KEY (event_id) REFERENCES event(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS order_item (

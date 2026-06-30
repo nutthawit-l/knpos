@@ -45,53 +45,61 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     // Authenticate user and verify shop/event membership if event_id is provided
-    let validatedEventId: number | null = null;
-    if (event_id !== undefined && event_id !== null) {
-      const parsedEventId = Number(event_id);
-      if (Number.isInteger(parsedEventId) && parsedEventId > 0) {
-        validatedEventId = parsedEventId;
+    if (event_id === undefined || event_id === null) {
+      return new Response('event_id is required', { status: 400 });
+    }
+
+    const validatedEventId = Number(event_id);
+    if (!Number.isInteger(validatedEventId) || validatedEventId <= 0) {
+      return new Response('Invalid event_id', { status: 400 });
+    }
+
+    let userShopId: number | null = null;
+    const cookieHeader = context.request.headers.get("Cookie");
+    const token = getCookie(cookieHeader, "session_token");
+
+    if (token) {
+      const session = await context.env.DB.prepare(
+        "SELECT user_id FROM session WHERE id = ?"
+      )
+        .bind(token)
+        .first<{ user_id: number }>();
+
+      if (session) {
+        const shopMember = await context.env.DB.prepare(
+          "SELECT shop_id FROM shop_member WHERE user_id = ?"
+        )
+          .bind(session.user_id)
+          .first<{ shop_id: number }>();
+
+        if (shopMember) {
+          userShopId = shopMember.shop_id;
+        }
       }
     }
 
-    if (validatedEventId) {
-      let userShopId: number | null = null;
-      const cookieHeader = context.request.headers.get("Cookie");
-      const token = getCookie(cookieHeader, "session_token");
+    // Verify that the event exists, belongs to the user's shop, and is in progress
+    const eventRecord = await context.env.DB.prepare(
+      "SELECT shop_id, start_date, end_date FROM event WHERE id = ?"
+    )
+      .bind(validatedEventId)
+      .first<{ shop_id: number; start_date: string; end_date: string }>();
 
-      if (token) {
-        const session: any = await context.env.DB.prepare(
-          "SELECT user_id FROM session WHERE id = ?"
-        )
-          .bind(token)
-          .first();
+    if (!eventRecord) {
+      return new Response('Event not found', { status: 400 });
+    }
 
-        if (session) {
-          const shopMember: any = await context.env.DB.prepare(
-            "SELECT shop_id FROM shop_member WHERE user_id = ?"
-          )
-            .bind(session.user_id)
-            .first();
+    if (userShopId && eventRecord.shop_id !== userShopId) {
+      return new Response('Unauthorized access to event', { status: 403 });
+    }
 
-          if (shopMember) {
-            userShopId = shopMember.shop_id;
-          }
-        }
-      }
+    // Calculate today's date in GMT+7 (Thailand timezone)
+    const GMT_OFFSET_MS = 7 * 60 * 60 * 1000;
+    const localTime = new Date(Date.now() + GMT_OFFSET_MS);
+    const todayStr = localTime.toISOString().split('T')[0];
 
-      // Verify that the event exists and belongs to the user's shop (if authenticated)
-      const eventRecord: any = await context.env.DB.prepare(
-        "SELECT shop_id FROM event WHERE id = ?"
-      )
-        .bind(validatedEventId)
-        .first();
-
-      if (!eventRecord) {
-        return new Response('Event not found', { status: 400 });
-      }
-
-      if (userShopId && eventRecord.shop_id !== userShopId) {
-        return new Response('Unauthorized access to event', { status: 403 });
-      }
+    if (todayStr < eventRecord.start_date || todayStr > eventRecord.end_date) {
+      return new Response('Transactions can only be logged for events that are in progress', { status: 400 });
     }
 
     let calculatedIncome = 0;
@@ -166,6 +174,73 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     const url = new URL(context.request.url);
+    
+    const eventIdParam = url.searchParams.get('event_id');
+    if (eventIdParam) {
+      const eventId = parseInt(eventIdParam, 10);
+      const eventRecord = await context.env.DB.prepare(
+        "SELECT country FROM event WHERE id = ?"
+      ).bind(eventId).first<{ country: string }>();
+
+      if (!eventRecord) {
+        return new Response('Event not found', { status: 404 });
+      }
+
+      const countryCurrencies: Record<string, string> = {
+        Thailand: 'THB',
+        Singapore: 'SGD',
+        Japan: 'JPY',
+        USA: 'USD',
+      };
+      const eventCurrency = countryCurrencies[eventRecord.country] || 'THB';
+
+      // Query 1: Event-wide aggregates (all-time for this event)
+      const summaryResult = await context.env.DB.prepare(
+        `SELECT 
+            COALESCE(SUM(total_income), 0) AS daily_total_income,
+            COALESCE(SUM(total_product_sold), 0) AS daily_total_product_sold
+         FROM "order"
+         WHERE event_id = ?`
+      ).bind(eventId).first<{ daily_total_income: number; daily_total_product_sold: number }>();
+
+      // Query 2: Product volumes for this event
+      const { results: productsResult } = await context.env.DB.prepare(
+        `SELECT 
+            p.id AS product_id,
+            p.name AS product_name,
+            p.image_url,
+            SUM(ti.quantity) AS total_sold_today
+         FROM order_item ti
+         JOIN "order" t ON ti.order_id = t.id
+         JOIN product p ON ti.product_id = p.id
+         WHERE t.event_id = ?
+         GROUP BY p.id, p.name, p.image_url
+         ORDER BY total_sold_today DESC`
+      ).bind(eventId).all<{ product_id: number; product_name: string; image_url: string; total_sold_today: number }>();
+
+      // Query 3: Individual orders for this event
+      const { results: ordersResult } = await context.env.DB.prepare(
+        `SELECT 
+            id,
+            total_income,
+            total_product_sold,
+            created_at
+         FROM "order"
+         WHERE event_id = ?
+         ORDER BY created_at DESC`
+      ).bind(eventId).all<{ id: number; total_income: number; total_product_sold: number; created_at: string }>();
+
+      return new Response(
+        JSON.stringify({
+          summary: summaryResult || { daily_total_income: 0, daily_total_product_sold: 0 },
+          products: productsResult || [],
+          orders: ordersResult || [],
+          eventCurrency,
+        }),
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const currency = (url.searchParams.get('currency') || 'THB').toUpperCase();
 
     // Determine the timezone offset. Eagerly check for a client-supplied tzOffset (in hours).

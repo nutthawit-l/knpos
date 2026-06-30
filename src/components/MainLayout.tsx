@@ -1,29 +1,48 @@
+import { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Header from './Header';
 import BottomNavigation from './BottomNavigation';
 import { Bell } from 'lucide-react';
+import { useOrderStore } from '../store/useOrderStore';
+import { currencies, COUNTRY_CURRENCY_MAP } from '../types/currency';
 
 interface LocationState {
   productToEdit?: unknown;
 }
 
 interface RouteConfig {
-  title: string | ((state: LocationState | null | undefined) => string);
+  title: string | ((state: LocationState | null | undefined, activeEventName?: string | null) => string);
   tab: string;
   hideBottomNav?: boolean;
   showBackButton?: boolean;
   backTo?: string | ((state: LocationState | null | undefined) => string);
+  disableLayoutScroll?: boolean;
 }
 
 // Static mapping of pathnames to layout configuration
 const ROUTE_CONFIGS: Record<string, RouteConfig> = {
   '/dashboard': { title: 'Dashboard', tab: 'dashboard' },
-  '/order': { title: 'New Order', tab: 'order' },
-  '/transactions': { title: 'History', tab: 'transactions' },
+  '/order': {
+    title: (_, activeEventName) => activeEventName ? `Order of ${activeEventName}` : 'New Order',
+    tab: 'order',
+    disableLayoutScroll: true,
+  },
+  '/transactions': {
+    title: (_, activeEventName) => activeEventName ? `Transaction of ${activeEventName}` : 'Transaction',
+    tab: 'transactions',
+    disableLayoutScroll: true,
+  },
   '/products': { title: 'Inventory', tab: 'products' },
   '/settings': { title: 'Settings', tab: 'settings' },
   '/create-event': {
     title: 'Create Event',
+    tab: '',
+    hideBottomNav: true,
+    showBackButton: true,
+    backTo: '/dashboard',
+  },
+  '/edit-event': {
+    title: 'Edit Event',
     tab: '',
     hideBottomNav: true,
     showBackButton: true,
@@ -41,6 +60,8 @@ const ROUTE_CONFIGS: Record<string, RouteConfig> = {
 export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { hasEvent, setHasEvent, setActiveEvent, activeEventName } = useOrderStore();
+  const [isLoadingEvent, setIsLoadingEvent] = useState(true);
 
   // Find config based on current pathname
   const config = ROUTE_CONFIGS[location.pathname] || { title: 'Boutique POS', tab: '' };
@@ -48,8 +69,69 @@ export default function MainLayout() {
   const state = location.state as LocationState | null | undefined;
 
   const resolvedTitle = typeof config.title === 'function' 
-    ? config.title(state) 
+    ? config.title(state, activeEventName) 
     : config.title;
+
+  let displayTitle = resolvedTitle;
+  if (location.pathname === '/transactions') {
+    const params = new URLSearchParams(location.search);
+    const eventNameParam = params.get('event_name');
+    if (eventNameParam) {
+      displayTitle = `Transaction of ${eventNameParam}`;
+    }
+  }
+
+  // Check event status on mount & navigation
+  useEffect(() => {
+    let active = true;
+    const d = new Date();
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+    fetch(`/api/event?today=${todayStr}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch events');
+        return res.json();
+      })
+      .then((data) => {
+        if (!active) return;
+        const events = data as Array<{ id: number; name: string; country: string; status: string }>;
+        const activeEvent = events.find((e) => e.status === 'inprogress');
+        if (activeEvent) {
+          setHasEvent(true);
+          setActiveEvent(activeEvent.id, activeEvent.name);
+
+          // Sync currency with active event's country
+          const currencyCode = COUNTRY_CURRENCY_MAP[activeEvent.country] || 'THB';
+          const matchedCurrency = currencies.find((c) => c.code === currencyCode);
+          if (matchedCurrency) {
+            useOrderStore.getState().setCurrency(matchedCurrency);
+          }
+        } else {
+          setHasEvent(false);
+          setActiveEvent(null, null);
+        }
+        setIsLoadingEvent(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (active) {
+          setIsLoadingEvent(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [setHasEvent, setActiveEvent, location.pathname]);
+
+  // Route guard: Redirect to /dashboard if on /order or /transactions and no active event exists
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const hasEventParam = params.has('event_id');
+    if (!isLoadingEvent && !hasEvent && !hasEventParam && (location.pathname === '/order' || location.pathname === '/transactions')) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isLoadingEvent, hasEvent, location.pathname, location.search, navigate]);
 
   const handleNavigate = (tab: string) => {
     navigate(`/${tab}`);
@@ -64,12 +146,23 @@ export default function MainLayout() {
     }
   };
 
+  if (isLoadingEvent && (location.pathname === '/order' || location.pathname === '/transactions')) {
+    return (
+      <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center items-center">
+        <div className="text-[#805062] font-medium text-sm flex flex-col items-center gap-2">
+          <span className="animate-spin border-4 border-[#805062] border-t-transparent w-8 h-8 rounded-full"></span>
+          <span>Checking active event...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#f9fafb] h-dvh overflow-hidden flex justify-center">
       <div className="bg-white flex flex-col h-dvh w-full max-w-[400px] relative shadow-2xl overflow-hidden font-quicksand bg-pattern">
         {/* Centralized Header with Dynamic Title, Back Arrow, and Bell Button */}
         <Header
-          title={resolvedTitle}
+          title={displayTitle}
           onBackClick={config.showBackButton ? handleBack : undefined}
           rightElement={
             !config.showBackButton && (
@@ -81,7 +174,11 @@ export default function MainLayout() {
         />
 
         {/* Sub-page Outlet */}
-        <div className={`flex-1 overflow-y-auto px-5 space-y-6 no-scrollbar pt-4 ${
+        <div className={`flex-1 px-5 pt-4 ${
+          config.disableLayoutScroll
+            ? 'flex flex-col min-h-0 overflow-hidden'
+            : 'overflow-y-auto space-y-6 no-scrollbar'
+        } ${
           config.hideBottomNav ? 'pb-8' : 'pb-24'
         }`}>
           <Outlet />

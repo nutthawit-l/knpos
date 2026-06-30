@@ -43,6 +43,7 @@ export default function TextInput({
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onWheel={(e) => type === 'number' && e.currentTarget.blur()}
         />
       </div>
     </div>
