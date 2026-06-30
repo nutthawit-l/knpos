@@ -26,6 +26,11 @@ export const InvitePartners: React.FC<InvitePartnersProps> = ({
       return;
     }
 
+    if (!trimmedEmail.toLowerCase().endsWith('@gmail.com')) {
+      alert('Only Gmail addresses (@gmail.com) are supported for invitations.');
+      return;
+    }
+
     // Capitalize and format name from email prefix (e.g. sarah.miller -> Sarah Miller)
     const prefix = trimmedEmail.split('@')[0];
     const formattedName = prefix
@@ -35,7 +40,6 @@ export const InvitePartners: React.FC<InvitePartnersProps> = ({
 
     addMember(formattedName, role, trimmedEmail);
     setEmail('');
-    alert(`Invitation sent to ${trimmedEmail}!`);
   };
 
   return (

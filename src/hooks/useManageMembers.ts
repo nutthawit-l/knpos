@@ -1,41 +1,55 @@
 import { useState, useEffect } from 'react';
-import { INITIAL_MEMBERS } from '../data/mockData';
 import type { Member } from '../data/mockData';
 
 export function useManageMembers() {
-  const [members, setMembers] = useState<Member[]>(() => {
-    const saved = localStorage.getItem('charni_members');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error('Failed to parse saved members, resetting', e);
-      }
-    }
-    return [...INITIAL_MEMBERS];
-  });
-
+  const [members, setMembers] = useState<Member[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchMembers = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/members');
+      if (!res.ok) throw new Error('Failed to fetch members');
+      const data = await res.json();
+      setMembers(data);
+    } catch (e: any) {
+      setError(e.message || 'Failed to load members');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    localStorage.setItem('charni_members', JSON.stringify(members));
-  }, [members]);
+    fetchMembers();
+  }, []);
 
-  const addMember = (name: string, role: string, email?: string) => {
-    const newMember: Member = {
-      // eslint-disable-next-line react-hooks/purity
-      id: Date.now().toString(),
-      name,
-      role,
-      status: 'ACTIVE',
-      email,
-    };
-    setMembers((prev) => [...prev, newMember]);
-    closeModal();
+  const addMember = async (_name: string, role: string, email?: string) => {
+    if (!email) return;
+    try {
+      // Map UI role ('Co-Owner' / 'Employee') to DB role ('owner' / 'employee')
+      const dbRole = role === 'Co-Owner' ? 'owner' : 'employee';
+      const res = await fetch('/api/members/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, role: dbRole }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to send invitation');
+      }
+      alert(`Invitation sent successfully to ${email}!`);
+      fetchMembers(); // Refresh from DB
+      closeModal();
+    } catch (e: any) {
+      alert(e.message || 'Failed to send invitation');
+    }
   };
 
   const updateMember = (id: string, name: string, role: string) => {
+    // Perform local state update as name/status are not DB-backed columns currently
     setMembers((prev) =>
       prev.map((m) => (m.id === id ? { ...m, name, role } : m))
     );
@@ -43,6 +57,7 @@ export function useManageMembers() {
   };
 
   const toggleMemberStatus = (id: string) => {
+    // Perform local state update as status is not a DB-backed column currently
     setMembers((prev) =>
       prev.map((m) =>
         m.id === id
@@ -52,8 +67,19 @@ export function useManageMembers() {
     );
   };
 
-  const deleteMember = (id: string) => {
-    setMembers((prev) => prev.filter((m) => m.id !== id));
+  const deleteMember = async (id: string) => {
+    try {
+      const res = await fetch(`/api/members?id=${id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to delete member');
+      }
+      fetchMembers(); // Refresh from DB
+    } catch (e: any) {
+      alert(e.message || 'Failed to delete member');
+    }
   };
 
   const openAddModal = () => {
@@ -75,6 +101,8 @@ export function useManageMembers() {
     members,
     isModalOpen,
     editingMember,
+    isLoading,
+    error,
     addMember,
     updateMember,
     toggleMemberStatus,

@@ -19,6 +19,7 @@ import CreateEvent from "./pages/CreateEvent";
 import EditEvent from "./pages/EditEvent";
 import ManageMembers from "./pages/ManageMembers";
 import InvitePartners from "./pages/InvitePartners";
+import AcceptInvite from "./pages/AcceptInvite";
 
 function RootRedirect() {
   const user = useAuthStore((state) => state.user);
@@ -30,6 +31,7 @@ function RootRedirect() {
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
+  { path: "/accept-invite", element: <AcceptInvite /> },
   {
     element: <ProtectedRoute />,
     children: [
