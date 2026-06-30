@@ -58,7 +58,22 @@ The current system seeds a single event via `scripts/seed.ts`, which drops and r
        `UPDATE event SET start_date = ?, end_date = ? WHERE id = ?`
      - If the event does not exist, compile an `INSERT` statement:
        `INSERT INTO event (shop_id, name, country, start_date, end_date, booth_rental, travel, accommodation, food_allowance) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)`
-  3. Batch execute the compiled SQL statements using a temporary SQL file and wrangler CLI.
+  3. Batch execute the compiled event insert/update SQL statements.
+  4. Query final event IDs to match them.
+  5. Check if orders already exist for both past events:
+     `SELECT event_id FROM "order" WHERE event_id IN (ID_A, ID_B)`
+  6. Query existing products and prices for `shop_id = 1`:
+     `SELECT p.id, pp.currency_code, pp.price FROM product p JOIN product_price pp ON p.id = pp.product_id WHERE p.shop_id = 1`
+  7. If products are available and past events do not have any orders seeded:
+     - **For Past Event A (Thailand - Profit target > 1800 THB)**:
+       - Find the first product with a THB price (e.g. 220 THB).
+       - Calculate total required quantity to exceed 1800 THB (e.g. 12 items = 2640 THB).
+       - Create 2 orders and matching `order_item` records for the event.
+     - **For Past Event B (Singapore - Loss target < 2900 SGD)**:
+       - Find the first product with an SGD price (e.g. 20 SGD).
+       - Calculate quantity to be well under 2900 SGD (e.g. 15 items = 300 SGD).
+       - Create 2 orders and matching `order_item` records for the event.
+  8. Batch execute the compiled order/order_item SQL statements.
 
 ### 2. Makefile Integration
 
