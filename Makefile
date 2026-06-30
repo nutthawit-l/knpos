@@ -1,4 +1,4 @@
-.PHONY: help seed-local seed-remote dev dev-with-seed deploy deploy-with-seed query-users query-shops delete-shop delete-products clear-local clear-remote
+.PHONY: help seed seed-local seed-remote dev dev-with-seed deploy deploy-with-seed query-users query-shops delete-shop delete-products clear-local clear-remote
 
 help:
 	@echo "Usage:"
@@ -15,7 +15,6 @@ help:
 	@echo "  make deploy            Build and deploy app to Cloudflare Pages"
 	@echo "  make deploy-with-seed  Seed remote databases, build, and deploy app to Cloudflare Pages"
 
-# Use when DB schema has changes.
 migrate:
 	pnpm install && npx wrangler d1 execute charnipos-db --local --file=./schema.sql
 
@@ -34,6 +33,16 @@ seed-events:
 remote-seed-events:
 	npx tsx seed/seed-events.ts --remote
 
+seed:
+	npx tsx seed/check-db.ts
+	$(MAKE) seed-products
+	$(MAKE) seed-events
+
+remote-seed:
+	npx tsx seed/check-db.ts --remote
+	$(MAKE) remote-seed-products
+	$(MAKE) remote-seed-events
+
 dev:
 	@if [ -n "$$TMUX" ]; then \
 		PANE_ID=$$(tmux split-window -h -P -F '#{pane_id}' 'pnpm dev:wrangler'); \
@@ -48,32 +57,3 @@ dev:
 
 deploy:
 	pnpm deploy
-
-# Old
-seed:
-	npx tsx scripts/seed.ts
-
-seed-remote:
-	npx tsx scripts/seed.ts --remote
-
-query-users:
-	./scripts/query-users.sh
-
-query-shops:
-	./scripts/query-shops.sh
-
-delete-shop:
-	@read -p "Enter Shop ID to delete: " shop_id; \
-	./scripts/delete-shop.sh $$shop_id
-
-delete-products:
-	./scripts/delete-products.sh
-
-clear-local:
-	./scripts/clear-db.sh
-
-clear-remote:
-	./scripts/clear-db.sh --remote
-
-
-deploy-with-seed: seed-remote deploy
