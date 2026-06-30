@@ -75,11 +75,11 @@ export default function Inventory() {
   const filteredProducts = products.filter((product) => {
     const category = product.category_name || 'General';
     const sku = getProductSku(product.id, category);
-    
+
     const matchesSearch =
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       sku.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
     const matchesCategory = selectedCategory === 'All' || category === selectedCategory;
 
     return matchesSearch && matchesCategory;
@@ -89,9 +89,7 @@ export default function Inventory() {
     setIsSavingStock(true);
     const success = await saveStockChanges();
     setIsSavingStock(false);
-    if (success) {
-      alert('Stock changes saved successfully.');
-    } else {
+    if (!success) {
       alert('Failed to save stock changes.');
     }
   };
