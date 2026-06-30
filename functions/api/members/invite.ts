@@ -4,6 +4,7 @@ import { getCookie, generateUUID } from "../auth/helper";
 export interface Env {
   DB: D1Database;
   RESEND_API_KEY?: string;
+  RESEND_FROM_EMAIL?: string;
 }
 
 interface SessionRow {
@@ -53,12 +54,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Validate email ends with @gmail.com (or is the Resend test recipient email)
+    // Validate email ends with @gmail.com
     const trimmedEmail = email.trim().toLowerCase();
-    const isGmail = trimmedEmail.endsWith("@gmail.com");
-    const isResendTestEmail = trimmedEmail === "nutthawit.l@proton.me";
-
-    if (!isGmail && !isResendTestEmail) {
+    if (!trimmedEmail.endsWith("@gmail.com")) {
       return new Response(JSON.stringify({ error: "Only Gmail addresses are supported for invitations" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
@@ -106,6 +104,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (context.env.RESEND_API_KEY) {
       try {
+        const fromEmail = context.env.RESEND_FROM_EMAIL || "Charni POS <onboarding@resend.dev>";
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -113,7 +112,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "Charni POS <onboarding@resend.dev>",
+            from: fromEmail,
             to: trimmedEmail,
             subject: "Invitation to join Charni POS Shop",
             html: `

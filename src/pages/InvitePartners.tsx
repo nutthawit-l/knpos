@@ -26,8 +26,7 @@ export const InvitePartners: React.FC<InvitePartnersProps> = ({
       return;
     }
 
-    const lowerEmail = trimmedEmail.toLowerCase();
-    if (!lowerEmail.endsWith('@gmail.com') && lowerEmail !== 'nutthawit.l@proton.me') {
+    if (!trimmedEmail.toLowerCase().endsWith('@gmail.com')) {
       alert('Only Gmail addresses (@gmail.com) are supported for invitations.');
       return;
     }
