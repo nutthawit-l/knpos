@@ -64,7 +64,7 @@ The current system seeds a single event via `scripts/seed.ts`, which drops and r
      `SELECT event_id FROM "order" WHERE event_id IN (ID_A, ID_B)`
   6. Query existing products and prices for `shop_id = 1`:
      `SELECT p.id, pp.currency_code, pp.price FROM product p JOIN product_price pp ON p.id = pp.product_id WHERE p.shop_id = 1`
-  7. If products are available and past events do not have any orders seeded:
+  7. If products are available and events do not have any orders seeded:
      - **For Past Event A (Thailand - Profit target > 1800 THB)**:
        - Generate 12 orders distributed across the event duration.
        - Each order randomly selects 1 to 5 unique THB products.
@@ -74,6 +74,10 @@ The current system seeds a single event via `scripts/seed.ts`, which drops and r
        - Generate 12 orders distributed across the event duration.
        - Each order randomly selects 1 to 5 unique SGD products.
        - Each order item has quantity 1, ensuring total revenue is well under 2900 SGD.
+       - Link order items to order using `(SELECT max(id) FROM "order")`.
+     - **For In-Progress Event C (Thailand)**:
+       - Generate 3 orders distributed across the current event duration (today - 2 days to today + 2 days).
+       - Each order selects 1 to 5 unique THB products.
        - Link order items to order using `(SELECT max(id) FROM "order")`.
   8. Batch execute the compiled order/order_item SQL statements.
 

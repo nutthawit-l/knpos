@@ -275,6 +275,43 @@ async function run() {
       }
     }
 
+    // In-Progress Event C: 3 orders (1-5 unique products per order)
+    if (existingOrderEventIds.has(idC)) {
+      console.log(`  -> Orders already exist for In-Progress Event C, skipping order seeding.`);
+    } else if (thbProducts.length === 0) {
+      console.warn(`  -> WARNING: No THB products found in database. Skipping order seeding for In-Progress Event C.`);
+    } else {
+      console.log(`  -> Preparing 3 orders for In-Progress Event C (THB)...`);
+      for (let i = 0; i < 3; i++) {
+        const dateOffset = -2 + i * 2; // -2, 0, 2 days relative to today
+        const dt = getRelativeDateTime(dateOffset);
+        
+        const numProducts = (i % 5) + 1; // 1 to 5 products
+        let totalIncome = 0;
+        let totalQty = 0;
+        const orderItemsSql: string[] = [];
+
+        for (let j = 0; j < numProducts; j++) {
+          const prod = thbProducts[(i + j) % thbProducts.length];
+          const qty = (i % 3) + 1; // 1 to 3 items
+          const price = prod.price;
+          totalIncome += qty * price;
+          totalQty += qty;
+
+          orderItemsSql.push(
+            `INSERT INTO order_item (order_id, product_id, quantity, price_per_unit) ` +
+            `VALUES ((SELECT max(id) FROM "order"), ${prod.id}, ${qty}, ${price});`
+          );
+        }
+
+        orderSqlLines.push(
+          `INSERT INTO "order" (currency_code, total_income, total_product_sold, event_id, created_at) ` +
+          `VALUES ('THB', ${totalIncome}, ${totalQty}, ${idC}, '${dt}');`
+        );
+        orderSqlLines.push(...orderItemsSql);
+      }
+    }
+
     if (orderSqlLines.length > 0) {
       const tempSqlFile = 'order_seed_temp.sql';
       fs.writeFileSync(tempSqlFile, orderSqlLines.join('\n'));
