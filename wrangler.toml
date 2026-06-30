@@ -13,3 +13,4 @@ bucket_name = "charnipos-images"
 
 [vars]
 R2_PUBLIC_URL = "https://pub-591d7a44897c44de8e396920cfc7042b.r2.dev"
+GOOGLE_CLIENT_ID = "992819053473-5pvqbjpa6etf5aghpfkm3ombdq04d49k.apps.googleusercontent.com"
