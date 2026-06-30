@@ -134,7 +134,7 @@ async function run() {
     fs.unlinkSync(tempSqlFile);
   }
 
-  // Seeding Orders and Order Items for Past Events
+  // Seeding Orders and Order Items for Past and In-Progress Events
   console.log(`Re-querying events to fetch IDs...`);
   const finalEventsResult = execSync(queryEventsCommand, { encoding: 'utf-8' });
   const finalEventsJson = parseWranglerJson(finalEventsResult) as { results?: { id: number; name: string }[] } | { results?: { id: number; name: string }[] }[];
@@ -146,10 +146,11 @@ async function run() {
 
   const idA = eventIdMap.get('Pop-up Craft Fair (Past)');
   const idB = eventIdMap.get('Singapore Art Festival (Past)');
+  const idC = eventIdMap.get('Design Week Expo (Current)');
 
-  if (idA !== undefined && idB !== undefined) {
-    console.log(`Checking existing orders for past events (event_ids: ${idA}, ${idB})...`);
-    const checkOrdersCommand = `npx wrangler d1 execute charnipos-db ${wranglerFlag} --command="SELECT DISTINCT event_id FROM \\"order\\" WHERE event_id IN (${idA}, ${idB})" --json`;
+  if (idA !== undefined && idB !== undefined && idC !== undefined) {
+    console.log(`Checking existing orders for events (event_ids: ${idA}, ${idB}, ${idC})...`);
+    const checkOrdersCommand = `npx wrangler d1 execute charnipos-db ${wranglerFlag} --command="SELECT DISTINCT event_id FROM \\"order\\" WHERE event_id IN (${idA}, ${idB}, ${idC})" --json`;
     const checkOrdersResult = execSync(checkOrdersCommand, { encoding: 'utf-8' });
     const checkOrdersJson = parseWranglerJson(checkOrdersResult) as { results?: { event_id: number }[] } | { results?: { event_id: number }[] }[];
     const existingOrders: Array<{ event_id: number }> =
@@ -239,6 +240,43 @@ async function run() {
         orderSqlLines.push(
           `INSERT INTO "order" (currency_code, total_income, total_product_sold, event_id, created_at) ` +
           `VALUES ('SGD', ${totalIncome}, ${totalQty}, ${idB}, '${dt}');`
+        );
+        orderSqlLines.push(...orderItemsSql);
+      }
+    }
+
+    // In-Progress Event C: 3 orders (1-5 unique products per order)
+    if (existingOrderEventIds.has(idC)) {
+      console.log(`  -> Orders already exist for In-Progress Event C, skipping order seeding.`);
+    } else if (thbProducts.length === 0) {
+      console.warn(`  -> WARNING: No THB products found in database. Skipping order seeding for In-Progress Event C.`);
+    } else {
+      console.log(`  -> Preparing 3 orders for In-Progress Event C (THB)...`);
+      for (let i = 0; i < 3; i++) {
+        const dateOffset = -2 + i * 2; // -2, 0, 2 days relative to today
+        const dt = getRelativeDateTime(dateOffset);
+        
+        const numProducts = (i % 5) + 1; // 1 to 5 products
+        let totalIncome = 0;
+        let totalQty = 0;
+        const orderItemsSql: string[] = [];
+
+        for (let j = 0; j < numProducts; j++) {
+          const prod = thbProducts[(i + j) % thbProducts.length];
+          const qty = (i % 3) + 1; // 1 to 3 items
+          const price = prod.price;
+          totalIncome += qty * price;
+          totalQty += qty;
+
+          orderItemsSql.push(
+            `INSERT INTO order_item (order_id, product_id, quantity, price_per_unit) ` +
+            `VALUES ((SELECT max(id) FROM "order"), ${prod.id}, ${qty}, ${price});`
+          );
+        }
+
+        orderSqlLines.push(
+          `INSERT INTO "order" (currency_code, total_income, total_product_sold, event_id, created_at) ` +
+          `VALUES ('THB', ${totalIncome}, ${totalQty}, ${idC}, '${dt}');`
         );
         orderSqlLines.push(...orderItemsSql);
       }
