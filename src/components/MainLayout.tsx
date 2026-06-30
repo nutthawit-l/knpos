@@ -34,6 +34,13 @@ const ROUTE_CONFIGS: Record<string, RouteConfig> = {
   },
   '/products': { title: 'Inventory', tab: 'products' },
   '/settings': { title: 'Settings', tab: 'settings' },
+  '/members': {
+    title: 'Manage members',
+    tab: '',
+    hideBottomNav: true,
+    showBackButton: true,
+    backTo: '/settings',
+  },
   '/create-event': {
     title: 'Create Event',
     tab: '',
