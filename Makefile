@@ -28,6 +28,22 @@ seed-products:
 remote-seed-products:
 	npx tsx seed/seed-products.ts --remote
 
+dev:
+	@if [ -n "$$TMUX" ]; then \
+		PANE_ID=$$(tmux split-window -h -P -F '#{pane_id}' 'pnpm dev:wrangler'); \
+		pnpm dev; \
+		tmux kill-pane -t $$PANE_ID 2>/dev/null || true; \
+	else \
+		tmux kill-session -t knpos-dev 2>/dev/null || true; \
+		tmux new-session -d -s knpos-dev 'pnpm dev; tmux kill-session -t knpos-dev'; \
+		tmux split-window -h -t knpos-dev 'pnpm dev:wrangler; tmux kill-session -t knpos-dev'; \
+		tmux attach-session -t knpos-dev; \
+	fi
+
+deploy:
+	pnpm deploy
+
+# Old
 seed:
 	npx tsx scripts/seed.ts
 
@@ -53,19 +69,5 @@ clear-local:
 clear-remote:
 	./scripts/clear-db.sh --remote
 
-dev:
-	@if [ -n "$$TMUX" ]; then \
-		PANE_ID=$$(tmux split-window -h -P -F '#{pane_id}' 'pnpm dev:wrangler'); \
-		pnpm dev; \
-		tmux kill-pane -t $$PANE_ID 2>/dev/null || true; \
-	else \
-		tmux kill-session -t knpos-dev 2>/dev/null || true; \
-		tmux new-session -d -s knpos-dev 'pnpm dev; tmux kill-session -t knpos-dev'; \
-		tmux split-window -h -t knpos-dev 'pnpm dev:wrangler; tmux kill-session -t knpos-dev'; \
-		tmux attach-session -t knpos-dev; \
-	fi
-
-deploy:
-	pnpm deploy
 
 deploy-with-seed: seed-remote deploy
