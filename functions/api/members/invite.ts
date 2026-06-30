@@ -70,12 +70,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Check sender's shop membership (must be shop member)
+    // Check sender's shop membership (must be shop member) and get shop name
     const senderMember = await context.env.DB.prepare(
-      "SELECT shop_id FROM shop_member WHERE user_id = ?"
+      `SELECT sm.shop_id, s.name as shop_name
+       FROM shop_member sm
+       JOIN shop s ON sm.shop_id = s.id
+       WHERE sm.user_id = ?`
     )
       .bind(session.user_id)
-      .first<MemberRow>();
+      .first<{ shop_id: number; shop_name: string }>();
 
     if (!senderMember) {
       return new Response(JSON.stringify({ error: "Sender is not associated with any shop" }), {
@@ -98,13 +101,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Log the invitation URL and trigger Resend email if key is configured
     const url = new URL(context.request.url);
     const inviteLink = `${url.origin}/accept-invite?token=${inviteToken}`;
-    
+
     let emailSent = false;
     let emailError = "";
 
     if (context.env.RESEND_API_KEY) {
       try {
-        const fromEmail = context.env.RESEND_FROM_EMAIL || "Charni POS <onboarding@resend.dev>";
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -112,14 +114,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: fromEmail,
+            from: "Charni POS <no-reply@charni-pos.ntwtech.com>",
             to: trimmedEmail,
-            subject: "Invitation to join Charni POS Shop",
+            subject: `Invitation to join ${senderMember.shop_name}`,
             html: `
               <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
                 <h2 style="color: #4E342E;">You've been invited!</h2>
                 <p>Hello,</p>
-                <p>You have been invited to join a Charni POS shop as a <strong>${role === 'owner' ? 'Co-Owner' : 'Employee'}</strong>.</p>
+                <p>You have been invited to join <strong>${senderMember.shop_name}</strong> as a <strong>${role === 'owner' ? 'Co-Owner' : 'Employee'}</strong>.</p>
                 <p>Click the button below to accept the invitation and access your dashboard instantly:</p>
                 <div style="text-align: center; margin: 30px 0;">
                   <a href="${inviteLink}" style="background-color: #EC4899; color: #4E342E; padding: 12px 24px; border-radius: 20px; text-decoration: none; font-weight: bold; display: inline-block;">Accept Invitation</a>
