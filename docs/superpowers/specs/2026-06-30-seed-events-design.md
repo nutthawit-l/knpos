@@ -66,13 +66,15 @@ The current system seeds a single event via `scripts/seed.ts`, which drops and r
      `SELECT p.id, pp.currency_code, pp.price FROM product p JOIN product_price pp ON p.id = pp.product_id WHERE p.shop_id = 1`
   7. If products are available and past events do not have any orders seeded:
      - **For Past Event A (Thailand - Profit target > 1800 THB)**:
-       - Find the first product with a THB price (e.g. 220 THB).
-       - Calculate total required quantity to exceed 1800 THB (e.g. 12 items = 2640 THB).
-       - Create 2 orders and matching `order_item` records for the event.
+       - Generate 12 orders distributed across the event duration.
+       - Each order randomly selects 1 to 5 unique THB products.
+       - Each order item has quantity 1 to 3, ensuring total revenue exceeds 1800 THB.
+       - Link order items to order using `(SELECT max(id) FROM "order")`.
      - **For Past Event B (Singapore - Loss target < 2900 SGD)**:
-       - Find the first product with an SGD price (e.g. 20 SGD).
-       - Calculate quantity to be well under 2900 SGD (e.g. 15 items = 300 SGD).
-       - Create 2 orders and matching `order_item` records for the event.
+       - Generate 12 orders distributed across the event duration.
+       - Each order randomly selects 1 to 5 unique SGD products.
+       - Each order item has quantity 1, ensuring total revenue is well under 2900 SGD.
+       - Link order items to order using `(SELECT max(id) FROM "order")`.
   8. Batch execute the compiled order/order_item SQL statements.
 
 ### 2. Makefile Integration

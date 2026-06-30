@@ -201,76 +201,78 @@ async function run() {
 
     const orderSqlLines: string[] = [];
 
-    // Past Event A: Profit target > 1800 THB
+    // Past Event A: Profit target > 1800 THB (12 orders, 1-5 unique products per order)
     if (existingOrderEventIds.has(idA)) {
       console.log(`  -> Orders already exist for Past Event A, skipping order seeding.`);
     } else if (thbProducts.length === 0) {
       console.warn(`  -> WARNING: No THB products found in database. Skipping order seeding for Past Event A.`);
     } else {
-      const prod = thbProducts[0];
-      const price = prod.price;
-      const targetIncome = 2500;
-      const totalQty = Math.ceil(targetIncome / price);
-      const qty1 = Math.floor(totalQty / 2);
-      const qty2 = totalQty - qty1;
+      console.log(`  -> Preparing 12 profit orders for Past Event A (THB)...`);
+      for (let i = 0; i < 12; i++) {
+        const dateOffset = -45 + (i % 5);
+        const dt = getRelativeDateTime(dateOffset);
+        
+        const numProducts = (i % 5) + 1; // 1 to 5 products
+        let totalIncome = 0;
+        let totalQty = 0;
+        const orderItemsSql: string[] = [];
 
-      console.log(`  -> Preparing profit orders for Past Event A (THB) using product id ${prod.id} (Price: ${price} THB, Total Qty: ${totalQty})...`);
-      const dt1 = getRelativeDateTime(-44);
-      const dt2 = getRelativeDateTime(-41);
+        for (let j = 0; j < numProducts; j++) {
+          const prod = thbProducts[(i + j) % thbProducts.length];
+          const qty = (i % 3) + 1; // 1 to 3 items
+          const price = prod.price;
+          totalIncome += qty * price;
+          totalQty += qty;
 
-      orderSqlLines.push(
-        `INSERT INTO "order" (currency_code, total_income, total_product_sold, event_id, created_at) ` +
-        `VALUES ('THB', ${qty1 * price}, ${qty1}, ${idA}, '${dt1}');`
-      );
-      orderSqlLines.push(
-        `INSERT INTO order_item (order_id, product_id, quantity, price_per_unit) ` +
-        `VALUES (last_insert_rowid(), ${prod.id}, ${qty1}, ${price});`
-      );
+          orderItemsSql.push(
+            `INSERT INTO order_item (order_id, product_id, quantity, price_per_unit) ` +
+            `VALUES ((SELECT max(id) FROM "order"), ${prod.id}, ${qty}, ${price});`
+          );
+        }
 
-      orderSqlLines.push(
-        `INSERT INTO "order" (currency_code, total_income, total_product_sold, event_id, created_at) ` +
-        `VALUES ('THB', ${qty2 * price}, ${qty2}, ${idA}, '${dt2}');`
-      );
-      orderSqlLines.push(
-        `INSERT INTO order_item (order_id, product_id, quantity, price_per_unit) ` +
-        `VALUES (last_insert_rowid(), ${prod.id}, ${qty2}, ${price});`
-      );
+        orderSqlLines.push(
+          `INSERT INTO "order" (currency_code, total_income, total_product_sold, event_id, created_at) ` +
+          `VALUES ('THB', ${totalIncome}, ${totalQty}, ${idA}, '${dt}');`
+        );
+        orderSqlLines.push(...orderItemsSql);
+      }
     }
 
-    // Past Event B: Loss target < 2900 SGD
+    // Past Event B: Loss target < 2900 SGD (12 orders, 1-5 unique products per order)
     if (existingOrderEventIds.has(idB)) {
       console.log(`  -> Orders already exist for Past Event B, skipping order seeding.`);
     } else if (sgdProducts.length === 0) {
       console.warn(`  -> WARNING: No SGD products found in database. Skipping order seeding for Past Event B.`);
     } else {
-      const prod = sgdProducts[0];
-      const price = prod.price;
-      const targetIncome = 300;
-      const totalQty = Math.ceil(targetIncome / price);
-      const qty1 = Math.floor(totalQty / 2);
-      const qty2 = totalQty - qty1;
+      console.log(`  -> Preparing 12 loss orders for Past Event B (SGD)...`);
+      for (let i = 0; i < 12; i++) {
+        const dateOffset = -20 + (i % 5);
+        const dt = getRelativeDateTime(dateOffset);
+        
+        const numProducts = (i % 5) + 1; // 1 to 5 products
+        let totalIncome = 0;
+        let totalQty = 0;
+        const orderItemsSql: string[] = [];
 
-      console.log(`  -> Preparing loss orders for Past Event B (SGD) using product id ${prod.id} (Price: ${price} SGD, Total Qty: ${totalQty})...`);
-      const dt1 = getRelativeDateTime(-19);
-      const dt2 = getRelativeDateTime(-16);
+        for (let j = 0; j < numProducts; j++) {
+          const prod = sgdProducts[(i + j) % sgdProducts.length];
+          const qty = 1; // Quantity 1 to keep total under 2900 SGD
+          const price = prod.price;
+          totalIncome += qty * price;
+          totalQty += qty;
 
-      orderSqlLines.push(
-        `INSERT INTO "order" (currency_code, total_income, total_product_sold, event_id, created_at) ` +
-        `VALUES ('SGD', ${qty1 * price}, ${qty1}, ${idB}, '${dt1}');`
-      );
-      orderSqlLines.push(
-        `INSERT INTO order_item (order_id, product_id, quantity, price_per_unit) ` +
-        `VALUES (last_insert_rowid(), ${prod.id}, ${qty1}, ${price});`
-      );
+          orderItemsSql.push(
+            `INSERT INTO order_item (order_id, product_id, quantity, price_per_unit) ` +
+            `VALUES ((SELECT max(id) FROM "order"), ${prod.id}, ${qty}, ${price});`
+          );
+        }
 
-      orderSqlLines.push(
-        `INSERT INTO "order" (currency_code, total_income, total_product_sold, event_id, created_at) ` +
-        `VALUES ('SGD', ${qty2 * price}, ${qty2}, ${idB}, '${dt2}');`
-      );
-      orderSqlLines.push(
-        `INSERT INTO order_item (order_id, product_id, quantity, price_per_unit) ` +
-        `VALUES (last_insert_rowid(), ${prod.id}, ${qty2}, ${price});`
-      );
+        orderSqlLines.push(
+          `INSERT INTO "order" (currency_code, total_income, total_product_sold, event_id, created_at) ` +
+          `VALUES ('SGD', ${totalIncome}, ${totalQty}, ${idB}, '${dt}');`
+        );
+        orderSqlLines.push(...orderItemsSql);
+      }
     }
 
     if (orderSqlLines.length > 0) {
@@ -294,7 +296,7 @@ run().catch((err) => {
 - [ ] **Step 2: Run the script locally to seed the events and orders**
 
 Run: `npx tsx seed/seed-events.ts`
-Expected: Output showing event inserts/updates, re-querying events, checking existing orders, querying products, preparing profit/loss orders, and executing D1 SQL.
+Expected: Output showing event inserts/updates, re-querying events, checking existing orders, querying products, preparing 12 profit/loss orders with multiple products, and executing D1 SQL.
 
 - [ ] **Step 3: Query local events to verify insertion**
 
