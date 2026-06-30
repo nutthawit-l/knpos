@@ -53,9 +53,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Validate email ends with @gmail.com
+    // Validate email ends with @gmail.com (or is the Resend test recipient email)
     const trimmedEmail = email.trim().toLowerCase();
-    if (!trimmedEmail.endsWith("@gmail.com")) {
+    const isGmail = trimmedEmail.endsWith("@gmail.com");
+    const isResendTestEmail = trimmedEmail === "nutthawit.l@proton.me";
+
+    if (!isGmail && !isResendTestEmail) {
       return new Response(JSON.stringify({ error: "Only Gmail addresses are supported for invitations" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
