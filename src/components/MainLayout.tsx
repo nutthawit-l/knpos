@@ -41,6 +41,13 @@ const ROUTE_CONFIGS: Record<string, RouteConfig> = {
     showBackButton: true,
     backTo: '/settings',
   },
+  '/invite-partners': {
+    title: 'Invite Partners',
+    tab: '',
+    hideBottomNav: true,
+    showBackButton: true,
+    backTo: '/members',
+  },
   '/create-event': {
     title: 'Create Event',
     tab: '',

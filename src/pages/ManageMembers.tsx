@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useManageMembers } from '../hooks/useManageMembers';
 import FormInput from '../components/FormInput';
 import FormSelect from '../components/FormSelect';
@@ -22,15 +23,14 @@ export interface ManageMembersProps {
 export const ManageMembers: React.FC<ManageMembersProps> = ({
   className = '',
 }) => {
+  const navigate = useNavigate();
   const {
     members,
     isModalOpen,
     editingMember,
-    addMember,
     updateMember,
     toggleMemberStatus,
     deleteMember,
-    openAddModal,
     openEditModal,
     closeModal,
   } = useManageMembers();
@@ -39,9 +39,7 @@ export const ManageMembers: React.FC<ManageMembersProps> = ({
   const [role, setRole] = useState('Employee');
 
   const handleOpenAdd = () => {
-    setName('');
-    setRole('Employee');
-    openAddModal();
+    navigate('/invite-partners');
   };
 
   const handleOpenEdit = (member: typeof members[number]) => {
@@ -52,13 +50,9 @@ export const ManageMembers: React.FC<ManageMembersProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim() || !editingMember) return;
 
-    if (editingMember) {
-      updateMember(editingMember.id, name, role);
-    } else {
-      addMember(name, role);
-    }
+    updateMember(editingMember.id, name, role);
   };
 
   const rolesList = ['Co-Owner', 'Employee', 'Inventory Specialist'] as const;

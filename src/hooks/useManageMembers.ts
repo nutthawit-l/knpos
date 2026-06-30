@@ -22,12 +22,14 @@ export function useManageMembers() {
     localStorage.setItem('charni_members', JSON.stringify(members));
   }, [members]);
 
-  const addMember = (name: string, role: string) => {
+  const addMember = (name: string, role: string, email?: string) => {
     const newMember: Member = {
+      // eslint-disable-next-line react-hooks/purity
       id: Date.now().toString(),
       name,
       role,
       status: 'ACTIVE',
+      email,
     };
     setMembers((prev) => [...prev, newMember]);
     closeModal();

@@ -149,6 +149,7 @@ export interface Member {
   status: 'ACTIVE' | 'PAUSED';
   avatarUrl?: string;
   isMascot?: boolean;
+  email?: string;
 }
 
 export const INITIAL_MEMBERS: readonly Member[] = [
@@ -157,6 +158,7 @@ export const INITIAL_MEMBERS: readonly Member[] = [
     name: 'Elena',
     role: 'Co-Owner',
     status: 'ACTIVE',
+    email: 'elena@boutique.com',
     avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBBZqIbd5VOzV5kyg9gDvfdVG5-zteluxg_2UmGbvExlNGywsK5m3ggXGHFagLAgyeK8iIF6SBvfBCdNoVL08YSdvVBzWjM4cQ1bMA4VAp1tLwr8tTvVQZp3An635zt6pBVlVckzjhhG7HpHKcbWVUtrjlya2qqTAv8muAjfWu3dgN46ljKVaRKAMBil9mQ85f1ogBByW8fo9rko-DDGcL98q6SLTSorWrAloGb5g45HRujULSm8kkhNnRpOO6bBX6r7EFNeBmCDWE',
   },
   {
@@ -164,6 +166,7 @@ export const INITIAL_MEMBERS: readonly Member[] = [
     name: 'Mike Th.',
     role: 'Employee',
     status: 'ACTIVE',
+    email: 'mike.t@boutique.com',
     avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBez3PzmJ7yfdmgpdgynTFGjYQo3sw5o4Nr99Yno926jQY4a5jiNCQt4nHHZm8hLdPzd1uQMJJqNtlzAe3gWm0U8jfTBXe90heT1i2_1DJvz5v0ocdSnZKrdabcZbK2W-HVgbCtB8Hv2Nyy2wKkPNtIxazONp5sKGQMM0p4rhZrQcRQEWMvWpwugKWfpcGwkX6ULtFav0cJkaAIXYwQ6RxN5Jck04l92QaG50ZjCr0dI2Jw_crp6o36YIAWMnkUHwz0u3Dl6hORQrU',
   },
   {
@@ -171,6 +174,7 @@ export const INITIAL_MEMBERS: readonly Member[] = [
     name: 'Jamie',
     role: 'Employee',
     status: 'PAUSED',
+    email: 'jamie@boutique.com',
     avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDgEt9kHr0-1vuJNUu7-Hu5kzbOKSMpSK1h_cOkN6F80RShEmdfXJ20BGpuAazb_g11jMcupMh3eJEY8ZGCH1rN2_K1nz5ThBWZPgeWvRvbSS8Iz9AsKoylyXKJZDFkury4fiaVmlR77Zu94DFg5Exmp76fQY4OYewJGzNtWwxLkKjGWmsGVfReDgfLDs0cs7DZ6_yPd22dWNnA6v3G28af6tl9fRcPUCJwaBjPuUwxIqqLHv9mntbuHibMl5n5PbQgXP4ww9QOB5Q',
   },
   {
@@ -178,6 +182,7 @@ export const INITIAL_MEMBERS: readonly Member[] = [
     name: 'Sam P.',
     role: 'Inventory Specialist',
     status: 'ACTIVE',
+    email: 'sam.p@boutique.com',
     isMascot: true,
   },
 ];
