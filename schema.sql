@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS otp_verification;
 DROP TABLE IF EXISTS order_item;
 DROP TABLE IF EXISTS product_price;
 DROP TABLE IF EXISTS event_member;
+DROP TABLE IF EXISTS shop_member_invite;
 DROP TABLE IF EXISTS shop_member;
 DROP TABLE IF EXISTS "order";
 DROP TABLE IF EXISTS product;
@@ -145,6 +146,18 @@ CREATE TABLE session (
     expires_at TEXT NOT NULL,
     created_at TEXT DEFAULT (datetime('now', 'localtime')),
     FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
+);
+
+CREATE TABLE shop_member_invite (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    shop_id INTEGER NOT NULL,
+    email TEXT NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('owner', 'employee')),
+    token TEXT NOT NULL UNIQUE,
+    expires_at TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (shop_id) REFERENCES shop(id) ON DELETE CASCADE,
+    UNIQUE(shop_id, email)
 );
 
 PRAGMA foreign_keys = ON;
