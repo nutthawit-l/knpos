@@ -3,6 +3,7 @@ import { getCookie, generateUUID } from "../auth/helper";
 
 export interface Env {
   DB: D1Database;
+  RESEND_API_KEY?: string;
 }
 
 interface SessionRow {
@@ -93,11 +94,66 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       .bind(senderMember.shop_id, trimmedEmail, role, inviteToken, expiresAt)
       .run();
 
-    // Log the invitation URL to the console (simulating sending the email)
+    // Log the invitation URL and trigger Resend email if key is configured
     const url = new URL(context.request.url);
     const inviteLink = `${url.origin}/accept-invite?token=${inviteToken}`;
+    
+    let emailSent = false;
+    let emailError = "";
+
+    if (context.env.RESEND_API_KEY) {
+      try {
+        const res = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${context.env.RESEND_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: "Charni POS <onboarding@resend.dev>",
+            to: trimmedEmail,
+            subject: "Invitation to join Charni POS Shop",
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #4E342E;">You've been invited!</h2>
+                <p>Hello,</p>
+                <p>You have been invited to join a Charni POS shop as a <strong>${role === 'owner' ? 'Co-Owner' : 'Employee'}</strong>.</p>
+                <p>Click the button below to accept the invitation and access your dashboard instantly:</p>
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${inviteLink}" style="background-color: #EC4899; color: #4E342E; padding: 12px 24px; border-radius: 20px; text-decoration: none; font-weight: bold; display: inline-block;">Accept Invitation</a>
+                </div>
+                <p style="font-size: 12px; color: #777;">If the button doesn't work, copy and paste this link into your browser: <br/> <a href="${inviteLink}">${inviteLink}</a></p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+                <p style="font-size: 11px; color: #999;">This invitation was sent to ${trimmedEmail} and expires in 24 hours.</p>
+              </div>
+            `,
+          }),
+        });
+
+        if (res.ok) {
+          emailSent = true;
+        } else {
+          emailError = await res.text();
+          console.error("[RESEND ERROR]", emailError);
+        }
+      } catch (e: any) {
+        emailError = e.message || String(e);
+        console.error("[RESEND FETCH ERROR]", e);
+      }
+    }
+
+    // Always log to console as fallback/verification in local development
     console.log(`\n==================================================`);
-    console.log(`[INVITE] Invitation link for ${trimmedEmail}:`);
+    if (emailSent) {
+      console.log(`[INVITE] Real email sent via Resend to ${trimmedEmail}`);
+    } else {
+      console.log(`[INVITE] (SIMULATED) Invitation link for ${trimmedEmail}:`);
+      if (context.env.RESEND_API_KEY) {
+        console.log(`Failed to send email via Resend: ${emailError}`);
+      } else {
+        console.log(`(RESEND_API_KEY is not configured)`);
+      }
+    }
     console.log(`${inviteLink}`);
     console.log(`Role: ${role}`);
     console.log(`Expires at: ${expiresAt}`);
