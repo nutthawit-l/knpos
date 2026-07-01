@@ -80,26 +80,17 @@
   );
   ```
 
-- [ ] **Step 2: Update seed/seed-events.ts to set up collaborative roles**
-  Modify `seed/seed-events.ts` to insert `event_member` entries for seeded events:
-  - Event 1: `user_id = 1` is `'creator'`
-  - Event 2: `user_id = 2` is `'creator'`, `user_id = 1` is `'collaborator'`
-  - Event 3: `user_id = 1` is `'creator'`
-  - Event 4: `user_id = 2` is `'creator'` (so `user_id = 1` is NOT in `event_member` yet for Event 4)
+- [ ] **Step 2: Update seed/seed-events.ts to set up creator roles for user 1**
+  Modify `seed/seed-events.ts` to insert `event_member` entries for seeded events, setting `user_id = 1` as `'creator'` for all of them:
   
   Write the SQL insert statement generation inside `seed/seed-events.ts`:
   ```typescript
-  // For each inserted/updated event, seed corresponding event_member records:
-  // e.g. for Event 1:
   `INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idA}, 1, 'creator');`
-  // for Event 2:
-  `INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idB}, 2, 'creator');`
-  `INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idB}, 1, 'collaborator');`
-  // for Event 3:
+  `INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idB}, 1, 'creator');`
   `INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idC}, 1, 'creator');`
-  // for Event 4:
-  `INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idD}, 2, 'creator');`
+  `INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idD}, 1, 'creator');`
   ```
+
 
 - [ ] **Step 3: Update functions/api/event.ts event creation role logic**
   In `functions/api/event.ts` `onRequestPost` (create event), update line 108-123 to use new roles (and remove auto-assignment to other owners):
