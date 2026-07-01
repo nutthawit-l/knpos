@@ -98,29 +98,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       throw new Error("Failed to insert event record.");
     }
 
-    // 2. Fetch other owners in the shop to auto-assign them as 'shop_owner'
-    const { results: otherOwners } = await context.env.DB.prepare(
-      "SELECT user_id FROM shop_member WHERE shop_id = ? AND role = 'owner' AND user_id != ?"
+    // 2. Insert creator into event_member with role 'creator'
+    await context.env.DB.prepare(
+      "INSERT INTO event_member (event_id, user_id, role) VALUES (?, ?, 'creator')"
     )
-      .bind(shopMember.shop_id, session.user_id)
-      .all<{ user_id: number }>();
+      .bind(eventId, session.user_id)
+      .run();
 
-    // 3. Batch insert creator and other owners into event_member
-    const memberStatements = [
-      context.env.DB.prepare(
-        "INSERT INTO event_member (event_id, user_id, role) VALUES (?, ?, 'event_creator')"
-      ).bind(eventId, session.user_id)
-    ];
-
-    for (const owner of otherOwners) {
-      memberStatements.push(
-        context.env.DB.prepare(
-          "INSERT INTO event_member (event_id, user_id, role) VALUES (?, ?, 'shop_owner')"
-        ).bind(eventId, owner.user_id)
-      );
-    }
-
-    await context.env.DB.batch(memberStatements);
 
     return new Response(
       JSON.stringify({
@@ -199,10 +183,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     if (eventIdParam) {
       const eventId = parseInt(eventIdParam, 10);
       const eventRecord = await context.env.DB.prepare(
-        `SELECT id, name, country, start_date AS startDate, end_date AS endDate, 
-                booth_rental AS boothRental, travel, accommodation, food_allowance AS foodAllowance 
-         FROM event WHERE id = ? AND shop_id = ?`
-      ).bind(eventId, shopMember.shop_id).first();
+        `SELECT e.id, e.name, e.country, e.start_date AS startDate, e.end_date AS endDate, 
+                e.booth_rental AS boothRental, e.travel, e.accommodation, e.food_allowance AS foodAllowance,
+                em.role, (CASE WHEN em.role IS NOT NULL THEN 1 ELSE 0 END) AS isJoined
+         FROM event e
+         LEFT JOIN event_member em ON e.id = em.event_id AND em.user_id = ?1
+         WHERE e.id = ?2 AND e.shop_id = ?3`
+      ).bind(session.user_id, eventId, shopMember.shop_id).first();
       
       if (!eventRecord) {
         return new Response(JSON.stringify({ error: "Event not found" }), { status: 404 });
@@ -229,6 +216,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         e.accommodation, 
         e.food_allowance AS foodAllowance, 
         em.role,
+        (CASE WHEN em.role IS NOT NULL THEN 1 ELSE 0 END) AS isJoined,
         CASE 
             WHEN ?3 < e.start_date THEN 'upcoming'
             WHEN ?3 BETWEEN e.start_date AND e.end_date THEN 'inprogress'

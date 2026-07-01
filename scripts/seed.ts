@@ -144,7 +144,7 @@ async function run() {
     `VALUES (1, ${defaultShopId}, 'Pop-up Craft Fair 2026', 'Thailand', '2026-03-01', '2026-03-31', 1500, 500, 1000, 200);`
   );
   sqlLines.push(
-    `INSERT INTO event_member (event_id, user_id, role) VALUES (1, ${defaultUserId}, 'event_creator');`
+    `INSERT INTO event_member (event_id, user_id, role) VALUES (1, ${defaultUserId}, 'creator');`
   );
 
   // Seed categories
