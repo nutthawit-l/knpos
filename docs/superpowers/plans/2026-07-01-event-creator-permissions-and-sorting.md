@@ -55,32 +55,13 @@
 
 **Files:**
 - Modify: `functions/api/event.ts`
-- Modify: `scripts/seed.ts`
 - Modify: `seed/seed-events.ts`
 
 **Interfaces:**
 - Consumes: `schema.sql` update.
 - Produces: API methods with new roles and invitation auto-assignment, and updated seed scripts.
 
-- [ ] **Step 1: Update scripts/seed.ts user role and collation**
-  Modify the seed insertion lines in `scripts/seed.ts` (lines 147-148):
-  ```typescript
-  sqlLines.push(
-    `INSERT INTO event_member (event_id, user_id, role) VALUES (1, ${defaultUserId}, 'creator');`
-  );
-  ```
-  Add a second test user to `scripts/seed.ts` (lines 135-141):
-  ```typescript
-  sqlLines.push(
-    `INSERT INTO "user" (id, email, password_hash, password_salt, is_verified) ` +
-    `VALUES (2, 'collab@example.com', '${hash}', '${salt}', 1);`
-  );
-  sqlLines.push(
-    `INSERT INTO shop_member (shop_id, user_id, role) VALUES (${defaultShopId}, 2, 'owner');`
-  );
-  ```
-
-- [ ] **Step 2: Update seed/seed-events.ts to set up creator roles for user 1**
+- [ ] **Step 1: Update seed/seed-events.ts to set up creator roles for user 1**
   Modify `seed/seed-events.ts` to insert `event_member` entries for seeded events, setting `user_id = 1` as `'creator'` for all of them:
   
   Write the SQL insert statement generation inside `seed/seed-events.ts`:
@@ -91,8 +72,7 @@
   `INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idD}, 1, 'creator');`
   ```
 
-
-- [ ] **Step 3: Update functions/api/event.ts event creation role logic**
+- [ ] **Step 2: Update functions/api/event.ts event creation role logic**
   In `functions/api/event.ts` `onRequestPost` (create event), update line 108-123 to use new roles (and remove auto-assignment to other owners):
   ```typescript
     const memberStatements = [
@@ -102,7 +82,7 @@
     ];
   ```
 
-- [ ] **Step 4: Update GET /api/event query to return roles and isJoined**
+- [ ] **Step 3: Update GET /api/event query to return roles and isJoined**
   In `functions/api/event.ts` `onRequestGet`:
   For single event query (lines 201-205):
   ```typescript
@@ -143,12 +123,13 @@
        ORDER BY e.start_date DESC`
   ```
 
-- [ ] **Step 5: Run make seed and check DB to verify seeding**
+- [ ] **Step 4: Run make seed and check DB to verify seeding**
   Run: `make seed`
   Verify there are no SQL check constraint errors.
 
-- [ ] **Step 6: Commit backend & seed changes**
-  Run: `git add functions/api/event.ts scripts/seed.ts seed/seed-events.ts && git commit -m "feat: implement creator role on creation and update seeds"`
+- [ ] **Step 5: Commit backend & seed changes**
+  Run: `git add functions/api/event.ts seed/seed-events.ts && git commit -m "feat: implement creator role on creation and update seeds"`
+
 
 ---
 
