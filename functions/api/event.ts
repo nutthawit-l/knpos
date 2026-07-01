@@ -337,6 +337,20 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       });
     }
 
+    // Verify user is the creator of the event
+    const userRole = await context.env.DB.prepare(
+      "SELECT role FROM event_member WHERE event_id = ? AND user_id = ?"
+    )
+      .bind(id, session.user_id)
+      .first<{ role: string }>();
+
+    if (!userRole || userRole.role !== 'creator') {
+      return new Response(JSON.stringify({ error: "Only the event creator can edit this event." }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     // Update the event
     await context.env.DB.prepare(
       `UPDATE event 
