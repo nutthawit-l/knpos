@@ -36,6 +36,8 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 export default function Dashboard() {
   const [events, setEvents] = useState<EventData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedEventToJoin, setSelectedEventToJoin] = useState<EventData | null>(null);
+  const [isJoining, setIsJoining] = useState(false);
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -68,12 +70,50 @@ export default function Dashboard() {
     };
   }, []);
   const handleEventClick = (event: EventData) => {
+    if (event.role !== 'creator' && event.isJoined === 0) {
+      setSelectedEventToJoin(event);
+      return;
+    }
+    navigateToEvent(event);
+  };
+
+  const navigateToEvent = (event: EventData) => {
     if (event.status === 'upcoming') {
       navigate(`/edit-event?event_id=${event.id}`);
     } else if (event.status === 'inprogress') {
       navigate(`/transactions?event_id=${event.id}&event_name=${encodeURIComponent(event.name)}`);
     } else if (event.status === 'ended') {
       navigate(`/transactions?event_id=${event.id}&event_name=${encodeURIComponent(event.name)}&disable_order=true`);
+    }
+  };
+  const handleConfirmJoin = async () => {
+    if (!selectedEventToJoin) return;
+    setIsJoining(true);
+    try {
+      const response = await fetch('/api/event/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId: selectedEventToJoin.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to join event');
+      }
+
+      setEvents((prev) =>
+        prev.map((evt) =>
+          evt.id === selectedEventToJoin.id ? { ...evt, isJoined: 1, role: 'collaborator' } : evt
+        )
+      );
+
+      const enteredEvent = { ...selectedEventToJoin, isJoined: 1, role: 'collaborator' as const };
+      setSelectedEventToJoin(null);
+      navigateToEvent(enteredEvent);
+    } catch (err) {
+      console.error(err);
+      alert('Could not join event. Please try again.');
+    } finally {
+      setIsJoining(false);
     }
   };
   if (isLoading) {
@@ -315,6 +355,37 @@ export default function Dashboard() {
           </p>
         </button>
       </section>
+
+      {/* Join Confirmation Modal */}
+      {selectedEventToJoin && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#4e342e]/40 backdrop-blur-sm transition-opacity" onClick={() => setSelectedEventToJoin(null)}></div>
+          <div className="bg-white w-full max-w-[320px] rounded-[24px] overflow-hidden shadow-2xl border border-[#E0D0CC]/20 z-10 p-6 space-y-4 animate-scaleUp">
+            <div className="text-center space-y-2">
+              <h3 className="font-bold text-[18px] text-text-brown">Join Event</h3>
+              <p className="text-[13px] text-text-brown/80 leading-relaxed">
+                Are you sure you want to join <strong>{selectedEventToJoin.name}</strong>?
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setSelectedEventToJoin(null)}
+                disabled={isJoining}
+                className="flex-1 h-11 border-2 border-outline-warm text-text-brown rounded-full font-bold text-[13px] hover:bg-gray-50 active:scale-95 transition-all cursor-pointer bg-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmJoin}
+                disabled={isJoining}
+                className="flex-1 h-11 bg-brand-pink text-text-brown rounded-full font-bold text-[13px] hover:bg-brand-pink-hover active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer border-none shadow-sm disabled:opacity-50"
+              >
+                {isJoining ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
