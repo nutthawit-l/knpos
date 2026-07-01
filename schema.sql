@@ -66,7 +66,7 @@ CREATE TABLE event_member (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     event_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
-    role TEXT NOT NULL CHECK(role IN ('event_creator', 'shop_owner', 'employee')),
+    role TEXT NOT NULL CHECK(role IN ('creator', 'collaborator', 'assistant')),
     created_at TEXT DEFAULT (datetime('now', 'localtime')),
     FOREIGN KEY (event_id) REFERENCES event(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE,
