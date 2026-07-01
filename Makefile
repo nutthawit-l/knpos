@@ -33,6 +33,13 @@ seed-events:
 remote-seed-events:
 	npx tsx seed/seed-events.ts --remote
 
+seed-shop:
+	npx tsx seed/seed-shop.ts
+
+remote-seed-shop:
+	npx tsx seed/seed-shop.ts --remote
+
+
 seed:
 	npx tsx seed/check-db.ts
 	$(MAKE) seed-products

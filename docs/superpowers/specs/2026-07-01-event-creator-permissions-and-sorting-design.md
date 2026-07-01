@@ -66,6 +66,11 @@ We will design and implement the user-specific event roles (`creator`, `collabor
   * Assign `user_id = 1` as `'collaborator'` with `has_joined = 1` for Event 2.
   * Assign `user_id = 1` as `'collaborator'` with `has_joined = 0` for Event 4.
 
+### 2.6 Seed Shop Script (`seed/seed-shop.ts`) [NEW]
+* Create a script to seed the specific user `nutthawit1513@gmail.com` with `is_verified = 1` and password `password123`.
+* Create a shop named `"Fly away to somewhere"` and assign this user as the `'owner'` of the shop.
+
+
 ## 3. Frontend Dashboard & Modal Integration
 
 ### 3.1 Sorting & Formatting on Dashboard
