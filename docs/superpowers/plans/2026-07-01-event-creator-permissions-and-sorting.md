@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Implement user-specific event roles, permissions check for editing events, dynamic priority-based dashboard sorting, and a one-time join confirmation modal persisted in the database.
+**Goal:** Implement user-specific event roles, permissions check for editing events, dynamic priority-based dashboard sorting, and a one-time join confirmation modal.
 
-**Architecture:** We will extend the `event_member` schema to support the role check constraints (`creator`, `collaborator`, `assistant`) and add a `has_joined` integer column. On the backend, we will validate that only creators can edit events, auto-assign roles on creation/invite-acceptance, and expose a `/api/event/join` endpoint. On the frontend, we will sort dashboard events by Creator $\rightarrow$ Joined $\rightarrow$ Non-Joined, display role badges, show a join confirmation modal for non-joined events, and enforce read-only event forms for non-creators.
+**Architecture:** We will extend the `event_member` schema to support the role check constraints (`creator`, `collaborator`, `assistant`). On the backend, we will validate that only creators can edit events, assign the `'creator'` role on event creation, and expose a `/api/event/join` endpoint to dynamically add members when they click to join. On the frontend, we will sort dashboard events by Creator $\rightarrow$ Joined $\rightarrow$ Non-Joined, display role badges, show a join confirmation modal for non-joined events, and enforce read-only event forms for non-creators.
 
 **Tech Stack:** Vite + React, Cloudflare Pages/Workers API, TypeScript, Zustand, Tailwind CSS, SQLite (D1)
 
@@ -35,7 +35,6 @@
       event_id INTEGER NOT NULL,
       user_id INTEGER NOT NULL,
       role TEXT NOT NULL CHECK(role IN ('creator', 'collaborator', 'assistant')),
-      has_joined INTEGER NOT NULL DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now', 'localtime')),
       FOREIGN KEY (event_id) REFERENCES event(id) ON DELETE CASCADE,
       FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE,
@@ -48,7 +47,7 @@
   Expected output: `Database schema re-initialized successfully.`
 
 - [ ] **Step 3: Commit migration changes**
-  Run: `git add schema.sql && git commit -m "migration: update event_member schema for creator roles and has_joined"`
+  Run: `git add schema.sql && git commit -m "migration: update event_member schema for creator roles"`
 
 ---
 
@@ -56,7 +55,6 @@
 
 **Files:**
 - Modify: `functions/api/event.ts`
-- Modify: `functions/api/members/accept.ts`
 - Modify: `scripts/seed.ts`
 - Modify: `seed/seed-events.ts`
 
@@ -68,7 +66,7 @@
   Modify the seed insertion lines in `scripts/seed.ts` (lines 147-148):
   ```typescript
   sqlLines.push(
-    `INSERT INTO event_member (event_id, user_id, role, has_joined) VALUES (1, ${defaultUserId}, 'creator', 1);`
+    `INSERT INTO event_member (event_id, user_id, role) VALUES (1, ${defaultUserId}, 'creator');`
   );
   ```
   Add a second test user to `scripts/seed.ts` (lines 135-141):
@@ -84,52 +82,43 @@
 
 - [ ] **Step 2: Update seed/seed-events.ts to set up collaborative roles**
   Modify `seed/seed-events.ts` to insert `event_member` entries for seeded events:
-  - Event 1: `user_id = 1` is `'creator'`, `has_joined = 1`
-  - Event 2: `user_id = 2` is `'creator'`, `user_id = 1` is `'collaborator'`, `has_joined = 1`
-  - Event 3: `user_id = 1` is `'creator'`, `has_joined = 1`
-  - Event 4: `user_id = 2` is `'creator'`, `user_id = 1` is `'collaborator'`, `has_joined = 0`
+  - Event 1: `user_id = 1` is `'creator'`
+  - Event 2: `user_id = 2` is `'creator'`, `user_id = 1` is `'collaborator'`
+  - Event 3: `user_id = 1` is `'creator'`
+  - Event 4: `user_id = 2` is `'creator'` (so `user_id = 1` is NOT in `event_member` yet for Event 4)
   
   Write the SQL insert statement generation inside `seed/seed-events.ts`:
   ```typescript
   // For each inserted/updated event, seed corresponding event_member records:
   // e.g. for Event 1:
-  `INSERT OR IGNORE INTO event_member (event_id, user_id, role, has_joined) VALUES (${idA}, 1, 'creator', 1);`
+  `INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idA}, 1, 'creator');`
   // for Event 2:
-  `INSERT OR IGNORE INTO event_member (event_id, user_id, role, has_joined) VALUES (${idB}, 2, 'creator', 1);`
-  `INSERT OR IGNORE INTO event_member (event_id, user_id, role, has_joined) VALUES (${idB}, 1, 'collaborator', 1);`
+  `INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idB}, 2, 'creator');`
+  `INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idB}, 1, 'collaborator');`
   // for Event 3:
-  `INSERT OR IGNORE INTO event_member (event_id, user_id, role, has_joined) VALUES (${idC}, 1, 'creator', 1);`
+  `INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idC}, 1, 'creator');`
   // for Event 4:
-  `INSERT OR IGNORE INTO event_member (event_id, user_id, role, has_joined) VALUES (${idD}, 2, 'creator', 1);`
-  `INSERT OR IGNORE INTO event_member (event_id, user_id, role, has_joined) VALUES (${idD}, 1, 'collaborator', 0);`
+  `INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idD}, 2, 'creator');`
   ```
 
 - [ ] **Step 3: Update functions/api/event.ts event creation role logic**
-  In `functions/api/event.ts` `onRequestPost` (create event), update line 108-123 to use new roles:
+  In `functions/api/event.ts` `onRequestPost` (create event), update line 108-123 to use new roles (and remove auto-assignment to other owners):
   ```typescript
     const memberStatements = [
       context.env.DB.prepare(
-        "INSERT INTO event_member (event_id, user_id, role, has_joined) VALUES (?, ?, 'creator', 1)"
+        "INSERT INTO event_member (event_id, user_id, role) VALUES (?, ?, 'creator')"
       ).bind(eventId, session.user_id)
     ];
-
-    for (const owner of otherOwners) {
-      memberStatements.push(
-        context.env.DB.prepare(
-          "INSERT INTO event_member (event_id, user_id, role, has_joined) VALUES (?, ?, 'collaborator', 0)"
-        ).bind(eventId, owner.user_id)
-      );
-    }
   ```
 
-- [ ] **Step 4: Update GET /api/event query to return roles and has_joined**
+- [ ] **Step 4: Update GET /api/event query to return roles and isJoined**
   In `functions/api/event.ts` `onRequestGet`:
   For single event query (lines 201-205):
   ```typescript
       const eventRecord = await context.env.DB.prepare(
         `SELECT e.id, e.name, e.country, e.start_date AS startDate, e.end_date AS endDate, 
                 e.booth_rental AS boothRental, e.travel, e.accommodation, e.food_allowance AS foodAllowance,
-                em.role, em.has_joined AS hasJoined
+                em.role, (CASE WHEN em.role IS NOT NULL THEN 1 ELSE 0 END) AS isJoined
          FROM event e
          LEFT JOIN event_member em ON e.id = em.event_id AND em.user_id = ?1
          WHERE e.id = ?2 AND e.shop_id = ?3`
@@ -149,7 +138,7 @@
         e.accommodation, 
         e.food_allowance AS foodAllowance, 
         em.role,
-        em.has_joined AS hasJoined,
+        (CASE WHEN em.role IS NOT NULL THEN 1 ELSE 0 END) AS isJoined,
         CASE 
             WHEN ?3 < e.start_date THEN 'upcoming'
             WHEN ?3 BETWEEN e.start_date AND e.end_date THEN 'inprogress'
@@ -163,33 +152,12 @@
        ORDER BY e.start_date DESC`
   ```
 
-- [ ] **Step 5: Update functions/api/members/accept.ts invitation acceptance logic**
-  In `functions/api/members/accept.ts`, after inserting into `shop_member` (line 86):
-  ```typescript
-      if (invite.role === "owner") {
-        const { results: existingEvents } = await context.env.DB.prepare(
-          "SELECT id FROM event WHERE shop_id = ?"
-        )
-          .bind(invite.shop_id)
-          .all<{ id: number }>();
-
-        if (existingEvents.length > 0) {
-          const statements = existingEvents.map((evt) =>
-            context.env.DB.prepare(
-              "INSERT OR IGNORE INTO event_member (event_id, user_id, role, has_joined) VALUES (?, ?, 'collaborator', 0)"
-            ).bind(evt.id, user.id)
-          );
-          await context.env.DB.batch(statements);
-        }
-      }
-  ```
-
-- [ ] **Step 6: Run make seed and check DB to verify seeding**
+- [ ] **Step 5: Run make seed and check DB to verify seeding**
   Run: `make seed`
   Verify there are no SQL check constraint errors.
 
-- [ ] **Step 7: Commit backend & seed changes**
-  Run: `git add functions/api/event.ts functions/api/members/accept.ts scripts/seed.ts seed/seed-events.ts && git commit -m "feat: implement backend role assignments and update seeds"`
+- [ ] **Step 6: Commit backend & seed changes**
+  Run: `git add functions/api/event.ts scripts/seed.ts seed/seed-events.ts && git commit -m "feat: implement creator role on creation and update seeds"`
 
 ---
 
@@ -274,13 +242,13 @@
       // Determine event role
       const eventRole = eventDetails.shop_role === 'owner' ? 'collaborator' : 'assistant';
 
-      // Upsert event member status
+      // Insert new member row
       await context.env.DB.prepare(
-        `INSERT INTO event_member (event_id, user_id, role, has_joined)
-         VALUES (?, ?, ?, 1)
-         ON CONFLICT(event_id, user_id) DO UPDATE SET has_joined = 1`
+        `INSERT INTO event_member (event_id, user_id, role)
+         VALUES (?, ?, ?)
+         ON CONFLICT(event_id, user_id) DO UPDATE SET role = ?`
       )
-        .bind(eventId, session.user_id, eventRole)
+        .bind(eventId, session.user_id, eventRole, eventRole)
         .run();
 
       return new Response(JSON.stringify({ success: true }), {
@@ -348,10 +316,10 @@
 - Modify: `src/pages/Dashboard.tsx`
 
 **Interfaces:**
-- Consumes: `role` and `hasJoined` properties in `EventData` retrieved from `/api/event`.
+- Consumes: `role` and `isJoined` properties in `EventData` retrieved from `/api/event`.
 - Produces: Correctly sorted event list and role badges.
 
-- [ ] **Step 1: Add hasJoined type definition**
+- [ ] **Step 1: Add isJoined type definition**
   In `src/pages/Dashboard.tsx`, update the `EventData` interface (lines 10-25):
   ```typescript
   interface EventData {
@@ -366,7 +334,7 @@
     accommodation: number;
     foodAllowance: number;
     role: 'creator' | 'collaborator' | 'assistant' | null;
-    hasJoined: number;
+    isJoined: number; // 1 if true, 0 if false
     status: 'upcoming' | 'inprogress' | 'ended';
     totalSales: number;
     netProfit: number;
@@ -382,7 +350,7 @@
 
     const getGroupPriority = (e: EventData) => {
       if (e.role === 'creator') return 1;
-      if (e.role !== 'creator' && e.hasJoined === 1) return 2;
+      if (e.role !== 'creator' && e.isJoined === 1) return 2;
       return 3;
     };
 
@@ -414,8 +382,8 @@
                   assistant: { text: 'Assistant', className: 'bg-[#f0f9ff] text-[#075985] border-[#bae6fd]/60' },
                 };
 
-                const currentRole = event.role || 'assistant';
-                const roleText = roleConfig[currentRole]?.text || 'Assistant';
+                const currentRole = event.role || 'collaborator';
+                const roleText = roleConfig[currentRole]?.text || 'Collaborator';
                 const roleBadgeClass = roleConfig[currentRole]?.className || 'bg-gray-50 text-gray-600 border-gray-200';
   ```
   And render it inside the card header next to/below the event status badge (around line 228):
@@ -424,9 +392,11 @@
                           <div className={`shrink-0 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${badgeClass}`}>
                             {badgeText}
                           </div>
-                          <div className={`shrink-0 px-2 py-0.5 rounded-full text-[9px] font-semibold border ${roleBadgeClass} mt-1`}>
-                            {roleText}
-                          </div>
+                          {event.isJoined === 1 && (
+                            <div className={`shrink-0 px-2 py-0.5 rounded-full text-[9px] font-semibold border ${roleBadgeClass} mt-1`}>
+                              {roleText}
+                            </div>
+                          )}
                         </div>
   ```
 
@@ -441,7 +411,7 @@
 - Modify: `src/pages/Dashboard.tsx`
 
 **Interfaces:**
-- Consumes: Card clicks for events with `hasJoined === 0`.
+- Consumes: Card clicks for events with `isJoined === 0`.
 - Produces: Join Confirm Modal popup, calling `POST /api/event/join`.
 
 - [ ] **Step 1: Add modal states**
@@ -455,7 +425,7 @@
   In `src/pages/Dashboard.tsx`, update `handleEventClick`:
   ```typescript
     const handleEventClick = (event: EventData) => {
-      if (event.role !== 'creator' && event.hasJoined === 0) {
+      if (event.role !== 'creator' && event.isJoined === 0) {
         setSelectedEventToJoin(event);
         return;
       }
@@ -493,11 +463,11 @@
         // Update local state
         setEvents((prev) =>
           prev.map((evt) =>
-            evt.id === selectedEventToJoin.id ? { ...evt, hasJoined: 1 } : evt
+            evt.id === selectedEventToJoin.id ? { ...evt, isJoined: 1, role: 'collaborator' } : evt
           )
         );
 
-        const enteredEvent = { ...selectedEventToJoin, hasJoined: 1 as const };
+        const enteredEvent = { ...selectedEventToJoin, isJoined: 1, role: 'collaborator' as const };
         setSelectedEventToJoin(null);
         navigateToEvent(enteredEvent);
       } catch (err) {
