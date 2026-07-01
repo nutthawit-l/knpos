@@ -18,7 +18,8 @@ interface EventData {
   travel: number;
   accommodation: number;
   foodAllowance: number;
-  role: string | null;
+  role: 'creator' | 'collaborator' | 'assistant' | null;
+  isJoined: number;
   status: 'upcoming' | 'inprogress' | 'ended';
   totalSales: number;
   netProfit: number;
@@ -85,9 +86,33 @@ export default function Dashboard() {
   }
 
   const hasEndedEvent = events.some((e) => e.status === 'ended');
-  const displayedEvents = hasEndedEvent
+  const rawDisplayedEvents = hasEndedEvent
     ? events
     : events.filter((e) => e.status === 'inprogress' || e.status === 'upcoming');
+
+  const getGroupPriority = (e: EventData) => {
+    if (e.role === 'creator') return 1;
+    if (e.role !== 'creator' && e.isJoined === 1) return 2;
+    return 3;
+  };
+
+  const getStatusPriority = (status: string) => {
+    if (status === 'inprogress') return 1;
+    if (status === 'upcoming') return 2;
+    return 3;
+  };
+
+  const displayedEvents = [...rawDisplayedEvents].sort((a, b) => {
+    const groupA = getGroupPriority(a);
+    const groupB = getGroupPriority(b);
+    if (groupA !== groupB) return groupA - groupB;
+
+    const statusA = getStatusPriority(a.status);
+    const statusB = getStatusPriority(b.status);
+    if (statusA !== statusB) return statusA - statusB;
+
+    return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+  });
 
   // Title label for the events list
   const eventsHeaderLabel = hasEndedEvent ? DASHBOARD2_DATA.pastEventsLabel : 'Current & Upcoming Events';
@@ -209,6 +234,16 @@ export default function Dashboard() {
                 ? `-${currencySym}${Math.abs(event.netProfit).toLocaleString()}`
                 : `+${currencySym}${event.netProfit.toLocaleString()}`;
 
+              const roleConfig = {
+                creator: { text: 'Creator', className: 'bg-[#fdf2f8] text-[#9d174d] border-[#fbcfe8]/60' },
+                collaborator: { text: 'Collaborator', className: 'bg-[#ecfdf5] text-[#065f46] border-[#a7f3d0]/60' },
+                assistant: { text: 'Assistant', className: 'bg-[#f0f9ff] text-[#075985] border-[#bae6fd]/60' },
+              };
+
+              const currentRole = event.role || 'collaborator';
+              const roleText = roleConfig[currentRole]?.text || 'Collaborator';
+              const roleBadgeClass = roleConfig[currentRole]?.className || 'bg-gray-50 text-gray-600 border border-gray-200';
+
               return (
                 <div
                   key={event.id}
@@ -225,8 +260,15 @@ export default function Dashboard() {
                           {dateRange}
                         </p>
                       </div>
-                      <div className={`shrink-0 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${badgeClass}`}>
-                        {badgeText}
+                      <div className="flex flex-col gap-1.5 items-end shrink-0">
+                        <div className={`px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${badgeClass}`}>
+                          {badgeText}
+                        </div>
+                        {event.isJoined === 1 && (
+                          <div className={`px-2 py-0.5 rounded-full text-[9px] font-semibold border ${roleBadgeClass}`}>
+                            {roleText}
+                          </div>
+                        )}
                       </div>
                     </div>
 
