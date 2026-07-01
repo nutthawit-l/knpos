@@ -155,7 +155,67 @@ export default function Dashboard() {
   });
 
   // Title label for the events list
-  const eventsHeaderLabel = hasEndedEvent ? DASHBOARD2_DATA.pastEventsLabel : 'Current & Upcoming Events';
+  const eventsHeaderLabel = hasEndedEvent ? 'All Events' : 'Current & Upcoming Events';
+
+  // Calculate summary metrics dynamically
+  const salesByCurrency: Record<string, number> = {};
+  const profitByCurrency: Record<string, number> = {};
+  let totalSalesSum = 0;
+  let totalProfitSum = 0;
+  let activeShopsCount = 0;
+  let eventsThisYearCount = 0;
+
+  const currentYearStr = new Date().getFullYear().toString();
+
+  events.forEach((event) => {
+    const currency = CURRENCY_SYMBOLS[event.country] || '฿';
+
+    // Sum total sales and net profit grouped by currency
+    salesByCurrency[currency] = (salesByCurrency[currency] || 0) + event.totalSales;
+    profitByCurrency[currency] = (profitByCurrency[currency] || 0) + event.netProfit;
+
+    totalSalesSum += event.totalSales;
+    totalProfitSum += event.netProfit;
+
+    // Count active shops (in-progress events)
+    if (event.status === 'inprogress') {
+      activeShopsCount++;
+    }
+
+    // Count events this year
+    if (event.startDate && event.startDate.startsWith(currentYearStr)) {
+      eventsThisYearCount++;
+    }
+  });
+
+  // Helper to format currency totals (e.g. "฿142,500 + S$2,400")
+  const formatCurrencyMap = (map: Record<string, number>) => {
+    const entries = Object.entries(map);
+    if (entries.length === 0) return '฿0';
+    return entries
+      .map(([sym, value]) => `${sym}${value.toLocaleString()}`)
+      .join(' + ');
+  };
+
+  // Helper to format profit totals (e.g. "+฿45,200 + -S$150")
+  const formatProfitCurrencyMap = (map: Record<string, number>) => {
+    const entries = Object.entries(map);
+    if (entries.length === 0) return '฿0';
+    return entries
+      .map(([sym, value]) => {
+        const isLoss = value < 0;
+        return `${isLoss ? '-' : '+'}${sym}${Math.abs(value).toLocaleString()}`;
+      })
+      .join(' + ');
+  };
+
+  const totalSalesValue = formatCurrencyMap(salesByCurrency);
+  
+  // Calculate overall margin percentage
+  const marginPercent = totalSalesSum > 0 ? (totalProfitSum / totalSalesSum) * 100 : 0;
+  const formattedMargin = `${marginPercent >= 0 ? '+' : ''}${marginPercent.toFixed(1)}% margin`;
+  const profitStr = formatProfitCurrencyMap(profitByCurrency);
+  const totalSalesTrend = `${profitStr} (${formattedMargin})`;
 
   return (
     <>
@@ -175,12 +235,12 @@ export default function Dashboard() {
                   {DASHBOARD2_DATA.totalSalesLabel}
                 </p>
                 <h3 className="text-[28px] font-bold text-[#76485a] leading-none mt-1">
-                  {DASHBOARD2_DATA.totalSalesValue}
+                  {totalSalesValue}
                 </h3>
               </div>
               <div className="mt-4 flex items-center text-[#76485a] font-bold text-[12px]">
                 <TrendingUp className="w-4 h-4 mr-1 shrink-0" />
-                <span>{DASHBOARD2_DATA.totalSalesTrend}</span>
+                <span>{totalSalesTrend}</span>
               </div>
             </div>
 
@@ -193,7 +253,7 @@ export default function Dashboard() {
                 </p>
               </div>
               <h3 className="text-[24px] font-bold text-[#37697d] leading-none mt-2">
-                {DASHBOARD2_DATA.activeShopsValue}
+                {activeShopsCount}
               </h3>
             </div>
 
@@ -206,7 +266,7 @@ export default function Dashboard() {
                 </p>
               </div>
               <h3 className="text-[24px] font-bold text-[#68522f] leading-none mt-2">
-                {DASHBOARD2_DATA.eventsYearValue}
+                {eventsThisYearCount}
               </h3>
             </div>
           </div>
@@ -220,14 +280,7 @@ export default function Dashboard() {
             <h2 className="font-bold text-[12px] tracking-widest text-[#4E342E] opacity-60 uppercase">
               {eventsHeaderLabel}
             </h2>
-            {hasEndedEvent && (
-              <button
-                onClick={() => alert('Viewing all events will be supported in the next update! 🐾')}
-                className="text-[#805062] font-bold text-[12px] hover:underline cursor-pointer bg-transparent border-none p-0"
-              >
-                {DASHBOARD2_DATA.viewAllLabel}
-              </button>
-            )}
+
           </div>
 
           <div className="grid grid-cols-1 gap-4">
