@@ -10,6 +10,7 @@ export interface FormInputProps {
   readonly placeholder?: string;
   readonly required?: boolean;
   readonly icon?: ComponentType<{ className?: string }>;
+  readonly disabled?: boolean;
 }
 
 export default function FormInput({
@@ -21,6 +22,7 @@ export default function FormInput({
   placeholder = '',
   required = false,
   icon: Icon,
+  disabled = false,
 }: FormInputProps) {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === 'password';
@@ -39,7 +41,7 @@ export default function FormInput({
           <Icon className="absolute left-4 w-5 h-5 text-surface-variant-custom" />
         )}
         <input
-          className={`w-full h-14 pr-4 py-4 rounded-full border-2 border-outline-warm bg-white focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 text-[16px] leading-[24px] placeholder:text-outline-variant-warm font-medium text-text-brown ${
+          className={`w-full h-14 pr-4 py-4 rounded-full border-2 border-outline-warm bg-white focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 text-[16px] leading-[24px] placeholder:text-outline-variant-warm font-medium text-text-brown disabled:opacity-50 disabled:bg-[#f9fafb] ${
             Icon ? 'pl-12' : 'px-6'
           }`}
           id={id}
@@ -48,6 +50,7 @@ export default function FormInput({
           type={inputType}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
           onWheel={(e) => type === 'number' && e.currentTarget.blur()}
         />
         {isPassword && (

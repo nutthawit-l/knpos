@@ -20,6 +20,7 @@ interface EventFormProps {
     travel: number;
     accommodation: number;
     foodAllowance: number;
+    role?: string | null;
   };
 }
 
@@ -37,6 +38,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate();
+  const isReadOnly = mode === 'edit' && initialData?.role !== 'creator';
 
   const { setCurrency, setHasEvent, setActiveEvent } = useOrderStore();
   const countries = ['Thailand', 'Singapore', 'USA', 'Japan'] as const;
@@ -140,6 +142,13 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
         <div className="absolute -right-8 -top-8 w-24 h-24 bg-brand-pink/30 rounded-full"></div>
       </section>
 
+      {isReadOnly && (
+        <div className="bg-[#fffbeb] border border-[#fef3c7] text-[#92400e] px-4 py-3.5 rounded-[20px] text-[12px] font-semibold flex items-center gap-2">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span>You are viewing this event as a collaborator. Only the creator can edit details.</span>
+        </div>
+      )}
+
       {/* Section 1: Event Details */}
       <section className="space-y-4">
         <div className="flex items-center gap-2 px-2 text-[#805062]">
@@ -157,6 +166,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
             required
             value={eventName}
             onChange={setEventName}
+            disabled={isReadOnly}
           />
 
           <FormSelect
@@ -165,6 +175,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
             options={countries}
             value={country}
             onChange={setCountry}
+            disabled={isReadOnly}
           />
 
           <div className="grid grid-cols-2 gap-4">
@@ -175,6 +186,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
               type="date"
               value={startDate}
               onChange={setStartDate}
+              disabled={isReadOnly}
             />
             <FormInput
               id="endDate"
@@ -183,6 +195,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
               type="date"
               value={endDate}
               onChange={setEndDate}
+              disabled={isReadOnly}
             />
           </div>
         </div>
@@ -209,13 +222,14 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
             <div className="relative flex items-center">
               <input
                 id="boothRental"
-                className="w-full h-14 pr-16 px-6 py-4 rounded-full border-2 border-outline-warm bg-[#f9fafb] focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 font-bold text-xl text-text-brown"
+                className="w-full h-14 pr-16 px-6 py-4 rounded-full border-2 border-outline-warm bg-[#f9fafb] focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 font-bold text-xl text-text-brown disabled:opacity-50"
                 placeholder="0.00"
                 type="number"
                 step="0.01"
                 min="0"
                 value={boothRental}
                 onChange={(e) => setBoothRental(e.target.value)}
+                disabled={isReadOnly}
               />
               <span className="absolute right-6 font-bold text-[14px] text-[#805062] opacity-60 cursor-default">
                 {activeCurrencyCode}
@@ -234,13 +248,14 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
             <div className="relative flex items-center">
               <input
                 id="travel"
-                className="w-full h-14 pr-16 px-6 py-4 rounded-full border-2 border-outline-warm bg-[#f9fafb] focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 font-bold text-xl text-text-brown"
+                className="w-full h-14 pr-16 px-6 py-4 rounded-full border-2 border-outline-warm bg-[#f9fafb] focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 font-bold text-xl text-text-brown disabled:opacity-50"
                 placeholder="0.00"
                 type="number"
                 step="0.01"
                 min="0"
                 value={travel}
                 onChange={(e) => setTravel(e.target.value)}
+                disabled={isReadOnly}
               />
               <span className="absolute right-6 font-bold text-[14px] text-[#805062] opacity-60 cursor-default">
                 {activeCurrencyCode}
@@ -259,13 +274,14 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
             <div className="relative flex items-center">
               <input
                 id="accommodation"
-                className="w-full h-14 pr-16 px-6 py-4 rounded-full border-2 border-outline-warm bg-[#f9fafb] focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 font-bold text-xl text-text-brown"
+                className="w-full h-14 pr-16 px-6 py-4 rounded-full border-2 border-outline-warm bg-[#f9fafb] focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 font-bold text-xl text-text-brown disabled:opacity-50"
                 placeholder="0.00"
                 type="number"
                 step="0.01"
                 min="0"
                 value={accommodation}
                 onChange={(e) => setAccommodation(e.target.value)}
+                disabled={isReadOnly}
               />
               <span className="absolute right-6 font-bold text-[14px] text-[#805062] opacity-60 cursor-default">
                 {activeCurrencyCode}
@@ -284,13 +300,14 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
             <div className="relative flex items-center">
               <input
                 id="foodAllowance"
-                className="w-full h-14 pr-16 px-6 py-4 rounded-full border-2 border-outline-warm bg-[#f9fafb] focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 font-bold text-xl text-text-brown"
+                className="w-full h-14 pr-16 px-6 py-4 rounded-full border-2 border-outline-warm bg-[#f9fafb] focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 font-bold text-xl text-text-brown disabled:opacity-50"
                 placeholder="0.00"
                 type="number"
                 step="0.01"
                 min="0"
                 value={foodAllowance}
                 onChange={(e) => setFoodAllowance(e.target.value)}
+                disabled={isReadOnly}
               />
               <span className="absolute right-6 font-bold text-[14px] text-[#805062] opacity-60 cursor-default">
                 {activeCurrencyCode}
@@ -304,10 +321,12 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
       <div className="pt-2 pb-6">
         <button
           type="submit"
-          disabled={isLoading || isSuccess}
-          className="w-full h-14 bg-brand-pink hover:bg-brand-pink-hover active:scale-[0.97] transition-all rounded-full flex items-center justify-center gap-2 text-text-brown font-bold text-[16px] uppercase tracking-wide shadow-md disabled:opacity-75 disabled:pointer-events-none cursor-pointer border-none"
+          disabled={isLoading || isSuccess || isReadOnly}
+          className="w-full h-14 bg-brand-pink hover:bg-brand-pink-hover active:scale-[0.97] transition-all rounded-full flex items-center justify-center gap-2 text-text-brown font-bold text-[16px] uppercase tracking-wide shadow-md disabled:opacity-75 disabled:pointer-events-none cursor-pointer border-none animate-none"
         >
-          {isLoading ? (
+          {isReadOnly ? (
+            <span>READ ONLY</span>
+          ) : isLoading ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin text-text-brown" />
               <span>Processing...</span>
@@ -324,7 +343,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
           )}
         </button>
         <p className="text-center mt-4 text-[12px] leading-normal text-surface-variant-custom opacity-70 font-medium px-4">
-          Confirm all details before saving.
+          {isReadOnly ? 'Collaborators cannot modify event details.' : 'Confirm all details before saving.'}
         </p>
       </div>
     </form>
