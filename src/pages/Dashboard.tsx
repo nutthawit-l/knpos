@@ -70,7 +70,7 @@ export default function Dashboard() {
     };
   }, []);
   const handleEventClick = (event: EventData) => {
-    if (event.role !== 'creator' && event.isJoined === 0) {
+    if (event.role !== 'creator' && !event.isJoined) {
       setSelectedEventToJoin(event);
       return;
     }
@@ -132,7 +132,7 @@ export default function Dashboard() {
 
   const getGroupPriority = (e: EventData) => {
     if (e.role === 'creator') return 1;
-    if (e.isJoined === 1) return 2;
+    if (e.isJoined) return 2;
     return 3;
   };
 
