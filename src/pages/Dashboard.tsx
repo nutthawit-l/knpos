@@ -18,7 +18,8 @@ interface EventData {
   travel: number;
   accommodation: number;
   foodAllowance: number;
-  role: string | null;
+  role: 'creator' | 'collaborator' | 'assistant' | null;
+  isJoined: number;
   status: 'upcoming' | 'inprogress' | 'ended';
   totalSales: number;
   netProfit: number;
@@ -35,6 +36,8 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 export default function Dashboard() {
   const [events, setEvents] = useState<EventData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedEventToJoin, setSelectedEventToJoin] = useState<EventData | null>(null);
+  const [isJoining, setIsJoining] = useState(false);
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -67,12 +70,50 @@ export default function Dashboard() {
     };
   }, []);
   const handleEventClick = (event: EventData) => {
+    if (event.role !== 'creator' && !event.isJoined) {
+      setSelectedEventToJoin(event);
+      return;
+    }
+    navigateToEvent(event);
+  };
+
+  const navigateToEvent = (event: EventData) => {
     if (event.status === 'upcoming') {
       navigate(`/edit-event?event_id=${event.id}`);
     } else if (event.status === 'inprogress') {
       navigate(`/transactions?event_id=${event.id}&event_name=${encodeURIComponent(event.name)}`);
     } else if (event.status === 'ended') {
       navigate(`/transactions?event_id=${event.id}&event_name=${encodeURIComponent(event.name)}&disable_order=true`);
+    }
+  };
+  const handleConfirmJoin = async () => {
+    if (!selectedEventToJoin) return;
+    setIsJoining(true);
+    try {
+      const response = await fetch('/api/event/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId: selectedEventToJoin.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to join event');
+      }
+
+      setEvents((prev) =>
+        prev.map((evt) =>
+          evt.id === selectedEventToJoin.id ? { ...evt, isJoined: 1, role: 'collaborator' } : evt
+        )
+      );
+
+      const enteredEvent = { ...selectedEventToJoin, isJoined: 1, role: 'collaborator' as const };
+      setSelectedEventToJoin(null);
+      navigateToEvent(enteredEvent);
+    } catch (err) {
+      console.error(err);
+      alert('Could not join event. Please try again.');
+    } finally {
+      setIsJoining(false);
     }
   };
   if (isLoading) {
@@ -85,9 +126,33 @@ export default function Dashboard() {
   }
 
   const hasEndedEvent = events.some((e) => e.status === 'ended');
-  const displayedEvents = hasEndedEvent
+  const rawDisplayedEvents = hasEndedEvent
     ? events
     : events.filter((e) => e.status === 'inprogress' || e.status === 'upcoming');
+
+  const getGroupPriority = (e: EventData) => {
+    if (e.role === 'creator') return 1;
+    if (e.isJoined) return 2;
+    return 3;
+  };
+
+  const getStatusPriority = (status: string) => {
+    if (status === 'inprogress') return 1;
+    if (status === 'upcoming') return 2;
+    return 3;
+  };
+
+  const displayedEvents = [...rawDisplayedEvents].sort((a, b) => {
+    const groupA = getGroupPriority(a);
+    const groupB = getGroupPriority(b);
+    if (groupA !== groupB) return groupA - groupB;
+
+    const statusA = getStatusPriority(a.status);
+    const statusB = getStatusPriority(b.status);
+    if (statusA !== statusB) return statusA - statusB;
+
+    return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+  });
 
   // Title label for the events list
   const eventsHeaderLabel = hasEndedEvent ? DASHBOARD2_DATA.pastEventsLabel : 'Current & Upcoming Events';
@@ -209,6 +274,16 @@ export default function Dashboard() {
                 ? `-${currencySym}${Math.abs(event.netProfit).toLocaleString()}`
                 : `+${currencySym}${event.netProfit.toLocaleString()}`;
 
+              const roleConfig = {
+                creator: { text: 'Creator', className: 'bg-[#fdf2f8] text-[#9d174d] border-[#fbcfe8]/60' },
+                collaborator: { text: 'Collaborator', className: 'bg-[#ecfdf5] text-[#065f46] border-[#a7f3d0]/60' },
+                assistant: { text: 'Assistant', className: 'bg-[#f0f9ff] text-[#075985] border-[#bae6fd]/60' },
+              };
+
+              const currentRole = event.role || 'collaborator';
+              const roleText = roleConfig[currentRole]?.text || 'Collaborator';
+              const roleBadgeClass = roleConfig[currentRole]?.className || 'bg-gray-50 text-gray-600 border border-gray-200';
+
               return (
                 <div
                   key={event.id}
@@ -225,8 +300,15 @@ export default function Dashboard() {
                           {dateRange}
                         </p>
                       </div>
-                      <div className={`shrink-0 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${badgeClass}`}>
-                        {badgeText}
+                      <div className="flex flex-col gap-1.5 items-end shrink-0">
+                        <div className={`px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${badgeClass}`}>
+                          {badgeText}
+                        </div>
+                        {event.isJoined === 1 && (
+                          <div className={`px-2 py-0.5 rounded-full text-[9px] font-semibold border ${roleBadgeClass}`}>
+                            {roleText}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -273,6 +355,37 @@ export default function Dashboard() {
           </p>
         </button>
       </section>
+
+      {/* Join Confirmation Modal */}
+      {selectedEventToJoin && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#4e342e]/40 backdrop-blur-sm transition-opacity" onClick={() => setSelectedEventToJoin(null)}></div>
+          <div className="bg-white w-full max-w-[320px] rounded-[24px] overflow-hidden shadow-2xl border border-[#E0D0CC]/20 z-10 p-6 space-y-4 animate-scaleUp">
+            <div className="text-center space-y-2">
+              <h3 className="font-bold text-[18px] text-text-brown">Join Event</h3>
+              <p className="text-[13px] text-text-brown/80 leading-relaxed">
+                Are you sure you want to join <strong>{selectedEventToJoin.name}</strong>?
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setSelectedEventToJoin(null)}
+                disabled={isJoining}
+                className="flex-1 h-11 border-2 border-outline-warm text-text-brown rounded-full font-bold text-[13px] hover:bg-gray-50 active:scale-95 transition-all cursor-pointer bg-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmJoin}
+                disabled={isJoining}
+                className="flex-1 h-11 bg-brand-pink text-text-brown rounded-full font-bold text-[13px] hover:bg-brand-pink-hover active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer border-none shadow-sm disabled:opacity-50"
+              >
+                {isJoining ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

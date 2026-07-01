@@ -147,6 +147,21 @@ async function run() {
   const idA = eventIdMap.get('Pop-up Craft Fair (Past)');
   const idB = eventIdMap.get('Singapore Art Festival (Past)');
   const idC = eventIdMap.get('Design Week Expo (Current)');
+  const idD = eventIdMap.get('Charni Showcase (Upcoming)');
+
+  console.log('Seeding event members (roles) for user 1...');
+  const memberSqlLines: string[] = [];
+  if (idA !== undefined) memberSqlLines.push(`INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idA}, 1, 'creator');`);
+  if (idB !== undefined) memberSqlLines.push(`INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idB}, 1, 'creator');`);
+  if (idC !== undefined) memberSqlLines.push(`INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idC}, 1, 'creator');`);
+  if (idD !== undefined) memberSqlLines.push(`INSERT OR IGNORE INTO event_member (event_id, user_id, role) VALUES (${idD}, 1, 'creator');`);
+
+  if (memberSqlLines.length > 0) {
+    const tempSqlFile = 'event_member_seed_temp.sql';
+    fs.writeFileSync(tempSqlFile, memberSqlLines.join('\n'));
+    execSync(`npx wrangler d1 execute charnipos-db ${wranglerFlag} --file=./${tempSqlFile}`, { stdio: 'inherit' });
+    fs.unlinkSync(tempSqlFile);
+  }
 
   if (idA !== undefined && idB !== undefined && idC !== undefined) {
     console.log(`Checking existing orders for events (event_ids: ${idA}, ${idB}, ${idC})...`);

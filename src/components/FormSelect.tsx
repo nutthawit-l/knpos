@@ -8,6 +8,7 @@ export interface FormSelectProps {
   readonly onChange: (value: string) => void;
   readonly options: readonly string[];
   readonly icon?: ComponentType<{ className?: string }>;
+  readonly disabled?: boolean;
 }
 
 export default function FormSelect({
@@ -17,6 +18,7 @@ export default function FormSelect({
   onChange,
   options,
   icon: Icon,
+  disabled = false,
 }: FormSelectProps) {
   return (
     <div className="space-y-2">
@@ -31,12 +33,13 @@ export default function FormSelect({
           <Icon className="absolute left-4 w-5 h-5 text-surface-variant-custom" />
         )}
         <select
-          className={`w-full h-14 pr-12 py-4 rounded-full border-2 border-outline-warm bg-white focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 text-[16px] leading-[24px] font-medium text-text-brown appearance-none cursor-pointer ${
+          className={`w-full h-14 pr-12 py-4 rounded-full border-2 border-outline-warm bg-white focus:border-brand-pink focus:ring-0 focus:outline-none transition-all duration-200 text-[16px] leading-[24px] font-medium text-text-brown appearance-none cursor-pointer disabled:opacity-50 disabled:bg-[#f9fafb] ${
             Icon ? 'pl-12' : 'px-6'
           }`}
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
         >
           {options.map((option) => (
             <option key={option} value={option}>

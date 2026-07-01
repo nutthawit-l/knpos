@@ -33,15 +33,25 @@ seed-events:
 remote-seed-events:
 	npx tsx seed/seed-events.ts --remote
 
+seed-shop:
+	npx tsx seed/seed-shop.ts
+
+remote-seed-shop:
+	npx tsx seed/seed-shop.ts --remote
+
+
 seed:
+	$(MAKE) seed-shop
 	npx tsx seed/check-db.ts
 	$(MAKE) seed-products
 	$(MAKE) seed-events
 
 remote-seed:
+	$(MAKE) remote-seed-shop
 	npx tsx seed/check-db.ts --remote
 	$(MAKE) remote-seed-products
 	$(MAKE) remote-seed-events
+
 
 dev:
 	@if [ -n "$$TMUX" ]; then \
