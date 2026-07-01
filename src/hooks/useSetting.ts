@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SETTINGS_DATA } from '../data/mockData';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -9,6 +10,7 @@ interface UseSettingProps {
 export function useSetting({ onNavigate }: UseSettingProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const { logout } = useAuthStore();
+  const navigate = useNavigate();
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -19,7 +21,11 @@ export function useSetting({ onNavigate }: UseSettingProps) {
 
   const handleItemClick = (item: typeof SETTINGS_DATA.menuItems[number]) => {
     if (item.action === 'navigate' && item.target) {
-      onNavigate?.(item.target);
+      if (onNavigate) {
+        onNavigate(item.target);
+      } else {
+        navigate(`/${item.target}`);
+      }
     } else if (item.action === 'alert' && item.message) {
       showToast(item.message);
     }
@@ -29,7 +35,11 @@ export function useSetting({ onNavigate }: UseSettingProps) {
     const confirmSignOut = window.confirm(SETTINGS_DATA.signOutConfirm);
     if (confirmSignOut) {
       await logout();
-      onNavigate?.('login');
+      if (onNavigate) {
+        onNavigate('login');
+      } else {
+        navigate('/login');
+      }
     }
   };
 

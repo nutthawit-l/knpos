@@ -35,6 +35,7 @@
   --color-surface-variant-custom: #504447;
   --color-primary-custom: #805062;
   --color-secondary-custom: #326578;
+  --color-tertiary-custom: #715b37;
 }
 
 @layer base {

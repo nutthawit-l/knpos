@@ -17,6 +17,9 @@ import Inventory from "./pages/Inventory";
 import Setting from "./pages/Setting";
 import CreateEvent from "./pages/CreateEvent";
 import EditEvent from "./pages/EditEvent";
+import ManageMembers from "./pages/ManageMembers";
+import InvitePartners from "./pages/InvitePartners";
+import AcceptInvite from "./pages/AcceptInvite";
 
 function RootRedirect() {
   const user = useAuthStore((state) => state.user);
@@ -28,6 +31,7 @@ function RootRedirect() {
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
+  { path: "/accept-invite", element: <AcceptInvite /> },
   {
     element: <ProtectedRoute />,
     children: [
@@ -40,6 +44,8 @@ const router = createBrowserRouter([
           { path: "/transactions", element: <Transactions /> },
           { path: "/products", element: <Inventory /> },
           { path: "/settings", element: <Setting /> },
+          { path: "/members", element: <ManageMembers /> },
+          { path: "/invite-partners", element: <InvitePartners /> },
           { path: "/add-product", element: <AddProduct /> },
           { path: "/create-event", element: <CreateEvent /> },
           { path: "/edit-event", element: <EditEvent /> },
